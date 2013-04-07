@@ -1,7 +1,15 @@
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
 
-public class TaskTrackerServices implements Remote, TaskLauncherInterface, StatusUpdater{
+public class TaskTrackerServices extends UnicastRemoteObject implements TaskLauncher, StatusUpdater{
+  
+  private TaskTracker taskTracker;
+  
+  public TaskTrackerServices(TaskTracker taskTracker) throws RemoteException{
+    super();
+    this.taskTracker = taskTracker;
+  }
 
   public TaskOutput runTask(TaskInfo taskinfo) {
     return null;

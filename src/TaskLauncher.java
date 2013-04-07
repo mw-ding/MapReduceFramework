@@ -1,8 +1,5 @@
+import java.rmi.Remote;
 
-public class TaskLauncher implements TaskLauncherInterface {
-
-  public TaskOutput runTask(TaskInfo taskinfo) {
-    return null;
-  }
-
+public interface TaskLauncher extends Remote {
+  TaskOutput runTask(TaskInfo taskinfo);
 }
