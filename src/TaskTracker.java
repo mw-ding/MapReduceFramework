@@ -38,7 +38,7 @@ public class TaskTracker implements TaskLauncherInterface{
     /* get the job tracker status updater */
     try {
       Registry reg = LocateRegistry.getRegistry(this.registryHostName, this.registryPort);
-      jobTrackerStatusUpdater = (JobTrackerStatusUpdater) reg.lookup("jobTrackerStatusUpdaterName");
+      jobTrackerStatusUpdater = (StatusUpdater) reg.lookup("jobTrackerStatusUpdaterName");
     } catch (RemoteException e) {
       e.printStackTrace();
     } catch (NotBoundException e) {
