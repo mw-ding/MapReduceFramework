@@ -8,8 +8,10 @@ import java.rmi.server.UnicastRemoteObject;
  */
 public class JobTrackerStatusUpdater extends UnicastRemoteObject implements StatusUpdater {
 
-	// the reference of the TaskTracker toward which this updater execute the update()
+	// the reference of the JobTracker toward which this updater execute the update()
 	private JobTracker jobTracker;
+	
+	
 	
 	/*************************************/
 	
