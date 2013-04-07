@@ -1,4 +1,5 @@
+import java.io.Serializable;
 
-public abstract class TaskOutput {
-
+public abstract class TaskOutput implements Serializable{
+  
 }
