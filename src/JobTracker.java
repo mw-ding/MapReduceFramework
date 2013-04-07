@@ -1,3 +1,5 @@
+import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.*;
 
 public class JobTracker {
@@ -8,16 +10,22 @@ public class JobTracker {
 	
 	private Map<Integer, Job> jobs;
 	
+	// all the communication services that this jobtracker provides
+	private JobTrackerServices services;
+	
 	// the scheduler, which generally decides assign which map/reduce task of
 	// which job to which tasktracker.
 	private TaskScheduler scheduler;
 
 	/*****************************************/
 	
-	public JobTracker() {
+	public JobTracker() throws RemoteException {
 		this.tasktrackers = new HashMap<String, TaskTrackerMeta>();
 				
 		this.scheduler = new DefaultTaskScheduler();
+		
+		// TODO : register this object in the RMI registry
+		this.services = new JobTrackerServices(this);
 	}
 	
 	/**
@@ -44,5 +52,5 @@ public class JobTracker {
 			this.tasktrackers.put(tt.getTaskTrackerName(), tt);
 		}
 	}
-
+	
 }
