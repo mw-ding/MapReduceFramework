@@ -19,16 +19,22 @@ public class TaskTracker implements Runnable {
 
   private String taskTrackerName;
 
-  private AtomicInteger numOfMapperSlots;
+  public AtomicInteger mapperCounter;
 
-  private AtomicInteger numOfReducerSlots;
+  public AtomicInteger reducerCounter;
 
   private StatusUpdater jobTrackerStatusUpdater;
 
   private HashMap<String, TaskProgress> taskStatus;
 
   /* period between heart beat in seconds */
-  public final static int HEART_BEAT_PERIOD = 2;
+  private final int HEART_BEAT_PERIOD = 2;
+
+  /* number of mapper slots */
+  public final int NUM_OF_MAPPER_SLOTS;
+
+  /* number of reducer slots */
+  public final int NUM_OF_REDUCER_SLOTS;
 
   /**
    * constructor of task tracker
@@ -38,13 +44,16 @@ public class TaskTracker implements Runnable {
    * @param taskTrackerName
    * @param jobTrackerStatusUpdaterName
    */
-  public void TaskTracker(String rHostName, int rPort, String taskTrackerName,
-          int numOfMapperSlots, int numOfReducerSlots, String jobTrackerStatusUpdaterName) {
+  public TaskTracker(String rHostName, int rPort, String taskTrackerName, int numOfMapperSlots,
+          int numOfReducerSlots, String jobTrackerStatusUpdaterName) {
     this.registryHostName = rHostName;
     this.registryPort = rPort;
     this.taskTrackerName = taskTrackerName;
-    this.numOfMapperSlots = numOfMapperSlots;
-    this.numOfReducerSlots = numOfReducerSlots;
+    this.mapperCounter = new AtomicInteger();
+    this.reducerCounter = new AtomicInteger();
+
+    this.NUM_OF_MAPPER_SLOTS = numOfMapperSlots;
+    this.NUM_OF_REDUCER_SLOTS = numOfReducerSlots;
 
     /* get the job tracker status updater */
     try {
@@ -99,8 +108,8 @@ public class TaskTracker implements Runnable {
         synchronized (taskStatus) {
           taskList = new ArrayList<TaskProgress>(taskStatus.values());
         }
-        TaskTrackerUpdatePkg pkg = new TaskTrackerUpdatePkg(numOfMapperSlots.get(),
-                numOfReducerSlots.get(), taskList);
+        TaskTrackerUpdatePkg pkg = new TaskTrackerUpdatePkg(mapperCounter.get(), reducerCounter
+                .get(), taskList);
         try {
           jobTrackerStatusUpdater.update(pkg);
         } catch (RemoteException e) {
@@ -109,4 +118,29 @@ public class TaskTracker implements Runnable {
       }
     }, 0, HEART_BEAT_PERIOD, TimeUnit.SECONDS);
   }
+
+  public String getRegistryHostName() {
+    return registryHostName;
+  }
+
+  public void setRegistryHostName(String registryHostName) {
+    this.registryHostName = registryHostName;
+  }
+
+  public int getRegistryPort() {
+    return registryPort;
+  }
+
+  public void setRegistryPort(int registryPort) {
+    this.registryPort = registryPort;
+  }
+
+  public String getTaskTrackerName() {
+    return taskTrackerName;
+  }
+
+  public void setTaskTrackerName(String taskTrackerName) {
+    this.taskTrackerName = taskTrackerName;
+  }
+
 }
