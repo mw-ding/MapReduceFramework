@@ -58,7 +58,7 @@ public class JobTracker {
 		return null;
 	}
 	
-	public void deleteTaskTrackers(String ttname) {
+	public void deleteTaskTracker(String ttname) {
 		
 	}
 }
