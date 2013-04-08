@@ -46,11 +46,7 @@ public abstract class Worker {
 	public TaskProgress getProgress(){
 		
 		progress.percentage = this.getPercentage();
-		
-		if(progress.percentage == 100.00)
-			progress.status = TaskStatus.SUCCEED;
-		else
-			progress.status = TaskStatus.INPROGRESS;
+		progress.status = TaskStatus.INPROGRESS;
 		
 		return this.progress;
 		
