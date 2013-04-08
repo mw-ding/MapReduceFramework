@@ -1,6 +1,7 @@
+import java.io.Serializable;
 import java.util.List;
 
-public class TaskTrackerUpdatePkg {
+public class TaskTrackerUpdatePkg implements Serializable {
   int numOfMapperSlots;
 
   int numOfReducerSlots;

@@ -11,31 +11,35 @@ public class TaskTrackerServices extends UnicastRemoteObject implements TaskLaun
     super();
     this.taskTracker = taskTracker;
   }
-
+  /**
+   * @param taskInfo: the information about the task
+   * @return the task is submitted successfully or not
+   */
   public boolean runTask(TaskInfo taskInfo) throws RemoteException {
     /* TODO: need to make it asynchronized */
     Worker worker;
+    /* if this is a mapper task */
     if (taskInfo.type == TaskType.MAPPER) {
+      /* instantiate a mapper task */
       worker = new MapperWorker(taskInfo, taskTracker.getRegistryHostName(),
               taskTracker.getRegistryPort(), taskTracker.getTaskTrackerName());
-      synchronized (taskTracker.mapperCounter) {
-        if (taskTracker.mapperCounter.get() < taskTracker.NUM_OF_MAPPER_SLOTS) {
+      /* if there is free mapper slots */
+      if (taskTracker.mapperCounter.incrementAndGet() <= taskTracker.NUM_OF_MAPPER_SLOTS) {
           /* TODO: start new process */
-          return true;
-        } else {
-          return false;
-        }
+        return true;
+      } else {
+        return false;
       }
     } else {
+      /* instantiate a reducer task */
       worker = new ReducerWorker(taskInfo, taskTracker.getRegistryHostName(),
               taskTracker.getRegistryPort(), taskTracker.getTaskTrackerName());
-      synchronized (taskTracker.reducerCounter) {
-        if (taskTracker.reducerCounter.get() < taskTracker.NUM_OF_REDUCER_SLOTS) {
-          /* TODO: start new process */
-          return true;
-        } else {
-          return false;
-        }
+      /* if there is free reducer slots */
+      if (taskTracker.reducerCounter.incrementAndGet() <= taskTracker.NUM_OF_REDUCER_SLOTS) {
+        /* TODO: start new process */
+        return true;
+      } else {
+        return false;
       }
     }
   }
