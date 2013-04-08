@@ -53,4 +53,12 @@ public class JobTracker {
 		}
 	}
 	
+	
+	public Map<String, TaskTrackerMeta> getTaskTrackers() {
+		return null;
+	}
+	
+	public void deleteTaskTrackers(String ttname) {
+		
+	}
 }
