@@ -18,20 +18,24 @@ public class TaskTrackerServices extends UnicastRemoteObject implements TaskLaun
     if (taskInfo.type == TaskType.MAPPER) {
       worker = new MapperWorker(taskInfo, taskTracker.getRegistryHostName(),
               taskTracker.getRegistryPort(), taskTracker.getTaskTrackerName());
-      if (taskTracker.mapperCounter.get() < taskTracker.NUM_OF_MAPPER_SLOTS) {
-        /* TODO: start new process */
-        return true;
-      } else {
-        return false;
+      synchronized (taskTracker.mapperCounter) {
+        if (taskTracker.mapperCounter.get() < taskTracker.NUM_OF_MAPPER_SLOTS) {
+          /* TODO: start new process */
+          return true;
+        } else {
+          return false;
+        }
       }
     } else {
       worker = new ReducerWorker(taskInfo, taskTracker.getRegistryHostName(),
               taskTracker.getRegistryPort(), taskTracker.getTaskTrackerName());
-      if (taskTracker.reducerCounter.get() < taskTracker.NUM_OF_REDUCER_SLOTS) {
-        /* TODO: start new process */
-        return true;
-      } else {
-        return false;
+      synchronized (taskTracker.reducerCounter) {
+        if (taskTracker.reducerCounter.get() < taskTracker.NUM_OF_REDUCER_SLOTS) {
+          /* TODO: start new process */
+          return true;
+        } else {
+          return false;
+        }
       }
     }
   }
