@@ -1,16 +1,29 @@
 import java.util.List;
 
 public class TaskTrackerUpdatePkg {
-  int numOfMapperSlots;
 
-  int numOfReducerSlots;
+	private int numOfMapperSlots;
 
-  List<TaskProgress> taskStatus;
+	private int numOfReducerSlots;
 
-  public TaskTrackerUpdatePkg(int numOfMapperSlots, int numOfReducerSlots,
-          List<TaskProgress> taskStatus) {
-    this.numOfMapperSlots = numOfMapperSlots;
-    this.numOfReducerSlots = numOfReducerSlots;
-    this.taskStatus = taskStatus;
-  }
+	private List<TaskProgress> taskStatus;
+
+	public TaskTrackerUpdatePkg(int numOfMapperSlots, int numOfReducerSlots,
+			List<TaskProgress> taskStatus) {
+		this.numOfMapperSlots = numOfMapperSlots;
+		this.numOfReducerSlots = numOfReducerSlots;
+		this.taskStatus = taskStatus;
+	}
+
+	public int getNumOfMapperSlots() {
+		return numOfMapperSlots;
+	}
+
+	public int getNumOfReducerSlots() {
+		return numOfReducerSlots;
+	}
+
+	public List<TaskProgress> getTaskStatus() {
+		return taskStatus;
+	}
 }
