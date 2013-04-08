@@ -5,12 +5,37 @@ public class TaskProgress implements Serializable {
 
   float percentage;
 
-  boolean failed;
-
-  public TaskProgress(String taskID, float percentage, boolean failed) {
+  TaskStatus status;
+  
+  long timestamp;
+  
+  public TaskProgress(String taskID) {
     this.taskID = taskID;
+  }
+
+  public float getPercentage() {
+    return percentage;
+  }
+
+  public void setPercentage(float percentage) {
     this.percentage = percentage;
-    this.failed = failed;
+  }
+  
+
+  public TaskStatus getStatus() {
+    return status;
+  }
+
+  public void setStatus(TaskStatus status) {
+    this.status = status;
+  }
+
+  public long getTimestamp() {
+    return timestamp;
+  }
+
+  public void setTimestamp(long timestamp) {
+    this.timestamp = timestamp;
   }
 
 }

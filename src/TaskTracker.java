@@ -1,13 +1,20 @@
+import java.net.ConnectException;
 import java.rmi.AlreadyBoundException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import test.HelloInterface;
 
-public class TaskTracker {
+public class TaskTracker implements Runnable {
   private String registryHostName;
 
   private int registryPort;
@@ -19,8 +26,11 @@ public class TaskTracker {
   private int numOfReducerSlots;
 
   private StatusUpdater jobTrackerStatusUpdater;
-  
+
   private HashMap<String, TaskProgress> taskStatus;
+  
+  /* period between heart beat in seconds */
+  public final static int HEART_BEAT_PERIOD = 2;
 
   /**
    * constructor of task tracker
@@ -50,7 +60,9 @@ public class TaskTracker {
 
     /* initiate task status */
     this.taskStatus = new HashMap<String, TaskProgress>();
-    
+
+    this.registerServices();
+
   }
 
   /**
@@ -70,6 +82,25 @@ public class TaskTracker {
 
   public TaskOutput runTask(TaskInfo taskinfo) {
     return null;
+  }
+
+  public Map<String, TaskProgress> getTaskStatus() {
+    return taskStatus;
+  }
+
+  @Override
+  public void run() {
+    ScheduledExecutorService schExec = Executors.newScheduledThreadPool(8);
+    ScheduledFuture<?> schFuture = schExec.scheduleAtFixedRate(new Runnable() {
+      @Override
+      public void run() {
+        String[] processlist = null;
+        synchronized (taskStatus) {
+          
+        }
+      }
+    }, 0, HEART_BEAT_PERIOD, TimeUnit.SECONDS);
+
   }
 
 }
