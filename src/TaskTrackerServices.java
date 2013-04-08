@@ -11,7 +11,7 @@ public class TaskTrackerServices extends UnicastRemoteObject implements TaskLaun
     this.taskTracker = taskTracker;
   }
 
-  public TaskOutput runTask(TaskInfo taskinfo) {
+  public TaskOutput runTask(TaskInfo taskinfo) throws RemoteException{
     return null;
   }
 
