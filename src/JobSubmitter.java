@@ -7,7 +7,7 @@ import java.rmi.RemoteException;
  */
 public interface JobSubmitter extends Remote {
 
-	public int getJobID() throws RemoteException;
+	public int requestJobID() throws RemoteException;
 	
 	public void submitJob(Object job) throws RemoteException;
 	

@@ -1,6 +1,10 @@
 import java.util.*;
 
 public class TaskTrackerMeta {
+	// the time period of how long at least the slave
+	// should send a heartbeat to keep it alive
+	private final long ALIVE_CYCLE = 8000; // 8 seconds
+	
 	// the unique name of task tracker
 	private String taskTrackerName;
 	
@@ -24,6 +28,6 @@ public class TaskTrackerMeta {
 	}
 	
 	public boolean isAlive(long ctime) {
-		return true;
+		return (ctime - this.timestamp <= ALIVE_CYCLE);
 	}
 }
