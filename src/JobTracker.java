@@ -1,14 +1,20 @@
 import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.*;
 
 public class JobTracker {
+	
+	public final static String JOBTRACKER_SERVICE_NAME = "JobTrackerService";
 
 	private Map<String, TaskTrackerMeta> tasktrackers;
 	
 	private Map<Integer, TaskMeta> tasks;
 	
 	private Map<Integer, Job> jobs;
+	
+	private Queue<Integer> tasksQueue;
 	
 	// all the communication services that this jobtracker provides
 	private JobTrackerServices services;
@@ -19,13 +25,17 @@ public class JobTracker {
 
 	/*****************************************/
 	
-	public JobTracker() throws RemoteException {
-		this.tasktrackers = new HashMap<String, TaskTrackerMeta>();
+	public JobTracker(String rh, int rp) throws RemoteException {
+		this.tasktrackers = Collections.unmodifiableMap(new HashMap<String, TaskTrackerMeta>());
+		this.tasks = Collections.unmodifiableMap(new HashMap<Integer, TaskMeta>());
+		this.jobs = Collections.unmodifiableMap(new HashMap<Integer, Job>());
+		this.tasksQueue = (Queue<Integer>) Collections.unmodifiableCollection(new LinkedList<Integer>());
 				
 		this.scheduler = new DefaultTaskScheduler();
 		
-		// TODO : register this object in the RMI registry
 		this.services = new JobTrackerServices(this);
+		Registry reg = LocateRegistry.getRegistry(rh, rp);
+		reg.rebind(JOBTRACKER_SERVICE_NAME, this.services);
 	}
 	
 	/**
@@ -55,10 +65,16 @@ public class JobTracker {
 	
 	
 	public Map<String, TaskTrackerMeta> getTaskTrackers() {
-		return null;
+		return Collections.unmodifiableMap(this.tasktrackers);
 	}
 	
 	public void deleteTaskTracker(String ttname) {
+		if (ttname == null) return ;
 		
+		if (this.tasktrackers.containsKey(ttname)) {
+			this.tasktrackers.remove(ttname);
+			
+			// TODO : restart thoses tasks running on this tasktracker.
+		}
 	}
 }

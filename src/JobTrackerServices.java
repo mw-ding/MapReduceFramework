@@ -12,11 +12,10 @@ public class JobTrackerServices extends UnicastRemoteObject implements StatusUpd
 
 	@Override
 	public void update(Object statuspck) throws RemoteException {
-		TaskProgress taskProgress = (statuspck) statuspck;
 	}
 
 	@Override
-	public int getJobID() throws RemoteException {
+	public int requestJobID() throws RemoteException {
 		return 0;
 	}
 
