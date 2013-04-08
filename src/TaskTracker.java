@@ -3,10 +3,11 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.util.HashMap;
 
 import test.HelloInterface;
 
-public class TaskTracker{
+public class TaskTracker {
   private String registryHostName;
 
   private int registryPort;
@@ -18,6 +19,8 @@ public class TaskTracker{
   private int numOfReducerSlots;
 
   private StatusUpdater jobTrackerStatusUpdater;
+  
+  private HashMap<String, TaskProgress> taskStatus;
 
   /**
    * constructor of task tracker
@@ -44,18 +47,20 @@ public class TaskTracker{
     } catch (NotBoundException e) {
       e.printStackTrace();
     }
-    
-    /* initiate slots status */
+
+    /* initiate task status */
+    this.taskStatus = new HashMap<String, TaskProgress>();
     
   }
 
   /**
-   * register it to rmi registry
+   * register services to rmi registry
    */
-  public void registerServices() {
+  private void registerServices() {
     try {
+      TaskTrackerServices tts = new TaskTrackerServices(this);
       Registry reg = LocateRegistry.getRegistry(this.registryHostName, this.registryPort);
-      reg.bind(this.taskTrackerName, this);
+      reg.bind(this.taskTrackerName, tts);
     } catch (RemoteException e) {
       e.printStackTrace();
     } catch (AlreadyBoundException e) {
