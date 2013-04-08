@@ -6,13 +6,15 @@ import java.rmi.registry.Registry;
 public abstract class Worker {
 
 	private String taskId;
-	private String taskStatus;
+	private TaskProgress progress;
 	private StatusUpdater taskStatusUpdater;
 	
 	
 	public Worker(TaskInfo t, String regHostName, int regPort, String taskStatusUpdaterName){
 		
-		this.taskStatus = "0";
+		this.taskId = t.taskID;
+		this.progress = new TaskProgress(this.taskId);
+		
 		/* get the task-tracker status updater */
 	    try {
 	      Registry reg = LocateRegistry.getRegistry(regHostName, regPort);
@@ -30,7 +32,7 @@ public abstract class Worker {
 	
 	public void updateStatus(){
 		try {
-			taskStatusUpdater.update(this.taskStatus);
+			taskStatusUpdater.update(getProgress());
 		} catch (RemoteException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -40,5 +42,20 @@ public abstract class Worker {
 	public String getTaskId(){
 		return this.taskId;
 	}
+	
+	public TaskProgress getProgress(){
+		
+		progress.percentage = this.getPercentage();
+		
+		if(progress.percentage == 100.00)
+			progress.status = TaskStatus.SUCCEED;
+		else
+			progress.status = TaskStatus.INPROGRESS;
+		
+		return this.progress;
+		
+	}
+	
+	public abstract float getPercentage();
 
 }
