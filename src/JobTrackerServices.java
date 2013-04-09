@@ -33,15 +33,16 @@ public class JobTrackerServices extends UnicastRemoteObject implements StatusUpd
 		/*update the tasks the taskTracker maintains*/
 		Map<Integer, TaskMeta> allTasks = this.jobTracker.getTasks();
 		
-		for(TaskProgress tProg : taskTracker.getTaskStatus()){
-			TaskMeta task = allTasks.get(tProg.taskID);
+		for(TaskProgress taskProg : taskTracker.getTaskStatus()){
+			TaskMeta task = allTasks.get(taskProg.getTaskID());
+			task.setTaskProgress(taskProg);
 		}
 		
 	}
 
 	@Override
 	public int requestJobID() throws RemoteException {
-		return 0;
+		return this.jobTracker.requestJobId();
 	}
 
 	@Override
