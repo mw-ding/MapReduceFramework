@@ -1,6 +1,9 @@
+import java.io.Serializable;
 import java.util.List;
 
-public class TaskTrackerUpdatePkg {
+public class TaskTrackerUpdatePkg implements Serializable {
+
+	private String taskTrackerName;
 
 	private int numOfMapperSlots;
 
@@ -8,11 +11,16 @@ public class TaskTrackerUpdatePkg {
 
 	private List<TaskProgress> taskStatus;
 
-	public TaskTrackerUpdatePkg(int numOfMapperSlots, int numOfReducerSlots,
-			List<TaskProgress> taskStatus) {
+	public TaskTrackerUpdatePkg(String taskTrackerName, int numOfMapperSlots,
+			int numOfReducerSlots, List<TaskProgress> taskStatus) {
+		this.taskTrackerName = taskTrackerName;
 		this.numOfMapperSlots = numOfMapperSlots;
 		this.numOfReducerSlots = numOfReducerSlots;
 		this.taskStatus = taskStatus;
+	}
+
+	public void setTaskTrackerName(String taskTrackerName) {
+		this.taskTrackerName = taskTrackerName;
 	}
 
 	public int getNumOfMapperSlots() {
@@ -26,4 +34,9 @@ public class TaskTrackerUpdatePkg {
 	public List<TaskProgress> getTaskStatus() {
 		return taskStatus;
 	}
+
+	public String getTaskTrackerName() {
+		return taskTrackerName;
+	}
+
 }

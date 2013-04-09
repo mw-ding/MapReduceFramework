@@ -77,4 +77,8 @@ public class JobTracker {
 			// TODO : restart thoses tasks running on this tasktracker.
 		}
 	}
+	
+	public Map<Integer, TaskMeta> getTasks(){
+		return this.tasks;
+	}
 }

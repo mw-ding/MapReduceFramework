@@ -1,5 +1,7 @@
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.Map;
+import java.util.Iterator;
 
 public class JobTrackerServices extends UnicastRemoteObject implements StatusUpdater, JobSubmitter {
 
@@ -11,7 +13,30 @@ public class JobTrackerServices extends UnicastRemoteObject implements StatusUpd
 	}
 
 	@Override
-	public void update(Object statuspck) throws RemoteException {
+	public void update(Object statusPkg) throws RemoteException {
+		
+		/*check update package class*/
+		if(statusPkg.getClass().getName().compareTo(TaskTrackerUpdatePkg.class.getName())!=0)
+			return;
+		
+		TaskTrackerUpdatePkg taskTracker = (TaskTrackerUpdatePkg) statusPkg;
+		
+		/*update the current taskTracker status*/
+		Map<String, TaskTrackerMeta> allTaskTrackers = this.jobTracker.getTaskTrackers();
+		String taskName = taskTracker.getTaskTrackerName();
+		TaskTrackerMeta meta = allTaskTrackers.get(taskName);
+		
+		meta.setNumOfMapperSlots(taskTracker.getNumOfMapperSlots());
+		meta.setNumOfReducerSlots(taskTracker.getNumOfReducerSlots());
+		meta.setTimestamp(System.currentTimeMillis());
+		
+		/*update the tasks the taskTracker maintains*/
+		Map<Integer, TaskMeta> allTasks = this.jobTracker.getTasks();
+		
+		for(TaskProgress tProg : taskTracker.getTaskStatus()){
+			TaskMeta task = allTasks.get(tProg.taskID);
+		}
+		
 	}
 
 	@Override
