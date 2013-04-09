@@ -108,7 +108,7 @@ public class TaskTracker implements Runnable {
         synchronized (taskStatus) {
           taskList = new ArrayList<TaskProgress>(taskStatus.values());
         }
-        TaskTrackerUpdatePkg pkg = new TaskTrackerUpdatePkg(NUM_OF_MAPPER_SLOTS
+        TaskTrackerUpdatePkg pkg = new TaskTrackerUpdatePkg(taskTrackerName, NUM_OF_MAPPER_SLOTS
                 - mapperCounter.get(), NUM_OF_REDUCER_SLOTS - reducerCounter.get(), taskList);
         try {
           jobTrackerStatusUpdater.update(pkg);
