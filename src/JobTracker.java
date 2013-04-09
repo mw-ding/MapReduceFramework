@@ -65,7 +65,7 @@ public class JobTracker {
 	
 	
 	public Map<String, TaskTrackerMeta> getTaskTrackers() {
-		return Collections.unmodifiableMap(this.tasktrackers);
+		return new HashMap<String, TaskTrackerMeta>(this.tasktrackers);
 	}
 	
 	public void deleteTaskTracker(String ttname) {

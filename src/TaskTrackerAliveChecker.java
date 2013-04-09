@@ -24,7 +24,7 @@ public class TaskTrackerAliveChecker implements Runnable {
 			
 			TaskTrackerMeta meta = entry.getValue();
 			
-			if(!meta.isAlive(meta.getTimestamp()))
+			if(!meta.isAlive())
 				this.jTracker.deleteTaskTracker(meta.getTaskTrackerName());
         }
 		

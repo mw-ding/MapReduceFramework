@@ -27,7 +27,7 @@ public class TaskTrackerMeta {
 		return this.timestamp;
 	}
 	
-	public boolean isAlive(long ctime) {
-		return (ctime - this.timestamp <= ALIVE_CYCLE);
+	public boolean isAlive() {
+		return (System.currentTimeMillis() - this.timestamp <= ALIVE_CYCLE);
 	}
 }
