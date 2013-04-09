@@ -41,7 +41,7 @@ public class JobTrackerServices extends UnicastRemoteObject implements StatusUpd
 
 	@Override
 	public int requestJobID() throws RemoteException {
-		return 0;
+		return this.jobTracker.requestJobId();
 	}
 
 	@Override

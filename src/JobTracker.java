@@ -22,10 +22,17 @@ public class JobTracker {
 	// the scheduler, which generally decides assign which map/reduce task of
 	// which job to which tasktracker.
 	private TaskScheduler scheduler;
+	
+	private int currentMaxJobId;
+	
+	private int currentMaxTaskId;
 
 	/*****************************************/
 	
 	public JobTracker(String rh, int rp) throws RemoteException {
+		this.currentMaxJobId = 0;
+		this.currentMaxTaskId = 0;
+		
 		this.tasktrackers = Collections.unmodifiableMap(new HashMap<String, TaskTrackerMeta>());
 		this.tasks = Collections.unmodifiableMap(new HashMap<Integer, TaskMeta>());
 		this.jobs = Collections.unmodifiableMap(new HashMap<Integer, Job>());
@@ -80,5 +87,15 @@ public class JobTracker {
 	
 	public Map<Integer, TaskMeta> getTasks(){
 		return this.tasks;
+	}
+	
+	public int requestJobId() {
+		int result = (++this.currentMaxJobId);
+		return result;
+	}
+	
+	public int requestTaskId() {
+		int result = (++this.currentMaxTaskId);
+		return result;
 	}
 }
