@@ -106,6 +106,14 @@ public class JobTracker {
 		return new HashMap<String, TaskTrackerMeta>(this.tasktrackers);
 	}
 	
+	public TaskTrackerMeta getTaskTracker(String id) {
+		if (this.tasktrackers.containsKey(id)) {
+			return this.tasktrackers.get(id);
+		} else {
+			return null;
+		}
+	}
+	
 	public void deleteTaskTracker(String ttname) {
 		if (ttname == null) return ;
 		

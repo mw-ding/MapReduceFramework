@@ -1,5 +1,6 @@
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.List;
 import java.util.Map;
 import java.util.Iterator;
 import java.util.Set;
@@ -20,31 +21,49 @@ public class JobTrackerServices extends UnicastRemoteObject implements StatusUpd
 		if(statusPkg.getClass().getName().compareTo(TaskTrackerUpdatePkg.class.getName())!=0)
 			return;
 		
-		TaskTrackerUpdatePkg taskTracker = (TaskTrackerUpdatePkg) statusPkg;
+		TaskTrackerUpdatePkg taskTrackerPkg = (TaskTrackerUpdatePkg) statusPkg;
 		
 		/*update the current taskTracker status*/
-		Map<String, TaskTrackerMeta> allTaskTrackers = this.jobTracker.getTaskTrackers();
-		String taskName = taskTracker.getTaskTrackerName();
-		TaskTrackerMeta meta = allTaskTrackers.get(taskName);
+		String taskName = taskTrackerPkg.getTaskTrackerName();
+		TaskTrackerMeta ttmeta = this.jobTracker.getTaskTracker(taskName);
+		if (ttmeta == null) {
+			System.err.println("TaskTracker " + taskName + " does not exist.");
+			return ;
+		}
 		
-		meta.setNumOfMapperSlots(taskTracker.getNumOfMapperSlots());
-		meta.setNumOfReducerSlots(taskTracker.getNumOfReducerSlots());
-		meta.setTimestamp(System.currentTimeMillis());
+		ttmeta.setNumOfMapperSlots(taskTrackerPkg.getNumOfMapperSlots());
+		ttmeta.setNumOfReducerSlots(taskTrackerPkg.getNumOfReducerSlots());
+		ttmeta.setTimestamp(System.currentTimeMillis());
 		
 		/*update the tasks the taskTracker maintains*/
-		Map<Integer, TaskMeta> allTasks = this.jobTracker.getTasks();
+		List<TaskProgress> taskStatus = taskTrackerPkg.getTaskStatus();
+		Map<Integer, TaskMeta> allMapTasks = this.jobTracker.getMapTasks();
+		Map<Integer, TaskMeta> allReduceTasks = this.jobTracker.getReduceTasks();
 		
-		for(TaskProgress taskProg : taskTracker.getTaskStatus()){
-			TaskMeta task = allTasks.get(taskProg.getTaskID());
-			task.setTaskProgress(taskProg);
+		for(TaskProgress taskProg : taskStatus){
+			int taskid = taskProg.getTaskID();
+			TaskMeta task = null;
 			
-			/*delete complete tasks*/
-			Set<Integer> taskIds = meta.getTasks();
+			/* check whether task exist */
+			if (allMapTasks.containsKey(taskid)) {
+				task = allMapTasks.get(taskid);
+			} else if (allReduceTasks.containsKey(taskid)) {
+				task = allReduceTasks.get(taskid);
+			}
+			
+			if (task == null) {
+				System.err.println("Task " + taskid + " does not exist.");
+				continue;
+			}
+			
+			task.setTaskProgress(taskProg);
+			/*delete this task from the task tracker if it completes*/
 			if(taskProg.getStatus() == TaskStatus.SUCCEED){
-				taskIds.remove(task.getTaskID());
+				ttmeta.removeTask(taskProg.getTaskID());
 			}
 		}
 		
+		// TODO : check whether a job finishes
 	}
 
 	@Override

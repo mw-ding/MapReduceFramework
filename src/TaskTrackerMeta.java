@@ -62,6 +62,12 @@ public class TaskTrackerMeta {
 	public void setTimestamp(long ctime) {
 		this.timestamp = ctime;
 	}
+	
+	public void removeTask(int id) {
+		if (this.tasks.contains(id)) {
+			this.tasks.remove(id);
+		}
+	}
 
 	public boolean isAlive() {
 		return (System.currentTimeMillis() - this.timestamp <= ALIVE_CYCLE);
