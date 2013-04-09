@@ -8,13 +8,17 @@ public class JobTracker {
 	
 	public final static String JOBTRACKER_SERVICE_NAME = "JobTrackerService";
 
+	// all the tasktrackers running under current system
 	private Map<String, TaskTrackerMeta> tasktrackers;
 	
+	// all the tasks, including accomplished, executing, and uninitiated
 	private Map<Integer, TaskMeta> tasks;
 	
+	// all the jobs, including accomplished, executing, and uninitiated
 	private Map<Integer, Job> jobs;
 	
-	private Queue<Integer> tasksQueue;
+	// the task queue that all tasks that have not been arranged to execute
+	private Queue<TaskMeta> tasksQueue;
 	
 	// all the communication services that this jobtracker provides
 	private JobTrackerServices services;
@@ -22,14 +26,29 @@ public class JobTracker {
 	// the scheduler, which generally decides assign which map/reduce task of
 	// which job to which tasktracker.
 	private TaskScheduler scheduler;
+	
+	private int currentMaxJobId;
+	
+	private int currentMaxTaskId;
 
 	/*****************************************/
 	
 	public JobTracker(String rh, int rp) throws RemoteException {
-		this.tasktrackers = Collections.unmodifiableMap(new HashMap<String, TaskTrackerMeta>());
-		this.tasks = Collections.unmodifiableMap(new HashMap<Integer, TaskMeta>());
-		this.jobs = Collections.unmodifiableMap(new HashMap<Integer, Job>());
-		this.tasksQueue = (Queue<Integer>) Collections.unmodifiableCollection(new LinkedList<Integer>());
+		this.currentMaxJobId = 0;
+		this.currentMaxTaskId = 0;
+		
+		this.tasktrackers = Collections.synchronizedMap(new HashMap<String, TaskTrackerMeta>());
+		this.tasks = Collections.synchronizedMap(new HashMap<Integer, TaskMeta>());
+		this.jobs = Collections.synchronizedMap(new HashMap<Integer, Job>());
+		
+		this.tasksQueue = (Queue<TaskMeta>) Collections.synchronizedCollection(new PriorityQueue<TaskMeta>(10, new Comparator<TaskMeta>() {
+
+			@Override
+			public int compare(TaskMeta o1, TaskMeta o2) {
+				return o1.getTaskID() - o2.getTaskID();
+			}
+			
+		}));
 				
 		this.scheduler = new DefaultTaskScheduler();
 		
@@ -80,5 +99,15 @@ public class JobTracker {
 	
 	public Map<Integer, TaskMeta> getTasks(){
 		return this.tasks;
+	}
+	
+	public int requestJobId() {
+		int result = (++this.currentMaxJobId);
+		return result;
+	}
+	
+	public int requestTaskId() {
+		int result = (++this.currentMaxTaskId);
+		return result;
 	}
 }

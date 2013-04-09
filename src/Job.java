@@ -5,10 +5,13 @@ public class Job {
 	// the unique name for each map/reduce job
 	private String jobName;
 	
-	private Set<Integer> tasks;
+	private Set<Integer> mapTasks;
+	
+	private Set<Integer> reduceTasks;
 	
 	public Job() {
-		tasks = new HashSet<Integer>();
+		this.mapTasks = new HashSet<Integer>();
+		this.reduceTasks = new HashSet<Integer>();
 	}
 	
 	public String getJobName() {
