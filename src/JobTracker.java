@@ -3,6 +3,7 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.*;
+import java.util.Map.Entry;
 
 public class JobTracker {
 	
@@ -11,14 +12,20 @@ public class JobTracker {
 	// all the tasktrackers running under current system
 	private Map<String, TaskTrackerMeta> tasktrackers;
 	
-	// all the tasks, including accomplished, executing, and uninitiated
-	private Map<Integer, TaskMeta> tasks;
+	// all the map tasks, including accomplished, executing, and uninitiated
+	private Map<Integer, TaskMeta> mapTasks;
+	
+	// all the reduce tasks, including accomplished, executing, and uninitiated
+	private Map<Integer, TaskMeta> reduceTasks;
 	
 	// all the jobs, including accomplished, executing, and uninitiated
 	private Map<Integer, Job> jobs;
 	
-	// the task queue that all tasks that have not been arranged to execute
-	private Queue<TaskMeta> tasksQueue;
+	// the map task queue that all map tasks that have not been arranged to execute
+	private Queue<TaskMeta> mapTasksQueue;
+	
+	// the reduce task queue that all reduce tasks that have not been arranged to execute
+	private Queue<TaskMeta> reduceTasksQueue;
 	
 	// all the communication services that this jobtracker provides
 	private JobTrackerServices services;
@@ -27,8 +34,10 @@ public class JobTracker {
 	// which job to which tasktracker.
 	private TaskScheduler scheduler;
 	
+	// the maximum assigned job id currently
 	private int currentMaxJobId;
 	
+	// the maximum assigned task id currently
 	private int currentMaxTaskId;
 
 	/*****************************************/
@@ -38,10 +47,20 @@ public class JobTracker {
 		this.currentMaxTaskId = 0;
 		
 		this.tasktrackers = Collections.synchronizedMap(new HashMap<String, TaskTrackerMeta>());
-		this.tasks = Collections.synchronizedMap(new HashMap<Integer, TaskMeta>());
+		this.mapTasks = Collections.synchronizedMap(new HashMap<Integer, TaskMeta>());
+		this.reduceTasks = Collections.synchronizedMap(new HashMap<Integer, TaskMeta>());
 		this.jobs = Collections.synchronizedMap(new HashMap<Integer, Job>());
 		
-		this.tasksQueue = (Queue<TaskMeta>) Collections.synchronizedCollection(new PriorityQueue<TaskMeta>(10, new Comparator<TaskMeta>() {
+		this.mapTasksQueue = (Queue<TaskMeta>) Collections.synchronizedCollection(new PriorityQueue<TaskMeta>(10, new Comparator<TaskMeta>() {
+
+			@Override
+			public int compare(TaskMeta o1, TaskMeta o2) {
+				return o1.getTaskID() - o2.getTaskID();
+			}
+			
+		}));
+		
+		this.reduceTasksQueue = (Queue<TaskMeta>) Collections.synchronizedCollection(new PriorityQueue<TaskMeta>(10, new Comparator<TaskMeta>() {
 
 			@Override
 			public int compare(TaskMeta o1, TaskMeta o2) {
@@ -50,7 +69,7 @@ public class JobTracker {
 			
 		}));
 				
-		this.scheduler = new DefaultTaskScheduler();
+		this.scheduler = new DefaultTaskScheduler(this.tasktrackers, this.mapTasksQueue, this.reduceTasksQueue);
 		
 		this.services = new JobTrackerServices(this);
 		Registry reg = LocateRegistry.getRegistry(rh, rp);
@@ -93,21 +112,82 @@ public class JobTracker {
 		if (this.tasktrackers.containsKey(ttname)) {
 			this.tasktrackers.remove(ttname);
 			
-			// TODO : restart thoses tasks running on this tasktracker.
+			// TODO : restart those tasks running on this tasktracker.
 		}
 	}
 	
-	public Map<Integer, TaskMeta> getTasks(){
-		return this.tasks;
+	/**
+	 * get the map tasks list
+	 * @return
+	 */
+	public Map<Integer, TaskMeta> getMapTasks(){
+		return Collections.unmodifiableMap(this.mapTasks);
 	}
 	
+	/**
+	 * get the reduce tasks list
+	 * @return
+	 */
+	public Map<Integer, TaskMeta> getReduceTasks() {
+		return Collections.unmodifiableMap(this.reduceTasks);
+	}
+	
+	/**
+	 * get next available job id
+	 * @return
+	 */
 	public int requestJobId() {
 		int result = (++this.currentMaxJobId);
 		return result;
 	}
 	
+	/**
+	 * get next available task id
+	 * @return
+	 */
 	public int requestTaskId() {
 		int result = (++this.currentMaxTaskId);
 		return result;
+	}
+	
+	/**
+	 * trigger the task scheduling to fill all those idle slots
+	 */
+	public void distributeTasks() {
+		Map<Integer, String> schestrategies = null;
+		synchronized (this.tasktrackers) {
+			schestrategies = this.scheduler.scheduleTask();
+		}
+		
+		if (schestrategies == null) 
+			return ;
+		
+		for (Entry<Integer, String> entry : schestrategies.entrySet()) {
+			Integer taskid = entry.getKey();
+			
+			// find the task meta data
+			TaskMeta task = null;
+			
+			if (this.mapTasks.containsKey(taskid)) {
+				task = this.mapTasks.get(taskid);
+			}
+			
+			if (this.reduceTasks.containsKey(taskid)) {
+				task = this.reduceTasks.get(taskid);
+			}
+			
+			if (task == null)
+				continue;
+			
+			// find the specific task tracker
+			TaskTrackerMeta targetTasktracker = this.tasktrackers.get(entry.getValue());
+			
+			try {
+				// assign the task to the tasktracker
+				targetTasktracker.getTaskTrackerServices().runTask(task.getTaskInfo());
+			} catch (RemoteException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 }
