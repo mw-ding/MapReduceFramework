@@ -25,7 +25,7 @@ public class DefaultTaskScheduler implements TaskScheduler {
 		for (Entry<String, TaskTrackerMeta> entry : taskTrackers.entrySet()) {
 			TaskTrackerMeta tasktracker = entry.getValue();
 			synchronized (tasktracker) {
-
+				// fill up all the mapper slots
 				if (tasktracker.getNumOfMapperSlots() > 0
 						&& !this.mapTaskQueue.isEmpty()) {
 					while (!this.mapTaskQueue.isEmpty()
@@ -35,7 +35,8 @@ public class DefaultTaskScheduler implements TaskScheduler {
 								tasktracker.getTaskTrackerName());
 					}
 				}
-
+				
+				// fill up all the reducer slots
 				if (tasktracker.getNumOfReducerSlots() > 0
 						&& !this.reduceTaskQueue.isEmpty()) {
 					while (!this.reduceTaskQueue.isEmpty()

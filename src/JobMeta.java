@@ -2,7 +2,9 @@ import java.util.*;
 
 
 public class JobMeta {
-	// the unique name for each map/reduce job
+	private int jobId;
+	
+	// the name for each map/reduce job
 	private String jobName;
 	
 	private Set<Integer> mapTasks;
