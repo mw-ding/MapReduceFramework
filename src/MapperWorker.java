@@ -1,8 +1,7 @@
-
 public class MapperWorker extends Worker {
 
-  public MapperWorker(TaskInfo t, String regHostName, int regPort, String taskStatusUpdaterName) {
-    super(t, regHostName, regPort, taskStatusUpdaterName);
+  public MapperWorker(TaskInfo t, String taskStatusUpdaterName) {
+    super(t, taskStatusUpdaterName);
     // TODO Auto-generated constructor stub
   }
 

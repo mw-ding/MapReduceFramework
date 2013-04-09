@@ -23,8 +23,7 @@ public class TaskTrackerServices extends UnicastRemoteObject implements TaskLaun
     /* if this is a mapper task */
     if (taskInfo.getType() == TaskType.MAPPER) {
       /* instantiate a mapper task */
-      worker = new MapperWorker(taskInfo, taskTracker.getRegistryHostName(),
-              taskTracker.getRegistryPort(), taskTracker.getTaskTrackerName());
+      worker = new MapperWorker(taskInfo,  taskTracker.getTaskTrackerName());
       /* if there is free mapper slots */
       if (taskTracker.mapperCounter.incrementAndGet() <= taskTracker.NUM_OF_MAPPER_SLOTS) {
         /* TODO: start new process */
@@ -35,8 +34,7 @@ public class TaskTrackerServices extends UnicastRemoteObject implements TaskLaun
       }
     } else {
       /* instantiate a reducer task */
-      worker = new ReducerWorker(taskInfo, taskTracker.getRegistryHostName(),
-              taskTracker.getRegistryPort(), taskTracker.getTaskTrackerName());
+      worker = new ReducerWorker(taskInfo,  taskTracker.getTaskTrackerName());
       /* if there is free reducer slots */
       if (taskTracker.reducerCounter.incrementAndGet() <= taskTracker.NUM_OF_REDUCER_SLOTS) {
         /* TODO: start new process */

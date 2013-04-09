@@ -1,8 +1,8 @@
 
 public class ReducerWorker extends Worker {
 
-  public ReducerWorker(TaskInfo t, String regHostName, int regPort, String taskStatusUpdaterName) {
-    super(t, regHostName, regPort, taskStatusUpdaterName);
+  public ReducerWorker(TaskInfo t, String taskStatusUpdaterName) {
+    super(t, taskStatusUpdaterName);
     // TODO Auto-generated constructor stub
   }
 
