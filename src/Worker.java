@@ -11,15 +11,20 @@ public abstract class Worker {
 
   private StatusUpdater taskStatusUpdater;
 
-  public Worker(TaskInfo t, String regHostName, int regPort, String taskStatusUpdaterName) {
+  public Worker(TaskInfo t, String taskTrackerServiceName) {
 
     this.taskId = t.getTaskID();
     this.progress = new TaskProgress(this.taskId);
 
-    /* get the task-tracker status updater */
+    /* get the task tracker status updater */
+    
+    /* get the registry information */
+    String registryHostName = Utility.getParam("REGISTRY_HOST");
+    int registryPort = Integer.parseInt(Utility.getParam("REGISTRY_PORT"));
+    
     try {
-      Registry reg = LocateRegistry.getRegistry(regHostName, regPort);
-      taskStatusUpdater = (StatusUpdater) reg.lookup(taskStatusUpdaterName);
+      Registry reg = LocateRegistry.getRegistry(registryHostName, registryPort);
+      taskStatusUpdater = (StatusUpdater) reg.lookup(taskTrackerServiceName);
     } catch (RemoteException e) {
       e.printStackTrace();
     } catch (NotBoundException e) {

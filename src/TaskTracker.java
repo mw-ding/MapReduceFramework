@@ -13,9 +13,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class TaskTracker implements Runnable {
-  private String registryHostName;
-
-  private int registryPort;
 
   private String taskTrackerName;
 
@@ -44,47 +41,40 @@ public class TaskTracker implements Runnable {
    * @param taskTrackerName
    * @param jobTrackerStatusUpdaterName
    */
-  public TaskTracker(String rHostName, int rPort, String taskTrackerName, int numOfMapperSlots,
-          int numOfReducerSlots, String jobTrackerStatusUpdaterName) {
-    this.registryHostName = rHostName;
-    this.registryPort = rPort;
-    this.taskTrackerName = taskTrackerName;
+  public TaskTracker(int taskTrackerSeq) {
+    this.taskTrackerName = Utility.getParam("TASK_TRACKER_"+taskTrackerSeq+"_NAME");
+    this.NUM_OF_MAPPER_SLOTS = Integer.parseInt(Utility.getParam("TASK_TRACKER_"+taskTrackerSeq+"_NUM_MAPPER"));
+    this.NUM_OF_REDUCER_SLOTS = Integer.parseInt(Utility.getParam("TASK_TRACKER_"+taskTrackerSeq+"_NUM_REDUCER"));
     this.mapperCounter = new AtomicInteger();
     this.reducerCounter = new AtomicInteger();
+    /* initiate task status */
+    this.taskStatus = new HashMap<Integer, TaskProgress>();
 
-    this.NUM_OF_MAPPER_SLOTS = numOfMapperSlots;
-    this.NUM_OF_REDUCER_SLOTS = numOfReducerSlots;
-
+    /* get the registry information */
+    String registryHostName = Utility.getParam("REGISTRY_HOST");
+    int registryPort = Integer.parseInt(Utility.getParam("REGISTRY_PORT"));
+    
     /* get the job tracker status updater */
     try {
-      Registry reg = LocateRegistry.getRegistry(this.registryHostName, this.registryPort);
-      jobTrackerStatusUpdater = (StatusUpdater) reg.lookup(jobTrackerStatusUpdaterName);
+      Registry reg = LocateRegistry.getRegistry(registryHostName, registryPort);
+      jobTrackerStatusUpdater = (StatusUpdater) reg.lookup(Utility.getParam("JOB_TRACKER_SERVICE_NAME"));
     } catch (RemoteException e) {
       e.printStackTrace();
     } catch (NotBoundException e) {
       e.printStackTrace();
     }
 
-    /* initiate task status */
-    this.taskStatus = new HashMap<Integer, TaskProgress>();
-
-    this.registerServices();
-
-  }
-
-  /**
-   * register services to rmi registry
-   */
-  private void registerServices() {
+    /* registry service to registry */
     try {
       TaskTrackerServices tts = new TaskTrackerServices(this);
-      Registry reg = LocateRegistry.getRegistry(this.registryHostName, this.registryPort);
+      Registry reg = LocateRegistry.getRegistry(registryHostName, registryPort);
       reg.bind(this.taskTrackerName, tts);
     } catch (RemoteException e) {
       e.printStackTrace();
     } catch (AlreadyBoundException e) {
       e.printStackTrace();
     }
+
   }
 
   public TaskOutput runTask(TaskInfo taskinfo) {
@@ -108,12 +98,12 @@ public class TaskTracker implements Runnable {
         synchronized (taskStatus) {
           taskList = new ArrayList<TaskProgress>(taskStatus.values());
           /* delete the job that has failed or succeeded */
-          ArrayList<Integer> toDelete = new ArrayList<Integer>(); 
-          for(int id : taskStatus.keySet()){
-            if(taskStatus.get(id).getStatus() != TaskStatus.INPROGRESS)
+          ArrayList<Integer> toDelete = new ArrayList<Integer>();
+          for (int id : taskStatus.keySet()) {
+            if (taskStatus.get(id).getStatus() != TaskStatus.INPROGRESS)
               toDelete.add(id);
           }
-          for(int id : toDelete){
+          for (int id : toDelete) {
             taskStatus.remove(id);
           }
           /* delete done */
@@ -127,22 +117,6 @@ public class TaskTracker implements Runnable {
         }
       }
     }, 0, HEART_BEAT_PERIOD, TimeUnit.SECONDS);
-  }
-
-  public String getRegistryHostName() {
-    return registryHostName;
-  }
-
-  public void setRegistryHostName(String registryHostName) {
-    this.registryHostName = registryHostName;
-  }
-
-  public int getRegistryPort() {
-    return registryPort;
-  }
-
-  public void setRegistryPort(int registryPort) {
-    this.registryPort = registryPort;
   }
 
   public String getTaskTrackerName() {
