@@ -20,8 +20,8 @@ public class JobTrackerServices extends UnicastRemoteObject implements StatusUpd
 	}
 
 	@Override
-	public void submitJob(Object job) throws RemoteException {
-		
+	public boolean submitJob(JobConf jconf) throws RemoteException {
+		return true;
 	}
 
 }

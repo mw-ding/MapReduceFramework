@@ -9,6 +9,6 @@ public interface JobSubmitter extends Remote {
 
 	public int requestJobID() throws RemoteException;
 	
-	public void submitJob(Object job) throws RemoteException;
+	public boolean submitJob(JobConf jconf) throws RemoteException;
 	
 }
