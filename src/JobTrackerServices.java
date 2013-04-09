@@ -2,6 +2,7 @@ import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.Map;
 import java.util.Iterator;
+import java.util.Set;
 
 public class JobTrackerServices extends UnicastRemoteObject implements StatusUpdater, JobSubmitter {
 
@@ -36,6 +37,12 @@ public class JobTrackerServices extends UnicastRemoteObject implements StatusUpd
 		for(TaskProgress taskProg : taskTracker.getTaskStatus()){
 			TaskMeta task = allTasks.get(taskProg.getTaskID());
 			task.setTaskProgress(taskProg);
+			
+			/*delete complete tasks*/
+			Set<Integer> taskIds = meta.getTasks();
+			if(taskProg.getStatus() == TaskStatus.SUCCEED){
+				taskIds.remove(task.getTaskID());
+			}
 		}
 		
 	}

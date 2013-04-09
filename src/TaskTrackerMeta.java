@@ -34,6 +34,14 @@ public class TaskTrackerMeta {
 	
 	private Set<Integer> tasks;
 	
+	public Set<Integer> getTasks() {
+		return tasks;
+	}
+
+	public void setTasks(Set<Integer> tasks) {
+		this.tasks = tasks;
+	}
+
 	public TaskTrackerMeta(String name, TaskTrackerServices services) {
 		this.taskTrackerName = name;
 		this.taskTrackServices = services;
