@@ -1,6 +1,8 @@
 import java.util.List;
 
 public class TaskTrackerUpdatePkg {
+	
+	private String taskTrackerName;
 
 	private int numOfMapperSlots;
 
@@ -8,11 +10,20 @@ public class TaskTrackerUpdatePkg {
 
 	private List<TaskProgress> taskStatus;
 
-	public TaskTrackerUpdatePkg(int numOfMapperSlots, int numOfReducerSlots,
+	public TaskTrackerUpdatePkg(String taskTrackerName, int numOfMapperSlots, int numOfReducerSlots,
 			List<TaskProgress> taskStatus) {
+		this.taskTrackerName = taskTrackerName;
 		this.numOfMapperSlots = numOfMapperSlots;
 		this.numOfReducerSlots = numOfReducerSlots;
 		this.taskStatus = taskStatus;
+	}
+
+	public String getTaskTrackerName() {
+		return taskTrackerName;
+	}
+
+	public void setTaskTrackerName(String taskTrackerName) {
+		this.taskTrackerName = taskTrackerName;
 	}
 
 	public int getNumOfMapperSlots() {

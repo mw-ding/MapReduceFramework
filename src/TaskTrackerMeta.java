@@ -8,6 +8,26 @@ public class TaskTrackerMeta {
 	// the unique name of task tracker
 	private String taskTrackerName;
 	
+	private int numOfMapperSlots;
+
+	private int numOfReducerSlots;
+	
+	public int getNumOfMapperSlots() {
+		return numOfMapperSlots;
+	}
+
+	public void setNumOfMapperSlots(int numOfMapperSlots) {
+		this.numOfMapperSlots = numOfMapperSlots;
+	}
+
+	public int getNumOfReducerSlots() {
+		return numOfReducerSlots;
+	}
+
+	public void setNumOfReducerSlots(int numOfReducerSlots) {
+		this.numOfReducerSlots = numOfReducerSlots;
+	}
+
 	private long timestamp;
 	
 	private TaskTrackerServices taskTrackServices;
@@ -25,6 +45,10 @@ public class TaskTrackerMeta {
 	
 	public long getTimestamp() {
 		return this.timestamp;
+	}
+	
+	public void setTimestamp(long ctime){
+		this.timestamp = ctime;
 	}
 	
 	public boolean isAlive() {
