@@ -35,7 +35,6 @@ public abstract class Worker {
     try {
       taskStatusUpdater.update(getProgress());
     } catch (RemoteException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
   }
@@ -45,12 +44,10 @@ public abstract class Worker {
   }
 
   public TaskProgress getProgress() {
-
     progress.setPercentage(this.getPercentage());
     progress.setStatus(TaskStatus.INPROGRESS);
 
     return this.progress;
-
   }
 
   public abstract float getPercentage();

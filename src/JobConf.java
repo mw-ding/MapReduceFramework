@@ -1,6 +1,9 @@
 import java.io.Serializable;
 
 public class JobConf implements Serializable {
+  
+  // the id for current job
+  private int jobID;
 
 	// the name for current job
 	private String jobName;
@@ -26,7 +29,6 @@ public class JobConf implements Serializable {
 
 	public JobConf() {
 		this.jobName = "";
-
 		this.inputPath = null;
 		this.outputPath = null;
 		this.mapperClass = null;
@@ -96,4 +98,14 @@ public class JobConf implements Serializable {
 	public void setReducerClass(Class<?> reducerClass) {
 		this.reducerClass = reducerClass;
 	}
+
+  public int getJobID() {
+    return jobID;
+  }
+
+  public void setJobID(int jobID) {
+    this.jobID = jobID;
+  }
+	
+	
 }

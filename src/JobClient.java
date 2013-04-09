@@ -10,6 +10,8 @@ import java.rmi.registry.Registry;
  */
 public class JobClient {
 	
+  //
+  public static String CLIENT_SERVICE_NAME = "";
 	// the remote reference to the job submitter of the job tracker;
 	private JobSubmitter jobsubmitter;
 	
@@ -47,7 +49,7 @@ public class JobClient {
 	 * submit a job with a configuration
 	 * @param jconf
 	 */
-	private void submitJob(JobConf jconf) {
+	public void submitJob(JobConf jconf) {
 		if (jconf == null || !jconf.isValid()) {
 			System.err.println("Invalid job configuration.");
 		}
@@ -56,6 +58,9 @@ public class JobClient {
 		int jid = this.requestJobID();
 		if (jid <= 0) {
 			System.err.println("The system is not available for submitting new job.");
+			return;
+		}else{
+		  jconf.setJobID(jid);
 		}
 		
 		// 2. set the job id as the default job name if name has not been specified
@@ -64,6 +69,7 @@ public class JobClient {
 		}
 		
 		// 3. prepare the data and code. Not necessary for now.
+		
 		
 		// 4. finally submit the job to the job tracker
 		try {
@@ -74,12 +80,6 @@ public class JobClient {
 			}
 		} catch (RemoteException e) {
 			e.printStackTrace();
-		}
-	}
-	
-	public void run() {
-		while(true) {
-			// TODO : 
 		}
 	}
 }

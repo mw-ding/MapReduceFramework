@@ -107,6 +107,16 @@ public class TaskTracker implements Runnable {
         ArrayList<TaskProgress> taskList;
         synchronized (taskStatus) {
           taskList = new ArrayList<TaskProgress>(taskStatus.values());
+          /* delete the job that has failed or succeeded */
+          ArrayList<Integer> toDelete = new ArrayList<Integer>(); 
+          for(int id : taskStatus.keySet()){
+            if(taskStatus.get(id).getStatus() != TaskStatus.INPROGRESS)
+              toDelete.add(id);
+          }
+          for(int id : toDelete){
+            taskStatus.remove(id);
+          }
+          /* delete done */
         }
         TaskTrackerUpdatePkg pkg = new TaskTrackerUpdatePkg(taskTrackerName, NUM_OF_MAPPER_SLOTS
                 - mapperCounter.get(), NUM_OF_REDUCER_SLOTS - reducerCounter.get(), taskList);
