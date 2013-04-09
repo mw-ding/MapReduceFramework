@@ -25,7 +25,7 @@ public class TaskTracker implements Runnable {
 
   private StatusUpdater jobTrackerStatusUpdater;
 
-  private HashMap<String, TaskProgress> taskStatus;
+  private HashMap<Integer, TaskProgress> taskStatus;
 
   /* period between heart beat in seconds */
   private final int HEART_BEAT_PERIOD = 2;
@@ -66,7 +66,7 @@ public class TaskTracker implements Runnable {
     }
 
     /* initiate task status */
-    this.taskStatus = new HashMap<String, TaskProgress>();
+    this.taskStatus = new HashMap<Integer, TaskProgress>();
 
     this.registerServices();
 
@@ -91,7 +91,7 @@ public class TaskTracker implements Runnable {
     return null;
   }
 
-  public Map<String, TaskProgress> getTaskStatus() {
+  public Map<Integer, TaskProgress> getTaskStatus() {
     return taskStatus;
   }
 

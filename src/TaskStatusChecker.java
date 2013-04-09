@@ -15,13 +15,13 @@ public class TaskStatusChecker implements Runnable {
   }
 
   private void checkStatus() {
-    Map<String, TaskProgress> taskStatus = this.taskTracker.getTaskStatus();
+    Map<Integer, TaskProgress> taskStatus = this.taskTracker.getTaskStatus();
     synchronized (taskStatus) {
       for (TaskProgress taskProgress : taskStatus.values()) {
         long curTime = System.currentTimeMillis();
         if ((curTime - taskProgress.getTimestamp() > this.ALIVE_CYCLE)
-                && taskProgress.status != TaskStatus.SUCCEED) {
-          taskProgress.status = TaskStatus.FAILED;
+                && taskProgress.getStatus() != TaskStatus.SUCCEED) {
+          taskProgress.setStatus(TaskStatus.FAILED);
         }
       }
     }

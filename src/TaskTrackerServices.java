@@ -19,7 +19,7 @@ public class TaskTrackerServices extends UnicastRemoteObject implements TaskLaun
     /* TODO: need to make it asynchronized */
     Worker worker;
     /* if this is a mapper task */
-    if (taskInfo.type == TaskType.MAPPER) {
+    if (taskInfo.getType() == TaskType.MAPPER) {
       /* instantiate a mapper task */
       worker = new MapperWorker(taskInfo, taskTracker.getRegistryHostName(),
               taskTracker.getRegistryPort(), taskTracker.getTaskTrackerName());
@@ -47,9 +47,9 @@ public class TaskTrackerServices extends UnicastRemoteObject implements TaskLaun
 
   public void update(Object statuspck) throws RemoteException {
     TaskProgress taskProgress = (TaskProgress) statuspck;
-    Map<String, TaskProgress> taskStatus = this.taskTracker.getTaskStatus();
+    Map<Integer, TaskProgress> taskStatus = this.taskTracker.getTaskStatus();
     synchronized (taskStatus) {
-      taskStatus.put(taskProgress.taskID, taskProgress);
+      taskStatus.put(taskProgress.getTaskID(), taskProgress);
     }
   }
 }
