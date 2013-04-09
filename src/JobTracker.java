@@ -4,6 +4,9 @@ import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class JobTracker {
 	
@@ -19,7 +22,7 @@ public class JobTracker {
 	private Map<Integer, TaskMeta> reduceTasks;
 	
 	// all the jobs, including accomplished, executing, and uninitiated
-	private Map<Integer, Job> jobs;
+	private Map<Integer, JobMeta> jobs;
 	
 	// the map task queue that all map tasks that have not been arranged to execute
 	private Queue<TaskMeta> mapTasksQueue;
@@ -40,6 +43,10 @@ public class JobTracker {
 	// the maximum assigned task id currently
 	private int currentMaxTaskId;
 
+	public final static int SCHEDULER_POOL_SIZE = 8;
+	
+	public final static int ALIVE_CHECK_CYCLE_SEC = 4;
+	
 	/*****************************************/
 	
 	public JobTracker(String rh, int rp) throws RemoteException {
@@ -49,7 +56,7 @@ public class JobTracker {
 		this.tasktrackers = Collections.synchronizedMap(new HashMap<String, TaskTrackerMeta>());
 		this.mapTasks = Collections.synchronizedMap(new HashMap<Integer, TaskMeta>());
 		this.reduceTasks = Collections.synchronizedMap(new HashMap<Integer, TaskMeta>());
-		this.jobs = Collections.synchronizedMap(new HashMap<Integer, Job>());
+		this.jobs = Collections.synchronizedMap(new HashMap<Integer, JobMeta>());
 		
 		this.mapTasksQueue = (Queue<TaskMeta>) Collections.synchronizedCollection(new PriorityQueue<TaskMeta>(10, new Comparator<TaskMeta>() {
 
@@ -74,6 +81,12 @@ public class JobTracker {
 		this.services = new JobTrackerServices(this);
 		Registry reg = LocateRegistry.getRegistry(rh, rp);
 		reg.rebind(JOBTRACKER_SERVICE_NAME, this.services);
+		
+		ScheduledExecutorService serviceSche = Executors.newScheduledThreadPool(SCHEDULER_POOL_SIZE);
+		
+		// start the task tracker alive checking
+		TaskTrackerAliveChecker alivechecker = new TaskTrackerAliveChecker(this);
+		serviceSche.scheduleAtFixedRate(alivechecker, ALIVE_CHECK_CYCLE_SEC, ALIVE_CHECK_CYCLE_SEC, TimeUnit.SECONDS);
 	}
 	
 	/**
@@ -101,11 +114,21 @@ public class JobTracker {
 		}
 	}
 	
-	
+	/**
+	 * get the whole list of task trackers
+	 * @return
+	 */
 	public Map<String, TaskTrackerMeta> getTaskTrackers() {
-		return new HashMap<String, TaskTrackerMeta>(this.tasktrackers);
+		return Collections.unmodifiableMap(this.tasktrackers);
 	}
 	
+	/**
+	 * retrieve a specific task tracker
+	 * @param id
+	 * 		the id of the task tracker
+	 * @return
+	 * 		the task tracker if it exist; null if not
+	 */
 	public TaskTrackerMeta getTaskTracker(String id) {
 		if (this.tasktrackers.containsKey(id)) {
 			return this.tasktrackers.get(id);

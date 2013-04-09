@@ -1,3 +1,3 @@
 public enum TaskStatus {
-  INPROGRESS, FAILED, SUCCEED
+  INIT, INPROGRESS, FAILED, SUCCEED
 }
