@@ -1,13 +1,13 @@
 import java.io.Serializable;
 
 public class TaskProgress implements Serializable {
-  int taskID;
+  private int taskID;
 
-  float percentage;
+  private float percentage;
 
-  TaskStatus status;
+  private TaskStatus status;
   
-  long timestamp;
+  private long timestamp;
   
   public TaskProgress(int taskID) {
     this.taskID = taskID;
@@ -38,5 +38,14 @@ public class TaskProgress implements Serializable {
   public void setTimestamp(long timestamp) {
     this.timestamp = timestamp;
   }
+
+  public int getTaskID() {
+    return taskID;
+  }
+
+  public void setTaskID(int taskID) {
+    this.taskID = taskID;
+  }
+  
 
 }

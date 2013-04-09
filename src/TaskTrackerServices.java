@@ -26,6 +26,7 @@ public class TaskTrackerServices extends UnicastRemoteObject implements TaskLaun
       /* if there is free mapper slots */
       if (taskTracker.mapperCounter.incrementAndGet() <= taskTracker.NUM_OF_MAPPER_SLOTS) {
           /* TODO: start new process */
+        
         return true;
       } else {
         return false;
