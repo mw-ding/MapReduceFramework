@@ -19,6 +19,8 @@ public class JobClient {
               Integer.parseInt(Utility.getParam("REGISTRY_PORT")));
       this.jobTrackerJobSubmitter = (JobTrackerJobSubmitter) register.lookup(Utility
               .getParam("JOB_TRACKER_SERVICE_NAME"));
+      ClientServices cs = new ClientServices(this);
+      register.rebind(Utility.getParam("CLIENT_SERVICE_NAME"), cs);
     } catch (RemoteException e) {
       e.printStackTrace();
     } catch (NotBoundException e) {

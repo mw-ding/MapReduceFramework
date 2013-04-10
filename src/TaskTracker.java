@@ -69,11 +69,9 @@ public class TaskTracker {
     try {
       TaskTrackerServices tts = new TaskTrackerServices(this);
       Registry reg = LocateRegistry.getRegistry(registryHostName, registryPort);
-      reg.bind(this.taskTrackerName, tts);
+      reg.rebind(this.taskTrackerName, tts);
     } catch (RemoteException e) {
       e.printStackTrace();
-    } catch (AlreadyBoundException e) {
-      System.err.println(this.taskTrackerName+" is already registered.");
     }
 
   }
