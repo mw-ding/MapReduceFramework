@@ -2,7 +2,7 @@ public class MapperWorker extends Worker {
 
   private String inputFile;
 
-  private int offset;
+  private long offset;
 
   private int blockSize;
 
@@ -12,7 +12,7 @@ public class MapperWorker extends Worker {
   
   private Mapper mapper;
 
-  public MapperWorker(int taskID, String inputFile, int offset, int blockSize, String outputFile,
+  public MapperWorker(int taskID, String inputFile, long offset, int blockSize, String outputFile,
           String code, int numReducer, String taskTrackerServiceName) {
     super(taskID, outputFile, code, taskTrackerServiceName);
     this.inputFile = inputFile;
@@ -47,7 +47,7 @@ public class MapperWorker extends Worker {
     }
     int taskID = Integer.parseInt(args[0]);
     String inputFile = args[1];
-    int offset = Integer.parseInt(args[2]);
+    long offset = Long.parseLong(args[2]);
     int blockSize = Integer.parseInt(args[3]);
     String outputFile = args[4];
     String code = args[5];

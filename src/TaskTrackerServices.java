@@ -8,10 +8,6 @@ public class TaskTrackerServices extends UnicastRemoteObject implements TaskLaun
 
   private TaskTracker taskTracker;
 
-  private static String RUN_MAPPER_CMD = "java " + MapperWorker.class.getName();
-
-  private static String RUN_REDUCER_CMD = "java " + ReducerWorker.class.getName();
-
   public TaskTrackerServices(TaskTracker taskTracker) throws RemoteException {
     super();
     this.taskTracker = taskTracker;
@@ -29,7 +25,7 @@ public class TaskTrackerServices extends UnicastRemoteObject implements TaskLaun
       /* if there is free mapper slots */
       if (taskTracker.mapperCounter.incrementAndGet() <= taskTracker.NUM_OF_MAPPER_SLOTS) {
         /* TODO: start new process */
-        String[] args = new String[] { TaskTrackerServices.RUN_MAPPER_CMD,
+        String[] args = new String[] { MapperWorker.class.getName(),
             String.valueOf(taskInfo.getTaskID()), taskInfo.getInputPath(),
             String.valueOf(taskInfo.getOffset()), String.valueOf(taskInfo.getBlockSize()),
             taskInfo.getOutputPath(), taskInfo.getCodePath(),
