@@ -10,7 +10,7 @@ public class Utility {
   private static String MAPREDUCE_HOME = System.getenv().get("MAPREDUCE_HOME");
 
   public static String getParam(String key) {
-    String configPath = MAPREDUCE_HOME + "/config";
+    String configPath = MAPREDUCE_HOME + "/config/config";
     FileInputStream fis = null;
     BufferedReader br = null;
     try {
@@ -24,7 +24,7 @@ public class Utility {
           return line.substring(ind + 1);
         }
       }
-      throw new RuntimeException("cannot find param "+key);
+      throw new RuntimeException("cannot find param " + key);
     } catch (FileNotFoundException e) {
       e.printStackTrace();
     } catch (IOException e) {
@@ -38,5 +38,25 @@ public class Utility {
       }
     }
     return "";
+  }
+
+  public static void startJavaProcess(String[] args) throws Exception {
+    String separator = System.getProperty("file.separator");
+    String classpath = System.getProperty("java.class.path");
+    String path = System.getProperty("java.home") + separator + "bin" + separator + "java";
+    String[] newargs = new String[args.length + 3]; /* three more args for path, -cp, classpath */
+    newargs[0] = path;
+    newargs[1] = "-cp";
+    newargs[2] = classpath;
+    for (int i = 3, j = 0; j < args.length; i++, j++) {
+      newargs[i] = args[j];
+    }
+    ProcessBuilder processBuilder = new ProcessBuilder(newargs);
+    Process process = processBuilder.start();
+  }
+  
+  public static void startProcess(String[] args) throws Exception{
+    ProcessBuilder processBuilder = new ProcessBuilder(args);
+    Process process = processBuilder.start();
   }
 }

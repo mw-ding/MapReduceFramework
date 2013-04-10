@@ -43,6 +43,7 @@ public class TaskTracker {
    */
   public TaskTracker(int taskTrackerSeq) {
     this.taskTrackerName = Utility.getParam("TASK_TRACKER_"+taskTrackerSeq+"_NAME");
+    System.out.println(taskTrackerName + " STARTED..");
     this.NUM_OF_MAPPER_SLOTS = Integer.parseInt(Utility.getParam("TASK_TRACKER_"+taskTrackerSeq+"_NUM_MAPPER"));
     this.NUM_OF_REDUCER_SLOTS = Integer.parseInt(Utility.getParam("TASK_TRACKER_"+taskTrackerSeq+"_NUM_REDUCER"));
     this.mapperCounter = new AtomicInteger();
@@ -86,7 +87,7 @@ public class TaskTracker {
   }
 
 
-  public void runTaskTracker() {
+  public void run() {
     /* start the task status checker */
     Thread taskStatusChecker = new Thread(new TaskStatusChecker(this));
     taskStatusChecker.start();
@@ -125,6 +126,15 @@ public class TaskTracker {
 
   public void setTaskTrackerName(String taskTrackerName) {
     this.taskTrackerName = taskTrackerName;
+  }
+  
+  public static void main(String[] args){
+    if(args.length != 1){
+      System.err.println("illegal arguments");
+      return;
+    }
+    TaskTracker tt = new TaskTracker(Integer.parseInt(args[0]));
+    tt.run();
   }
 
 }
