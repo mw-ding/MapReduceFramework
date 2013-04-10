@@ -6,7 +6,7 @@ public class TaskInfo implements Serializable {
 
   private String inputPath;
 
-  private int offset;
+  private long offset;
 
   private int blockSize;
 
@@ -16,7 +16,7 @@ public class TaskInfo implements Serializable {
 
   private TaskType type;
 
-  public TaskInfo(int taskID, String inputPath, int offset, int blockSize, String codePath,
+  public TaskInfo(int taskID, String inputPath, long offset, int blockSize, String codePath,
           String outputPath, TaskType type) {
     this.taskID = taskID;
     this.inputPath = inputPath;
@@ -47,7 +47,7 @@ public class TaskInfo implements Serializable {
     return type;
   }
 
-  public int getOffset() {
+  public long getOffset() {
     return offset;
   }
 

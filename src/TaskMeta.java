@@ -45,4 +45,12 @@ public class TaskMeta {
   public TaskType getType() {
 	  return this.taskInfo.getType();
   }
+  
+  public boolean isMapper() {
+	  return this.getType() == TaskType.MAPPER;
+  }
+  
+  public boolean isReducer() {
+	  return this.getType() == TaskType.REDUCER;
+  }
 }
