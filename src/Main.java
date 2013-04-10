@@ -11,7 +11,7 @@ public class Main {
 //      e.printStackTrace();
 //    }
     JobConf jobConf = new JobConf();
-    jobConf.setInputPath("");
+    jobConf.setInputPath("config/config");
     jobConf.setBlockSize(5);
     jobConf.setJobName("test");
     jobConf.setMapperClassName("Mapper");

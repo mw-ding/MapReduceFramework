@@ -75,6 +75,7 @@ public class JobMeta {
 	 * split all the input files
 	 */
 	public void splitInput() {
+		System.out.println("Splitting input file");
 		if (this.inputBlocks == null)
 			this.inputBlocks = new ArrayList<InputBlock>();
 		else 
@@ -98,6 +99,7 @@ public class JobMeta {
 	 * @return
 	 */
 	private List<InputBlock> splitOneInputFile(File file) {
+		System.out.println("Splitting file " + file.getName());
 		List<InputBlock> result = new ArrayList<InputBlock>();
 		
 		long len = file.length();
@@ -112,6 +114,7 @@ public class JobMeta {
 			} else {
 				// otherwise, take all the rest content as a block
 				result.add(new InputBlock(file.getAbsolutePath(), offset, (int)len));
+				len = 0;
 			}
 		}
 		

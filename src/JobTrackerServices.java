@@ -78,7 +78,7 @@ public class JobTrackerServices extends UnicastRemoteObject implements StatusUpd
 		int jid = jconf.getJobID();
 		
 		// prepare the code for each jobs
-		if (!this.jobTracker.extractJobClassJar(jid, "")) {
+		if (!this.jobTracker.extractJobClassJar(jid, "testjar.jar")) {
 			System.out.println("Extracting jar file error.");
 			return false;
 		}

@@ -9,6 +9,7 @@ public class TaskMeta {
   private TaskProgress taskProgress;
 
   public TaskMeta(int TaskID, TaskInfo taskInfo, TaskProgress taskProgress) {
+	this.taskID = TaskID;
     this.taskInfo = taskInfo;
     this.taskProgress = taskProgress;
   }

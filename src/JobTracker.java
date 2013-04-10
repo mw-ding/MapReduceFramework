@@ -196,6 +196,7 @@ public class JobTracker {
 	 * trigger the task scheduling to fill all those idle slots
 	 */
 	public void distributeTasks() {
+		System.out.println("Distributing tasks.");
 		Map<Integer, String> schestrategies = null;
 		synchronized (this.tasktrackers) {
 			schestrategies = this.scheduler.scheduleTask();
@@ -205,6 +206,7 @@ public class JobTracker {
 			return ;
 		
 		for (Entry<Integer, String> entry : schestrategies.entrySet()) {
+			System.out.println("Assigning task " + entry.getKey() + " to tasktracker " + entry.getValue());
 			Integer taskid = entry.getKey();
 			
 			// find the task meta data
@@ -230,6 +232,7 @@ public class JobTracker {
 				
 				if (res) {
 					// if this task has been submitted to a tasktracker successfully
+					System.out.println("Assign task " + task.getTaskID() + " to tasktracker " + targetTasktracker.getTaskTrackerName());
 					task.getTaskProgress().setStatus(TaskStatus.INPROGRESS);
 				} else {
 					// if this task is failed to be submitted, place it back to the queue
@@ -305,6 +308,8 @@ public class JobTracker {
 		newjob.splitInput();
 		List<JobMeta.InputBlock> blocks = newjob.getInputBlocks();
 		
+		System.out.println("get " + blocks.size() + " splits.");
+		
 		Map<Integer, TaskMeta> mapTasks = new HashMap<Integer, TaskMeta>();
 		Map<Integer, TaskMeta> reduceTasks = new HashMap<Integer, TaskMeta>();
 		
@@ -317,6 +322,8 @@ public class JobTracker {
 			
 			mapTasks.put(taskid, mtask);
 			newjob.addMapperTask(taskid);
+			
+			System.out.println("Create a map task " + taskid);
 		}
 		
 		// create new reduce tasks for this job
@@ -328,7 +335,12 @@ public class JobTracker {
 			
 			reduceTasks.put(taskid, rtask);
 			newjob.addReducerTask(taskid);
+			
+			System.out.println("Create a reduce task " + taskid);
 		}
+		
+		System.out.println("Add " + mapTasks.size() + " mapper tasks.");
+		System.out.println("Add " + reduceTasks.size() + " reducer tasks.");
 		
 		// submit these tasks into the system
 		this.mapTasks.putAll(mapTasks);
