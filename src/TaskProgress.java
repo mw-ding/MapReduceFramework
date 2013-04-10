@@ -11,7 +11,7 @@ public class TaskProgress implements Serializable {
   
   public TaskProgress(int taskID) {
     this.taskID = taskID;
-    this.status = TaskStatus.INPROGRESS;
+    this.status = TaskStatus.INIT;
   }
 
   public float getPercentage() {
@@ -46,6 +46,4 @@ public class TaskProgress implements Serializable {
   public void setTaskID(int taskID) {
     this.taskID = taskID;
   }
-  
-
 }

@@ -1,15 +1,16 @@
 
 public class ReducerWorker extends Worker {
 
-  public ReducerWorker(TaskInfo t, String taskStatusUpdaterName) {
-    super(t, taskStatusUpdaterName);
+  public ReducerWorker(int taskID, String inputFile, int offset, int blockSize, String outputFile,
+          String code, String taskTrackerServiceName) {
+    super(taskID, inputFile, offset, blockSize, outputFile, code, taskTrackerServiceName);
     // TODO Auto-generated constructor stub
   }
 
   @Override
-  public void run(String in, String out, String code) {
+  public void run() {
     // TODO Auto-generated method stub
-
+    
   }
 
   @Override
@@ -17,5 +18,7 @@ public class ReducerWorker extends Worker {
     // TODO Auto-generated method stub
     return 0;
   }
+
+
 
 }

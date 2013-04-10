@@ -1,8 +1,11 @@
 public class TaskMeta {
+  /* the id of the task */
   private int taskID;
 
+  /* task information like input path, output path, code path etc. */
   private TaskInfo taskInfo;
 
+  /* the progress and status of one task */
   private TaskProgress taskProgress;
 
   public TaskMeta(int TaskID, TaskInfo taskInfo, TaskProgress taskProgress) {

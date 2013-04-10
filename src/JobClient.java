@@ -10,16 +10,14 @@ import java.rmi.registry.Registry;
  */
 public class JobClient {
 	
-  //
-  public static String CLIENT_SERVICE_NAME = "";
 	// the remote reference to the job submitter of the job tracker;
-	private JobSubmitter jobsubmitter;
+	private JobTrackerJobSubmitter jobTrackerJobSubmitter;
 	
 	public JobClient(String rh, int rp) {
 		try {
 			// locate the remote reference from the registry
 			Registry register = LocateRegistry.getRegistry(rh, rp);
-			this.jobsubmitter = (JobSubmitter) register.lookup(JobTracker.JOBTRACKER_SERVICE_NAME);
+			this.jobTrackerJobSubmitter = (JobTrackerJobSubmitter) register.lookup(Utility.getParam("JOB_TRACKER_SERVICE_NAME"));
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		} catch (NotBoundException e) {
@@ -38,7 +36,7 @@ public class JobClient {
 	 */
 	private int requestJobID() {
 		try {
-			return this.jobsubmitter.requestJobID();
+			return this.jobTrackerJobSubmitter.requestJobID();
 		} catch (RemoteException e) {
 			e.printStackTrace();
 			return -1;
@@ -73,7 +71,7 @@ public class JobClient {
 		
 		// 4. finally submit the job to the job tracker
 		try {
-			if (this.jobsubmitter.submitJob(jconf)) {
+			if (this.jobTrackerJobSubmitter.submitJob(jconf)) {
 				System.out.println("Job submitted.");
 			} else {
 				System.out.println("Failed to submit this job");
