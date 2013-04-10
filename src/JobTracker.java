@@ -66,7 +66,7 @@ public class JobTracker {
 		this.reduceTasks = Collections.synchronizedMap(new HashMap<Integer, TaskMeta>());
 		this.jobs = Collections.synchronizedMap(new HashMap<Integer, JobMeta>());
 		
-		this.mapTasksQueue = (Queue<TaskMeta>) Collections.synchronizedCollection(new PriorityQueue<TaskMeta>(10, new Comparator<TaskMeta>() {
+		this.mapTasksQueue = (Queue<TaskMeta>) (new PriorityQueue<TaskMeta>(10, new Comparator<TaskMeta>() {
 
 			@Override
 			public int compare(TaskMeta o1, TaskMeta o2) {
@@ -75,7 +75,7 @@ public class JobTracker {
 			
 		}));
 		
-		this.reduceTasksQueue = (Queue<TaskMeta>) Collections.synchronizedCollection(new PriorityQueue<TaskMeta>(10, new Comparator<TaskMeta>() {
+		this.reduceTasksQueue = (Queue<TaskMeta>) (new PriorityQueue<TaskMeta>(10, new Comparator<TaskMeta>() {
 
 			@Override
 			public int compare(TaskMeta o1, TaskMeta o2) {

@@ -8,11 +8,12 @@ public class Job {
 
   private ClientServices cs;
 
-  public Job(JobConf jobConf, String rh, int rp) {
+  public Job(JobConf jobConf) {
     this.jobConf = jobConf;
     try {
       // locate the remote reference from the registry
-      Registry register = LocateRegistry.getRegistry(rh, rp);
+      Registry register = LocateRegistry.getRegistry(Utility.getParam("REGISTRY_HOST"),
+              Integer.parseInt(Utility.getParam("REGISTRY_PORT")));
       this.cs = (ClientServices) register.lookup(Utility.getParam("CLIENT_SERVICE_NAME"));
     } catch (RemoteException e) {
       e.printStackTrace();

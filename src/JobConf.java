@@ -1,6 +1,7 @@
 import java.io.Serializable;
 
 public class JobConf implements Serializable {
+  /* TODO: make set job id invisible to user */
 
 	// the id for current job
 	private int jobID;
