@@ -1,25 +1,40 @@
 public class MapperWorker extends Worker {
 
-  String inputFile;
+  private String inputFile;
 
-  int offset;
+  private long offset;
 
-  int blockSize;
+  private int blockSize;
 
-  int numReducer;
+  private int reducerNum;
+  
+  private Partitioner partitioner;
+  
+  private Mapper mapper;
 
-  public MapperWorker(int taskID, String inputFile, int offset, int blockSize, String outputFile,
+  public MapperWorker(int taskID, String inputFile, long offset, int blockSize, String outputFile,
           String code, int numReducer, String taskTrackerServiceName) {
     super(taskID, outputFile, code, taskTrackerServiceName);
     this.inputFile = inputFile;
     this.offset = offset;
     this.blockSize = blockSize;
-    this.numReducer = numReducer;
+    this.reducerNum = numReducer;
+    this.partitioner = new Partitioner(this.reducerNum);
+    try {
+      this.mapper = (Mapper)Class.forName(this.code).newInstance();
+    } catch (InstantiationException e) {
+      e.printStackTrace();
+    } catch (IllegalAccessException e) {
+      e.printStackTrace();
+    } catch (ClassNotFoundException e) {
+      e.printStackTrace();
+    }
   }
 
   @Override
   public void run() {
     System.out.println("MAPPER JOB WILL RUN");
+    mapper.setup();
   }
 
   public float getPercentage() {
@@ -32,7 +47,7 @@ public class MapperWorker extends Worker {
     }
     int taskID = Integer.parseInt(args[0]);
     String inputFile = args[1];
-    int offset = Integer.parseInt(args[2]);
+    long offset = Long.parseLong(args[2]);
     int blockSize = Integer.parseInt(args[3]);
     String outputFile = args[4];
     String code = args[5];
