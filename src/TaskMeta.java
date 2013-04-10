@@ -42,4 +42,7 @@ public class TaskMeta {
     this.taskID = taskID;
   }
 
+  public TaskType getType() {
+	  return this.taskInfo.getType();
+  }
 }
