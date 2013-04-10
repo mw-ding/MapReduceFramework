@@ -333,4 +333,12 @@ public class JobTracker {
 		this.mapTasksQueue.addAll(mapTasks.values());
 		this.reduceTasksQueue.addAll(reduceTasks.values());
 	}
+	
+	public static void main(String[] args) {
+		try {
+			JobTracker jb = new JobTracker("127.0.0.1", 12345);
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		}
+	}
 }
