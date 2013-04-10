@@ -15,7 +15,7 @@ public abstract class Mapper {
 	 * be called once at the very end of this task
 	 */
 	protected void cleanup() {
-		
+	  
 	}
 	
 	public abstract void map(String key, String value);
