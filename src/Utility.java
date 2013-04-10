@@ -42,6 +42,7 @@ public class Utility {
   }
 
   public static void startJavaProcess(String[] args) throws Exception {
+    System.out.println("start new process " + args[0]);
     String separator = System.getProperty("file.separator");
     String classpath = System.getProperty("java.class.path");
     String path = System.getProperty("java.home") + separator + "bin" + separator + "java";

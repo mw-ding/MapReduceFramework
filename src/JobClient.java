@@ -62,6 +62,7 @@ public class JobClient {
     } else {
       jconf.setJobID(jid);
     }
+    System.out.println("client get job id "+jid+" from job tracker");
 
     // 2. set the job id as the default job name if name has not been specified
     if (jconf.getJobName().length() == 0) {
@@ -73,7 +74,7 @@ public class JobClient {
     // 4. finally submit the job to the job tracker
     try {
       if (this.jobTrackerJobSubmitter.submitJob(jconf)) {
-        System.out.println("Job submitted.");
+        System.out.println("Client submmited Job successfully.");
       } else {
         System.out.println("Failed to submit this job");
       }

@@ -65,7 +65,7 @@ public class TaskTracker {
       System.err.println(Utility.getParam("JOB_TRACKER_SERVICE_NAME")+" is not registered.");
     }
 
-    /* registry service to registry */
+    /* register service to registry */
     try {
       TaskTrackerServices tts = new TaskTrackerServices(this);
       Registry reg = LocateRegistry.getRegistry(registryHostName, registryPort);
