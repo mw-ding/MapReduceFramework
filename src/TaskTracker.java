@@ -62,7 +62,7 @@ public class TaskTracker {
     } catch (RemoteException e) {
       e.printStackTrace();
     } catch (NotBoundException e) {
-      e.printStackTrace();
+      System.err.println(Utility.getParam("JOB_TRACKER_SERVICE_NAME")+" is not registered.");
     }
 
     /* registry service to registry */
@@ -73,7 +73,7 @@ public class TaskTracker {
     } catch (RemoteException e) {
       e.printStackTrace();
     } catch (AlreadyBoundException e) {
-      e.printStackTrace();
+      System.err.println(this.taskTrackerName+" is already registered.");
     }
 
   }

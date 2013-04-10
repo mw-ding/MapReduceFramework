@@ -21,6 +21,7 @@ public class Utility {
         int ind = line.indexOf('=');
         String k = line.substring(0, ind);
         if (k.equals(key)) {
+          String s = line.substring(ind + 1);
           return line.substring(ind + 1);
         }
       }
