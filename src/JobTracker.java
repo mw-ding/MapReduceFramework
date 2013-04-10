@@ -225,8 +225,6 @@ public class JobTracker {
       return;
 
     for (Entry<Integer, String> entry : schestrategies.entrySet()) {
-      System.out
-              .println("Assigning task " + entry.getKey() + " to tasktracker " + entry.getValue());
       Integer taskid = entry.getKey();
 
       // find the task meta data
