@@ -224,9 +224,12 @@ public class JobTracker {
 			try {
 				// assign the task to the tasktracker
 				boolean res = targetTasktracker.getTaskTrackerServices().runTask(task.getTaskInfo());
+				
 				if (res) {
+					// if this task has been submitted to a tasktracker successfully
 					task.getTaskProgress().setStatus(TaskStatus.INPROGRESS);
 				} else {
+					// if this task is failed to be submitted, place it back to the queue
 					if (task.isMapper()) {
 						this.mapTasksQueue.offer(task);
 					} else {

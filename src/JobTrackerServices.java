@@ -87,7 +87,9 @@ public class JobTrackerServices extends UnicastRemoteObject implements StatusUpd
 		JobMeta newjob = new JobMeta(jconf);
 		this.jobTracker.submitJob(newjob);
 		
-		// TODO : 2. trigger the task scheduler
+		// trigger the task scheduler
+		this.jobTracker.distributeTasks();
+		
 		return true;
 	}
 
