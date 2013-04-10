@@ -21,6 +21,7 @@ public class TaskTrackerServices extends UnicastRemoteObject implements TaskLaun
   public boolean runTask(TaskInfo taskInfo) throws RemoteException {
     System.out.println("task tracker " + this.taskTracker.getTaskTrackerName()
             + " received runTask request taskid:" + taskInfo.getTaskID());
+    System.out.println("task type " + taskInfo.getType());
     /* TODO: need to make it asynchronized */
     /* if this is a mapper task */
     if (taskInfo.getType() == TaskType.MAPPER) {
