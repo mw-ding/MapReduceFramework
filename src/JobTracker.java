@@ -1,12 +1,14 @@
+import java.io.*;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.rmi.server.UnicastRemoteObject;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 public class JobTracker {
 	
@@ -46,6 +48,12 @@ public class JobTracker {
 	public final static int SCHEDULER_POOL_SIZE = 8;
 	
 	public final static int ALIVE_CHECK_CYCLE_SEC = 4;
+	
+	// the directory to which all the classes that user submits are extracted 
+	public final static String JOB_CLASSPATH = "bin" + File.separator;
+	
+	// the prefix of the directories that stores the classes for different jobs
+	public final static String JOB_CLASSPATH_PREFIX = "job";
 	
 	/*****************************************/
 	
@@ -219,6 +227,46 @@ public class JobTracker {
 			} catch (RemoteException e) {
 				e.printStackTrace();
 			}
+		}
+	}
+	
+	public void extractJobClassJar(int jobid, String jarpath) {
+		try {
+			JarFile jar = new JarFile(jarpath);
+			Enumeration enums = jar.entries();
+			String destDirPath = JobTracker.JOB_CLASSPATH + JobTracker.JOB_CLASSPATH_PREFIX + jobid + File.separator;
+			
+			System.out.println("Extracting file to " + destDirPath);
+			
+			// copy each file in jar archive one by one
+			while (enums.hasMoreElements()) {
+				JarEntry file = (JarEntry) enums.nextElement();
+				
+				File outputfile = new File(destDirPath + file.getName());
+				if (outputfile.isDirectory()) {
+					outputfile.mkdirs();
+					continue;
+				}
+				
+				InputStream is = jar.getInputStream(file);
+				FileOutputStream fos = null;
+				try {
+					fos = new FileOutputStream(outputfile);
+				} catch (FileNotFoundException e) {
+					outputfile.getParentFile().mkdirs();
+					fos = new FileOutputStream(outputfile);
+				}
+				
+				while (is.available() > 0) {
+					fos.write(is.read());
+				}
+				
+				fos.close();
+				is.close();
+			}
+		} catch (IOException e) {
+			// TODO : handle this exception if the jar file cannot be found
+			e.printStackTrace();
 		}
 	}
 }

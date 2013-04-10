@@ -73,8 +73,17 @@ public class JobTrackerServices extends UnicastRemoteObject implements StatusUpd
 
 	@Override
 	public boolean submitJob(JobConf jconf) throws RemoteException {
-		// TODO : 1. split the input
+		if (jconf == null) return false;
 		
+		int jid = jconf.getJobID();
+		
+		// prepare the code for each jobs
+		this.jobTracker.extractJobClassJar(jid, "");
+		
+		// update the job class information with the new place
+		
+		
+		// TODO : 1. split the input
 		
 		// TODO : 2. trigger the task scheduler
 		return true;
