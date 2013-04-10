@@ -6,12 +6,15 @@ public class MapperWorker extends Worker {
 
   int blockSize;
 
+  int numReducer;
+
   public MapperWorker(int taskID, String inputFile, int offset, int blockSize, String outputFile,
-          String code, String taskTrackerServiceName) {
+          String code, int numReducer, String taskTrackerServiceName) {
     super(taskID, outputFile, code, taskTrackerServiceName);
     this.inputFile = inputFile;
     this.offset = offset;
     this.blockSize = blockSize;
+    this.numReducer = numReducer;
   }
 
   @Override
@@ -24,7 +27,7 @@ public class MapperWorker extends Worker {
   }
 
   public static void main(String[] args) {
-    if (args.length != 7) {
+    if (args.length != 8) {
       System.out.println("Illegal arguments");
     }
     int taskID = Integer.parseInt(args[0]);
@@ -33,9 +36,10 @@ public class MapperWorker extends Worker {
     int blockSize = Integer.parseInt(args[3]);
     String outputFile = args[4];
     String code = args[5];
-    String taskTrackerServiceName = args[6];
+    int reducerNum = Integer.parseInt(args[6]);
+    String taskTrackerServiceName = args[7];
     MapperWorker worker = new MapperWorker(taskID, inputFile, offset, blockSize, outputFile, code,
-            taskTrackerServiceName);
+            reducerNum, taskTrackerServiceName);
     worker.run();
   }
 

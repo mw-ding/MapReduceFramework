@@ -29,13 +29,14 @@ public class TaskTrackerServices extends UnicastRemoteObject implements TaskLaun
       /* if there is free mapper slots */
       if (taskTracker.mapperCounter.incrementAndGet() <= taskTracker.NUM_OF_MAPPER_SLOTS) {
         /* TODO: start new process */
-        ProcessBuilder pb = new ProcessBuilder(TaskTrackerServices.RUN_MAPPER_CMD,
-                String.valueOf(taskInfo.getTaskID()), taskInfo.getInputPath(),
-                String.valueOf(taskInfo.getOffset()), String.valueOf(taskInfo.getBlockSize()),
-                taskInfo.getOutputPath(), taskInfo.getCodePath(), taskTracker.getTaskTrackerName());
+        String[] args = new String[] { TaskTrackerServices.RUN_MAPPER_CMD,
+            String.valueOf(taskInfo.getTaskID()), taskInfo.getInputPath(),
+            String.valueOf(taskInfo.getOffset()), String.valueOf(taskInfo.getBlockSize()),
+            taskInfo.getOutputPath(), taskInfo.getCodePath(),
+            String.valueOf(taskInfo.getReducerNum()), taskTracker.getTaskTrackerName() };
         try {
-          pb.start();
-        } catch (IOException e) {
+          Utility.startJavaProcess(args);
+        } catch (Exception e) {
           e.printStackTrace();
         }
         return true;
@@ -46,15 +47,6 @@ public class TaskTrackerServices extends UnicastRemoteObject implements TaskLaun
       /* if there is free reducer slots */
       if (taskTracker.reducerCounter.incrementAndGet() <= taskTracker.NUM_OF_REDUCER_SLOTS) {
         /* TODO: start new process */
-        ProcessBuilder pb = new ProcessBuilder(TaskTrackerServices.RUN_MAPPER_CMD,
-                String.valueOf(taskInfo.getTaskID()), taskInfo.getInputPath(),
-                String.valueOf(taskInfo.getOffset()), String.valueOf(taskInfo.getBlockSize()),
-                taskInfo.getOutputPath(), taskInfo.getCodePath(), taskTracker.getTaskTrackerName());
-        try {
-          pb.start();
-        } catch (IOException e) {
-          e.printStackTrace();
-        }
         return true;
       } else {
         return false;

@@ -2,28 +2,39 @@ import java.io.Serializable;
 
 public class TaskInfo implements Serializable {
 
+  /* the id of the task */
   private int taskID;
 
+  /* the input file path */
   private String inputPath;
 
+  /* the start offset of the file range */
   private int offset;
 
+  /* the block size to be processed */
   private int blockSize;
 
+  /* the path of the source code */
   private String codePath;
 
+  /* the output path */
   private String outputPath;
 
+  /* the number of reducer */
+  private int reducerNum;
+
+  /* worker type, mapper or reducer */
   private TaskType type;
 
   public TaskInfo(int taskID, String inputPath, int offset, int blockSize, String codePath,
-          String outputPath, TaskType type) {
+          String outputPath, int reducerNum, TaskType type) {
     this.taskID = taskID;
     this.inputPath = inputPath;
     this.offset = offset;
     this.blockSize = blockSize;
     this.codePath = codePath;
     this.outputPath = outputPath;
+    this.reducerNum = reducerNum;
     this.type = type;
   }
 
@@ -53,6 +64,10 @@ public class TaskInfo implements Serializable {
 
   public int getBlockSize() {
     return blockSize;
+  }
+
+  public int getReducerNum() {
+    return reducerNum;
   }
 
 }

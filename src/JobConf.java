@@ -64,6 +64,9 @@ public class JobConf implements Serializable {
 
 		if (this.blockSize == 0)
 			return false;
+		
+		if(this.reducerNum == 0)
+		  return false;
 
 		return true;
 	}
