@@ -6,7 +6,7 @@ import java.rmi.registry.Registry;
 public class Job {
   private JobConf jobConf;
 
-  private ClientServices cs;
+  private ClientJobSubmitter cs;
 
   public Job(JobConf jobConf) {
     this.jobConf = jobConf;
@@ -14,7 +14,7 @@ public class Job {
       // locate the remote reference from the registry
       Registry register = LocateRegistry.getRegistry(Utility.getParam("REGISTRY_HOST"),
               Integer.parseInt(Utility.getParam("REGISTRY_PORT")));
-      this.cs = (ClientServices) register.lookup(Utility.getParam("CLIENT_SERVICE_NAME"));
+      this.cs = (ClientJobSubmitter) register.lookup(Utility.getParam("CLIENT_SERVICE_NAME"));
     } catch (RemoteException e) {
       e.printStackTrace();
     } catch (NotBoundException e) {
