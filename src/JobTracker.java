@@ -306,7 +306,7 @@ public class JobTracker {
 		for (JobMeta.InputBlock block : blocks) {
 			int taskid = this.requestTaskId();
 			TaskInfo minfo = new TaskInfo(taskid, block.getFilePath(), block.getOffset(), block.getLength(), newjob.getMapperClassName(),
-			          "", TaskType.MAPPER);
+			          "", newjob.getReducerNum(), TaskType.MAPPER);
 			TaskMeta mtask = new TaskMeta(taskid, minfo, new TaskProgress(taskid));
 			
 			mapTasks.put(taskid, mtask);
@@ -317,7 +317,7 @@ public class JobTracker {
 		int reducerNum = newjob.getReducerNum();
 		for (int i = 0; i < reducerNum; i++) {
 			int taskid = this.requestTaskId();
-			TaskInfo rinfo = new TaskInfo(taskid, "", 0, 0, newjob.getReducerClassName(), "", TaskType.REDUCER);
+			TaskInfo rinfo = new TaskInfo(taskid, "", 0, 0, newjob.getReducerClassName(), "", newjob.getReducerNum(), TaskType.REDUCER);
 			TaskMeta rtask = new TaskMeta(taskid, rinfo, new TaskProgress(taskid));
 			
 			reduceTasks.put(taskid, rtask);

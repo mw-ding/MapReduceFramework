@@ -3,7 +3,7 @@ public class ReducerWorker extends Worker {
 
   public ReducerWorker(int taskID, String inputFile, int offset, int blockSize, String outputFile,
           String code, String taskTrackerServiceName) {
-    super(taskID, inputFile, offset, blockSize, outputFile, code, taskTrackerServiceName);
+    super(taskID, outputFile, code, taskTrackerServiceName);
     // TODO Auto-generated constructor stub
   }
 
