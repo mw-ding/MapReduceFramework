@@ -1,3 +1,4 @@
+import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.List;
@@ -26,9 +27,24 @@ public class JobTrackerServices extends UnicastRemoteObject implements StatusUpd
 		/*update the current taskTracker status*/
 		String taskName = taskTrackerPkg.getTaskTrackerName();
 		TaskTrackerMeta ttmeta = this.jobTracker.getTaskTracker(taskName);
+		
+		System.err.println("Processing update from - " + taskName);
+		
 		if (ttmeta == null) {
-			System.err.println("TaskTracker " + taskName + " does not exist.");
-			return ;
+			// register this tasktracker first
+			try {
+				TaskLauncher taskLauncher = (TaskLauncher) this.jobTracker.getRMIRegistry().lookup(taskTrackerPkg.getServiceName());
+				ttmeta = new TaskTrackerMeta(taskTrackerPkg.getTaskTrackerName(), taskLauncher);
+				if (this.jobTracker.registerTaskTracker(ttmeta)) {
+					System.err.println("Register successfully");
+				} else {
+					System.err.println("Register failed");
+					return ;
+				}
+			} catch (NotBoundException e) {
+				System.out.println("Cannot retrieve the service ");
+				return ;
+			}
 		}
 		
 		ttmeta.setNumOfMapperSlots(taskTrackerPkg.getNumOfMapperSlots());

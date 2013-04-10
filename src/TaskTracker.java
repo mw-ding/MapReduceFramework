@@ -13,6 +13,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class TaskTracker {
+	
+	public static String TASKTRACKER_SERVICE_NAME;
 
   private String taskTrackerName;
 
@@ -69,7 +71,8 @@ public class TaskTracker {
     try {
       TaskTrackerServices tts = new TaskTrackerServices(this);
       Registry reg = LocateRegistry.getRegistry(registryHostName, registryPort);
-      reg.rebind(this.taskTrackerName, tts);
+      TaskTracker.TASKTRACKER_SERVICE_NAME = this.taskTrackerName;
+      reg.rebind(TaskTracker.TASKTRACKER_SERVICE_NAME, tts);
     } catch (RemoteException e) {
       e.printStackTrace();
     }
@@ -108,7 +111,7 @@ public class TaskTracker {
           /* delete done */
         }
         TaskTrackerUpdatePkg pkg = new TaskTrackerUpdatePkg(taskTrackerName, NUM_OF_MAPPER_SLOTS
-                - mapperCounter.get(), NUM_OF_REDUCER_SLOTS - reducerCounter.get(), taskList);
+                - mapperCounter.get(), NUM_OF_REDUCER_SLOTS - reducerCounter.get(), TaskTracker.TASKTRACKER_SERVICE_NAME, taskList);
         try {
           jobTrackerStatusUpdater.update(pkg);
         } catch (RemoteException e) {

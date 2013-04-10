@@ -10,17 +10,16 @@ public class TaskTrackerUpdatePkg implements Serializable {
 	private int numOfReducerSlots;
 
 	private List<TaskProgress> taskStatus;
+	
+	private String serviceName;
 
 	public TaskTrackerUpdatePkg(String taskTrackerName, int numOfMapperSlots,
-			int numOfReducerSlots, List<TaskProgress> taskStatus) {
+			int numOfReducerSlots, String sn, List<TaskProgress> taskStatus) {
 		this.taskTrackerName = taskTrackerName;
 		this.numOfMapperSlots = numOfMapperSlots;
 		this.numOfReducerSlots = numOfReducerSlots;
 		this.taskStatus = taskStatus;
-	}
-
-	public void setTaskTrackerName(String taskTrackerName) {
-		this.taskTrackerName = taskTrackerName;
+		this.serviceName = sn;
 	}
 
 	public int getNumOfMapperSlots() {
@@ -39,4 +38,7 @@ public class TaskTrackerUpdatePkg implements Serializable {
 		return taskTrackerName;
 	}
 
+	public String getServiceName() {
+		return serviceName;
+	}
 }

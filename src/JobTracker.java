@@ -1,4 +1,5 @@
 import java.io.*;
+import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -44,6 +45,8 @@ public class JobTracker {
 	
 	// the maximum assigned task id currently
 	private int currentMaxTaskId;
+	
+	private Registry rmiReg;
 
 	public final static int SCHEDULER_POOL_SIZE = 8;
 	
@@ -66,9 +69,6 @@ public class JobTracker {
 		this.reduceTasks = Collections.synchronizedMap(new HashMap<Integer, TaskMeta>());
 		this.jobs = Collections.synchronizedMap(new HashMap<Integer, JobMeta>());
 		
-		TaskTrackerMeta m = new TaskTrackerMeta("tt1", null);
-		this.tasktrackers.put("tt1", m);
-		
 		this.mapTasksQueue = (Queue<TaskMeta>) (new PriorityQueue<TaskMeta>(10, new Comparator<TaskMeta>() {
 
 			@Override
@@ -90,8 +90,8 @@ public class JobTracker {
 		this.scheduler = new DefaultTaskScheduler(this.tasktrackers, this.mapTasksQueue, this.reduceTasksQueue);
 		
 		this.services = new JobTrackerServices(this);
-		Registry reg = LocateRegistry.getRegistry(rh, rp);
-		reg.rebind(JOBTRACKER_SERVICE_NAME, this.services);
+		this.rmiReg = LocateRegistry.getRegistry(rh, rp);
+		this.rmiReg.rebind(JOBTRACKER_SERVICE_NAME, this.services);
 		
 		ScheduledExecutorService serviceSche = Executors.newScheduledThreadPool(SCHEDULER_POOL_SIZE);
 		
@@ -115,13 +115,16 @@ public class JobTracker {
 	 * @param tt
 	 * 		the metadata of this trasktracker
 	 */
-	public void registerTaskTracker(TaskTrackerMeta tt) {
-		if (tt == null) return ;
+	public boolean registerTaskTracker(TaskTrackerMeta tt) {
+		if (tt == null) return false;
 		
 		if (this.tasktrackers.containsKey(tt.getTaskTrackerName())) {
-			throw new RuntimeException("The TaskTracker \"" + tt.getTaskTrackerName() + "\" already exist.");
+			System.err.println("The TaskTracker \"" + tt.getTaskTrackerName() + "\" already exist.");
+			return false;
 		} else {
+			System.err.println("Register a new tasktracker : " + tt.getTaskTrackerName());
 			this.tasktrackers.put(tt.getTaskTrackerName(), tt);
+			return true;
 		}
 	}
 	
@@ -192,6 +195,10 @@ public class JobTracker {
 		return result;
 	}
 	
+	public Registry getRMIRegistry() {
+		return rmiReg;
+	}
+	
 	/**
 	 * trigger the task scheduling to fill all those idle slots
 	 */
@@ -228,7 +235,7 @@ public class JobTracker {
 			
 			try {
 				// assign the task to the tasktracker
-				boolean res = targetTasktracker.getTaskTrackerServices().runTask(task.getTaskInfo());
+				boolean res = targetTasktracker.getTaskLauncher().runTask(task.getTaskInfo());
 				
 				if (res) {
 					// if this task has been submitted to a tasktracker successfully

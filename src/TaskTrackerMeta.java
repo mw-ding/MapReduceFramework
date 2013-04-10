@@ -14,17 +14,21 @@ public class TaskTrackerMeta {
 
 	private long timestamp;
 
-	private TaskTrackerServices taskTrackServices;
+	private TaskLauncher taskLauncher;
 
 	private Set<Integer> tasks;
 
-	public TaskTrackerMeta(String name, TaskTrackerServices services) {
+	public TaskTrackerMeta(String name, TaskLauncher services) {
 		this.taskTrackerName = name;
-		this.taskTrackServices = services;
+		this.taskLauncher = services;
 	}
 	
-	public TaskTrackerServices getTaskTrackerServices() {
-		return this.taskTrackServices;
+	public TaskLauncher getTaskLauncher() {
+		return this.taskLauncher;
+	}
+	
+	public void setTaskLauncher(TaskLauncher tl) {
+		this.taskLauncher = tl;
 	}
 
 	public int getNumOfMapperSlots() {
