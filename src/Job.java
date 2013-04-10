@@ -5,6 +5,7 @@ import java.rmi.registry.Registry;
 
 public class Job {
   private JobConf jobConf;
+
   private ClientServices cs;
 
   public Job(JobConf jobConf, String rh, int rp) {
@@ -12,7 +13,7 @@ public class Job {
     try {
       // locate the remote reference from the registry
       Registry register = LocateRegistry.getRegistry(rh, rp);
-      this.cs = (ClientServices) register.lookup(JobClient.CLIENT_SERVICE_NAME);
+      this.cs = (ClientServices) register.lookup(Utility.getParam("CLIENT_SERVICE_NAME"));
     } catch (RemoteException e) {
       e.printStackTrace();
     } catch (NotBoundException e) {
@@ -21,7 +22,7 @@ public class Job {
   }
 
   public void run() {
-     try {
+    try {
       cs.submitJob(jobConf);
     } catch (RemoteException e) {
       e.printStackTrace();

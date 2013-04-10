@@ -13,6 +13,9 @@ public class JobConf implements Serializable {
 
 	// the output path
 	private String outputPath;
+	
+	// the block size
+	private int blockSize;
 
 	// the mapper class
 	private Class<?> mapperClass;
@@ -54,6 +57,9 @@ public class JobConf implements Serializable {
 		
 		if (this.reducerClass == null || !this.reducerClass.getName().equals(Reducer.class.getName()))
 			return false;
+		
+		if(this.blockSize == 0)
+		  return false;
 		
 		return true;
 	}
@@ -106,6 +112,13 @@ public class JobConf implements Serializable {
   public void setJobID(int jobID) {
     this.jobID = jobID;
   }
-	
+
+  public int getBlockSize() {
+    return blockSize;
+  }
+
+  public void setBlockSize(int blockSize) {
+    this.blockSize = blockSize;
+  }
 	
 }

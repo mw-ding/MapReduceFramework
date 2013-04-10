@@ -5,23 +5,27 @@ import java.rmi.registry.Registry;
 
 public abstract class Worker {
 
-  private int taskId;
+  private int taskID;
 
-  private TaskProgress progress;
+  String outputFile;
+
+  String code;
 
   private StatusUpdater taskStatusUpdater;
 
-  public Worker(TaskInfo t, String taskTrackerServiceName) {
+  private TaskProgress progress;
 
-    this.taskId = t.getTaskID();
-    this.progress = new TaskProgress(this.taskId);
+  public Worker(int taskID, String outputFile, String code, String taskTrackerServiceName) {
+
+    this.taskID = taskID;
+    this.outputFile = outputFile;
+    this.code = code;
+    this.progress = new TaskProgress(this.taskID);
 
     /* get the task tracker status updater */
-    
-    /* get the registry information */
     String registryHostName = Utility.getParam("REGISTRY_HOST");
     int registryPort = Integer.parseInt(Utility.getParam("REGISTRY_PORT"));
-    
+
     try {
       Registry reg = LocateRegistry.getRegistry(registryHostName, registryPort);
       taskStatusUpdater = (StatusUpdater) reg.lookup(taskTrackerServiceName);
@@ -31,10 +35,9 @@ public abstract class Worker {
       e.printStackTrace();
     }
 
-    run(t.getInputPath(), t.getOutputPath(), t.getCodePath());
   }
 
-  public abstract void run(String in, String out, String code);
+  public abstract void run();
 
   public void updateStatus() {
     try {
@@ -44,14 +47,10 @@ public abstract class Worker {
     }
   }
 
-  public int getTaskId() {
-    return this.taskId;
-  }
-
   public TaskProgress getProgress() {
     progress.setPercentage(this.getPercentage());
     progress.setStatus(TaskStatus.INPROGRESS);
-
+    progress.setTimestamp(System.currentTimeMillis());
     return this.progress;
   }
 

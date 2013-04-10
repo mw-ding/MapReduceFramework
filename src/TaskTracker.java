@@ -12,7 +12,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class TaskTracker implements Runnable {
+public class TaskTracker {
 
   private String taskTrackerName;
 
@@ -85,8 +85,8 @@ public class TaskTracker implements Runnable {
     return taskStatus;
   }
 
-  @Override
-  public void run() {
+
+  public void runTaskTracker() {
     /* start the task status checker */
     Thread taskStatusChecker = new Thread(new TaskStatusChecker(this));
     taskStatusChecker.start();

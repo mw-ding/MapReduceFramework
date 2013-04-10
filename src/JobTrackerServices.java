@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.Iterator;
 import java.util.Set;
 
-public class JobTrackerServices extends UnicastRemoteObject implements StatusUpdater, JobSubmitter {
+public class JobTrackerServices extends UnicastRemoteObject implements StatusUpdater, JobTrackerJobSubmitter {
 
 	private JobTracker jobTracker;
 	

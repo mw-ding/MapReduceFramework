@@ -5,7 +5,7 @@ import java.rmi.RemoteException;
  * This interface is used for JobClients to communiation with the jobtracker,
  * including get the job id first and then submit a job
  */
-public interface JobSubmitter extends Remote {
+public interface JobTrackerJobSubmitter extends Remote {
 
 	public int requestJobID() throws RemoteException;
 	
