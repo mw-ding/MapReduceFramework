@@ -13,8 +13,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class TaskTracker {
-	
-	public static String TASKTRACKER_SERVICE_NAME;
+
+  public static String TASKTRACKER_SERVICE_NAME;
 
   private String taskTrackerName;
 
@@ -44,10 +44,12 @@ public class TaskTracker {
    * @param jobTrackerStatusUpdaterName
    */
   public TaskTracker(int taskTrackerSeq) {
-    this.taskTrackerName = Utility.getParam("TASK_TRACKER_"+taskTrackerSeq+"_NAME");
+    this.taskTrackerName = Utility.getParam("TASK_TRACKER_" + taskTrackerSeq + "_NAME");
     System.out.println(taskTrackerName + " STARTED..");
-    this.NUM_OF_MAPPER_SLOTS = Integer.parseInt(Utility.getParam("TASK_TRACKER_"+taskTrackerSeq+"_NUM_MAPPER"));
-    this.NUM_OF_REDUCER_SLOTS = Integer.parseInt(Utility.getParam("TASK_TRACKER_"+taskTrackerSeq+"_NUM_REDUCER"));
+    this.NUM_OF_MAPPER_SLOTS = Integer.parseInt(Utility.getParam("TASK_TRACKER_" + taskTrackerSeq
+            + "_NUM_MAPPER"));
+    this.NUM_OF_REDUCER_SLOTS = Integer.parseInt(Utility.getParam("TASK_TRACKER_" + taskTrackerSeq
+            + "_NUM_REDUCER"));
     this.mapperCounter = new AtomicInteger();
     this.reducerCounter = new AtomicInteger();
     /* initiate task status */
@@ -56,15 +58,16 @@ public class TaskTracker {
     /* get the registry information */
     String registryHostName = Utility.getParam("REGISTRY_HOST");
     int registryPort = Integer.parseInt(Utility.getParam("REGISTRY_PORT"));
-    
+
     /* get the job tracker status updater */
     try {
       Registry reg = LocateRegistry.getRegistry(registryHostName, registryPort);
-      jobTrackerStatusUpdater = (StatusUpdater) reg.lookup(Utility.getParam("JOB_TRACKER_SERVICE_NAME"));
+      jobTrackerStatusUpdater = (StatusUpdater) reg.lookup(Utility
+              .getParam("JOB_TRACKER_SERVICE_NAME"));
     } catch (RemoteException e) {
       e.printStackTrace();
     } catch (NotBoundException e) {
-      System.err.println(Utility.getParam("JOB_TRACKER_SERVICE_NAME")+" is not registered.");
+      System.err.println(Utility.getParam("JOB_TRACKER_SERVICE_NAME") + " is not registered.");
     }
 
     /* register service to registry */
@@ -86,7 +89,6 @@ public class TaskTracker {
   public Map<Integer, TaskProgress> getTaskStatus() {
     return taskStatus;
   }
-
 
   public void run() {
     /* start the task status checker */
@@ -111,7 +113,8 @@ public class TaskTracker {
           /* delete done */
         }
         TaskTrackerUpdatePkg pkg = new TaskTrackerUpdatePkg(taskTrackerName, NUM_OF_MAPPER_SLOTS
-                - mapperCounter.get(), NUM_OF_REDUCER_SLOTS - reducerCounter.get(), TaskTracker.TASKTRACKER_SERVICE_NAME, taskList);
+                - mapperCounter.get(), NUM_OF_REDUCER_SLOTS - reducerCounter.get(),
+                TaskTracker.TASKTRACKER_SERVICE_NAME, taskList);
         try {
           jobTrackerStatusUpdater.update(pkg);
         } catch (RemoteException e) {
@@ -128,9 +131,9 @@ public class TaskTracker {
   public void setTaskTrackerName(String taskTrackerName) {
     this.taskTrackerName = taskTrackerName;
   }
-  
-  public static void main(String[] args){
-    if(args.length != 1){
+
+  public static void main(String[] args) {
+    if (args.length != 1) {
       System.err.println("illegal arguments");
       return;
     }
