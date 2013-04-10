@@ -223,7 +223,16 @@ public class JobTracker {
 			
 			try {
 				// assign the task to the tasktracker
-				targetTasktracker.getTaskTrackerServices().runTask(task.getTaskInfo());
+				boolean res = targetTasktracker.getTaskTrackerServices().runTask(task.getTaskInfo());
+				if (res) {
+					task.getTaskProgress().setStatus(TaskStatus.INPROGRESS);
+				} else {
+					if (task.isMapper()) {
+						this.mapTasksQueue.offer(task);
+					} else {
+						this.reduceTasksQueue.offer(task);
+					}
+				}
 			} catch (RemoteException e) {
 				e.printStackTrace();
 			}
@@ -290,6 +299,35 @@ public class JobTracker {
 		newjob.splitInput();
 		List<JobMeta.InputBlock> blocks = newjob.getInputBlocks();
 		
+		Map<Integer, TaskMeta> mapTasks = new HashMap<Integer, TaskMeta>();
+		Map<Integer, TaskMeta> reduceTasks = new HashMap<Integer, TaskMeta>();
 		
+		// create new map tasks for this job
+		for (JobMeta.InputBlock block : blocks) {
+			int taskid = this.requestTaskId();
+			TaskInfo minfo = new TaskInfo(taskid, block.getFilePath(), block.getOffset(), block.getLength(), newjob.getMapperClassName(),
+			          "", newjob.getReducerNum(), TaskType.MAPPER);
+			TaskMeta mtask = new TaskMeta(taskid, minfo, new TaskProgress(taskid));
+			
+			mapTasks.put(taskid, mtask);
+			newjob.addMapperTask(taskid);
+		}
+		
+		// create new reduce tasks for this job
+		int reducerNum = newjob.getReducerNum();
+		for (int i = 0; i < reducerNum; i++) {
+			int taskid = this.requestTaskId();
+			TaskInfo rinfo = new TaskInfo(taskid, "", 0, 0, newjob.getReducerClassName(), "", newjob.getReducerNum(), TaskType.REDUCER);
+			TaskMeta rtask = new TaskMeta(taskid, rinfo, new TaskProgress(taskid));
+			
+			reduceTasks.put(taskid, rtask);
+			newjob.addReducerTask(taskid);
+		}
+		
+		// submit these tasks into the system
+		this.mapTasks.putAll(mapTasks);
+		this.reduceTasks.putAll(reduceTasks);
+		this.mapTasksQueue.addAll(mapTasks.values());
+		this.reduceTasksQueue.addAll(reduceTasks.values());
 	}
 }

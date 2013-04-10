@@ -2,6 +2,7 @@ import java.io.File;
 import java.util.*;
 
 public class JobMeta {
+
 	// the input blocks after splitting the input data
 	public class InputBlock {
 		private String filePath;
@@ -45,6 +46,8 @@ public class JobMeta {
 	
 	private int blockSize;
 	
+	private int reducerNum;
+	
 	private Set<Integer> mapTasks;
 	
 	private Set<Integer> reduceTasks;
@@ -59,6 +62,7 @@ public class JobMeta {
 		this.inputPath = jconf.getInputPath();
 		this.outputPath = jconf.getOutputPath();
 		this.blockSize = jconf.getBlockSize();
+		this.reducerNum = jconf.getReducerNum();
 		
 		this.mapTasks = new HashSet<Integer>();
 		this.reduceTasks = new HashSet<Integer>();
@@ -188,5 +192,17 @@ public class JobMeta {
 	
 	public List<InputBlock> getInputBlocks() {
 		return Collections.unmodifiableList(inputBlocks);
+	}
+	
+	public int getReducerNum() {
+		return reducerNum;
+	}
+	
+	public void addMapperTask(int taskid) {
+		this.mapTasks.add(taskid);
+	}
+	
+	public void addReducerTask(int taskid) {
+		this.reduceTasks.add(taskid);
 	}
 }

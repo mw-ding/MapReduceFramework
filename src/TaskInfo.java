@@ -8,8 +8,7 @@ public class TaskInfo implements Serializable {
   /* the input file path */
   private String inputPath;
 
-  /* the start offset of the file range */
-  private int offset;
+  private long offset;
 
   /* the block size to be processed */
   private int blockSize;
@@ -26,7 +25,7 @@ public class TaskInfo implements Serializable {
   /* worker type, mapper or reducer */
   private TaskType type;
 
-  public TaskInfo(int taskID, String inputPath, int offset, int blockSize, String codePath,
+  public TaskInfo(int taskID, String inputPath, long offset, int blockSize, String codePath,
           String outputPath, int reducerNum, TaskType type) {
     this.taskID = taskID;
     this.inputPath = inputPath;
@@ -58,7 +57,7 @@ public class TaskInfo implements Serializable {
     return type;
   }
 
-  public int getOffset() {
+  public long getOffset() {
     return offset;
   }
 
