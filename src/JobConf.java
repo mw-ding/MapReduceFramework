@@ -1,9 +1,9 @@
 import java.io.Serializable;
 
 public class JobConf implements Serializable {
-  
-  // the id for current job
-  private int jobID;
+
+	// the id for current job
+	private int jobID;
 
 	// the name for current job
 	private String jobName;
@@ -13,58 +13,62 @@ public class JobConf implements Serializable {
 
 	// the output path
 	private String outputPath;
-	
+
 	// the block size
 	private int blockSize;
-
-	// the mapper class
-	private Class<?> mapperClass;
-
-	// the reducer class
-	private Class<?> reducerClass;
 	
+	// the number of reducers
+	private int reducerNum;
+
+	// the mapper class name
+	private String mapperClassName;
+
+	// the reducer class name
+	private String reducerClassName;
+
 	// TODO : now we assume that key and value are both String type
 	// the key class
-//	private Class<?> keyClass;
-	
+	// private Class<?> keyClass;
+
 	// the value class
-//	private Class<?> valueClass;
+	// private Class<?> valueClass;
 
 	public JobConf() {
 		this.jobName = "";
 		this.inputPath = null;
 		this.outputPath = null;
-		this.mapperClass = null;
-		this.reducerClass = null;
-//		this.keyClass<?> = String.class;
-//		this.valueClass<?> = String.class;
+		this.mapperClassName = null;
+		this.reducerClassName = null;
+		// this.keyClass<?> = String.class;
+		// this.valueClass<?> = String.class;
 	}
-	
+
 	/**
 	 * whether current josb configuration is valid for a job
+	 * 
 	 * @return
 	 */
 	public boolean isValid() {
 		// if any of the following field is null, then invalid
 		if (this.inputPath == null)
 			return false;
-		
+
 		if (this.outputPath == null)
 			return false;
-		
-		if (this.mapperClass == null || !this.mapperClass.getName().equals(Mapper.class.getName()))
+
+		if (this.mapperClassName == null)
 			return false;
-		
-		if (this.reducerClass == null || !this.reducerClass.getName().equals(Reducer.class.getName()))
+
+		if (this.reducerClassName == null)
 			return false;
-		
-		if(this.blockSize == 0)
-		  return false;
-		
+
+		if (this.blockSize == 0)
+			return false;
+
 		return true;
 	}
 
-	// the getters and setters for all members 
+	// the getters and setters for all members
 	public String getJobName() {
 		return jobName;
 	}
@@ -89,36 +93,43 @@ public class JobConf implements Serializable {
 		this.outputPath = outputPath;
 	}
 
-	public Class<?> getMapperClass() {
-		return mapperClass;
+	public int getJobID() {
+		return jobID;
 	}
 
-	public void setMapperClass(Class<?> mapperClass) {
-		this.mapperClass = mapperClass;
+	public void setJobID(int jobID) {
+		this.jobID = jobID;
 	}
 
-	public Class<?> getReducerClass() {
-		return reducerClass;
+	public int getBlockSize() {
+		return blockSize;
 	}
 
-	public void setReducerClass(Class<?> reducerClass) {
-		this.reducerClass = reducerClass;
+	public void setBlockSize(int blockSize) {
+		this.blockSize = blockSize;
 	}
 
-  public int getJobID() {
-    return jobID;
-  }
+	public String getMapperClassName() {
+		return mapperClassName;
+	}
 
-  public void setJobID(int jobID) {
-    this.jobID = jobID;
-  }
+	public void setMapperClassName(String mapperClassName) {
+		this.mapperClassName = mapperClassName;
+	}
 
-  public int getBlockSize() {
-    return blockSize;
-  }
+	public String getReducerClassName() {
+		return reducerClassName;
+	}
 
-  public void setBlockSize(int blockSize) {
-    this.blockSize = blockSize;
-  }
+	public void setReducerClassName(String reducerClassName) {
+		this.reducerClassName = reducerClassName;
+	}
 	
+	public int getReducerNum() {
+		return reducerNum;
+	}
+
+	public void setReducerNum(int reducerNum) {
+		this.reducerNum = reducerNum;
+	}
 }

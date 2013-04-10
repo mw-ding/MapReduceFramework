@@ -230,7 +230,14 @@ public class JobTracker {
 		}
 	}
 	
-	public void extractJobClassJar(int jobid, String jarpath) {
+	/**
+	 * extract the jar file into the system's ClassPath folder
+	 * 
+	 * @param jobid
+	 * @param jarpath
+	 * @return
+	 */
+	public boolean extractJobClassJar(int jobid, String jarpath) {
 		try {
 			JarFile jar = new JarFile(jarpath);
 			Enumeration enums = jar.entries();
@@ -266,7 +273,23 @@ public class JobTracker {
 			}
 		} catch (IOException e) {
 			// TODO : handle this exception if the jar file cannot be found
-			e.printStackTrace();
+			return false;
 		}
+		
+		return true;
+	}
+	
+	/**
+	 * submit a new job
+	 * @param meta
+	 */
+	public void submitJob(JobMeta newjob) {
+		this.jobs.put(newjob.getJobId(), newjob);
+		
+		// split the input
+		newjob.splitInput();
+		List<JobMeta.InputBlock> blocks = newjob.getInputBlocks();
+		
+		
 	}
 }
