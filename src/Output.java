@@ -4,11 +4,11 @@ import java.io.IOException;
 
 public class Output {
 
-  private static String defaultName = "part-";
+  public static String defaultName = "part-";
 
-  private static String separator = "\t";
+  public static String separator = "\t";
 
-  private String outputDir;
+  public String outputDir;
 
   private Partitioner partitioner;
 

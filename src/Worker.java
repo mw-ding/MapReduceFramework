@@ -72,6 +72,6 @@ public abstract class Worker {
     }
   }
 
-  public abstract float getPercentage();
+  protected abstract float getPercentage();
 
 }
