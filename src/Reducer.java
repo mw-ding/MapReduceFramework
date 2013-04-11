@@ -19,5 +19,5 @@ public abstract class Reducer {
 		
 	}
 	
-	public abstract void reduce(String key, List<String> values);
+	public abstract void reduce(String key, List<String> values, Output out);
 }
