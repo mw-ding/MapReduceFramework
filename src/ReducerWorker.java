@@ -8,7 +8,9 @@ public class ReducerWorker extends Worker {
   
   private int orderId;
 
-  private Output outputer;
+  private ReducerOutputer outputer;
+  
+  private OutputFormat formater;
 
   private Reducer reducer;
 
@@ -18,7 +20,7 @@ public class ReducerWorker extends Worker {
 
   private float reducePercentage;
 
-  public ReducerWorker(int taskID, int order, String reducer, String indir, String outdir,
+  public ReducerWorker(int taskID, int order, String reducer, String oformater, String indir, String outdir,
           String taskTrackerServiceName) {
     super(taskID, indir, outdir, taskTrackerServiceName);
     
@@ -29,7 +31,8 @@ public class ReducerWorker extends Worker {
     this.orderId = order;
     try {
       this.reducer = (Reducer) Class.forName(reducer).newInstance();
-      this.outputer = new Output(this.outputFile + File.separator + Output.defaultName + this.orderId);
+      this.formater = (OutputFormat) Class.forName(oformater).newInstance();
+      this.outputer = new ReducerOutputer(this.outputFile + File.separator + Outputer.defaultName + this.orderId, this.formater);
     } catch (InstantiationException e) {
       e.printStackTrace();
     } catch (IllegalAccessException e) {
@@ -57,7 +60,7 @@ public class ReducerWorker extends Worker {
     }
     
     File[] mapOutputDirs = indirfile.listFiles();
-    String filename = Output.defaultName + this.orderId;
+    String filename = Outputer.defaultName + this.orderId;
     for (File mapOutputDir : mapOutputDirs) {
       result.add(new File(mapOutputDir.getAbsolutePath() + File.separator + filename));
     }
@@ -82,7 +85,7 @@ public class ReducerWorker extends Worker {
         
         String line = null;
         while( (line = reader.readLine()) != null ) {
-          String[] fields = line.split(Output.separator);
+          String[] fields = line.split(Outputer.separator);
           result.add(new Record(fields[0], fields[1]));
         }
         
@@ -151,7 +154,7 @@ public class ReducerWorker extends Worker {
     this.reducePercentage = (float) 1.0;
 
     // 5. close the outputer
-    this.outputer.closeAll();
+    this.outputer.close();
 
     // 6. do cleanup
     this.reducer.cleanup();

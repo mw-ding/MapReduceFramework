@@ -17,7 +17,7 @@ public class MapperWorker extends Worker {
 
   private int reducerNum;
 
-  private Output outputer;
+  private MapperOutputer outputer;
 
   private Mapper mapper;
 
@@ -36,7 +36,7 @@ public class MapperWorker extends Worker {
       /* initialize the output with user-defined or default partitioner */
       Partitioner part = (Partitioner) Class.forName(partitioner).getConstructor(Integer.class)
               .newInstance(this.reducerNum);
-      this.outputer = new Output(this.outputFile, part);
+      this.outputer = new MapperOutputer(this.outputFile, part);
       /* initialize the user-defined or default input format */
       this.inputFormat = (InputFormat) Class.forName(inputFormat)
               .getConstructor(String.class, Long.class, Integer.class)
@@ -91,7 +91,7 @@ public class MapperWorker extends Worker {
     for (int i = 0; i < this.reducerNum; i++) {
       ArrayList<Record> list = new ArrayList<Record>();
       String filename = outputer.outputDir + System.getProperty("file.separator")
-              + Output.defaultName + i;
+              + Outputer.defaultName + i;
       /* read file for each partition, wrap to records, store to list */
       try {
         BufferedReader br = new BufferedReader(new FileReader(filename));
@@ -115,7 +115,7 @@ public class MapperWorker extends Worker {
       try {
         bw = new BufferedWriter(new FileWriter(filename, true));
         for (Record r : list) {
-          bw.write(r.key + Output.separator + r.value);
+          bw.write(r.key + Outputer.separator + r.value);
         }
         bw.close();
       } catch (IOException e) {
