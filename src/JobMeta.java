@@ -2,6 +2,10 @@ import java.io.File;
 import java.util.*;
 
 public class JobMeta {
+  
+  public enum JobStatus {
+    INIT, INPROGRESS, FAILED, SUCCEED
+  }
 
   // the input blocks after splitting the input data
   public class InputBlock {
@@ -51,8 +55,12 @@ public class JobMeta {
   private Set<Integer> mapTasks;
 
   private Set<Integer> reduceTasks;
+  
+  private int taskFinishedNum;
 
   private List<InputBlock> inputBlocks;
+  
+  private JobStatus status;
 
   public JobMeta(JobConf jconf) {
     this.jobId = jconf.getJobID();
@@ -65,12 +73,12 @@ public class JobMeta {
     this.outputPath = jconf.getOutputPath();
     this.blockSize = jconf.getBlockSize();
     this.reducerNum = jconf.getReducerNum();
+    this.taskFinishedNum = 0;
+    this.status = JobStatus.INIT;
 
     this.mapTasks = new HashSet<Integer>();
     this.reduceTasks = new HashSet<Integer>();
     this.inputBlocks = new ArrayList<InputBlock>();
-
-    // this.splitInput();
   }
 
   /**
@@ -122,6 +130,16 @@ public class JobMeta {
     }
 
     return result;
+  }
+  
+  public boolean isDone() {
+    return (this.taskFinishedNum == (this.mapTasks.size() + this.reduceTasks.size()));
+  }
+  
+  public void reportFinishedTask(int tid) {
+    if (this.mapTasks.contains(tid) || this.reduceTasks.contains(tid)) {
+      this.taskFinishedNum ++;
+    }
   }
 
   public int getJobId() {
@@ -210,5 +228,13 @@ public class JobMeta {
 
   public void addReducerTask(int taskid) {
     this.reduceTasks.add(taskid);
+  }
+  
+  public JobStatus getStatus() {
+    return status;
+  }
+
+  public void setStatus(JobStatus status) {
+    this.status = status;
   }
 }

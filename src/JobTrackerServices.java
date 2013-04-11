@@ -3,8 +3,6 @@ import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.List;
 import java.util.Map;
-import java.util.Iterator;
-import java.util.Set;
 
 public class JobTrackerServices extends UnicastRemoteObject implements StatusUpdater,
         JobTrackerJobSubmitter {
@@ -49,11 +47,16 @@ public class JobTrackerServices extends UnicastRemoteObject implements StatusUpd
       }
     }
 
+    /* update slot and timestamp information */
     ttmeta.setNumOfMapperSlots(taskTrackerPkg.getNumOfMapperSlots());
     ttmeta.setNumOfReducerSlots(taskTrackerPkg.getNumOfReducerSlots());
     ttmeta.setTimestamp(System.currentTimeMillis());
-
+    
     /* update the tasks the taskTracker maintains */
+    this.updateTaskStatus(taskTrackerPkg);
+  }
+  
+  public void updateTaskStatus(TaskTrackerUpdatePkg taskTrackerPkg) {
     List<TaskProgress> taskStatus = taskTrackerPkg.getTaskStatus();
     Map<Integer, TaskMeta> allMapTasks = this.jobTracker.getMapTasks();
     Map<Integer, TaskMeta> allReduceTasks = this.jobTracker.getReduceTasks();
@@ -75,13 +78,19 @@ public class JobTrackerServices extends UnicastRemoteObject implements StatusUpd
       }
 
       task.setTaskProgress(taskProg);
-      /* delete this task from the task tracker if it completes */
+      /* do handling when a task finishes */
       if (taskProg.getStatus() == TaskStatus.SUCCEED) {
-        ttmeta.removeTask(taskProg.getTaskID());
+        // 1. remove the task from the tasktracker
+        this.jobTracker.getTaskTracker(taskTrackerPkg.getTaskTrackerName()).removeTask(taskid);
+        // 2. report to the job this task belongs to
+        JobMeta job = this.jobTracker.getJob(task.getJobID());
+        job.reportFinishedTask(taskid);
+        // 3. check whether this job finishes
+        if (job.isDone()) {
+          job.setStatus(JobMeta.JobStatus.SUCCEED);
+        }
       }
     }
-
-    // TODO : check whether a job finishes
   }
 
   @Override

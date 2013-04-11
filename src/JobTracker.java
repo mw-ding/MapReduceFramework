@@ -74,7 +74,7 @@ public class JobTracker {
 
               @Override
               public int compare(TaskMeta o1, TaskMeta o2) {
-                return o1.getTaskID() - o2.getTaskID();
+                return o1.getJobID() - o2.getJobID();
               }
 
             }));
@@ -84,7 +84,7 @@ public class JobTracker {
 
               @Override
               public int compare(TaskMeta o1, TaskMeta o2) {
-                return o1.getTaskID() - o2.getTaskID();
+                return o1.getJobID() - o2.getJobID();
               }
 
             }));
@@ -164,11 +164,15 @@ public class JobTracker {
 
     if (this.tasktrackers.containsKey(ttname)) {
       this.tasktrackers.remove(ttname);
-
-      // TODO : restart those tasks running on this tasktracker.
+      
+      
     }
   }
 
+  public JobMeta getJob(int jid) {
+    return this.jobs.get(jid);
+  }
+  
   /**
    * get the map tasks list
    * 
@@ -323,8 +327,6 @@ public class JobTracker {
    * @param meta
    */
   public void submitJob(JobMeta newjob) {
-    this.jobs.put(newjob.getJobId(), newjob);
-
     // split the input
     newjob.splitInput();
     List<JobMeta.InputBlock> blocks = newjob.getInputBlocks();
@@ -340,12 +342,10 @@ public class JobTracker {
       TaskInfo minfo = new TaskInfo(taskid, block.getFilePath(), block.getOffset(),
               block.getLength(), newjob.getMapperClassName(), "", newjob.getReducerNum(),
               TaskType.MAPPER);
-      TaskMeta mtask = new TaskMeta(taskid, minfo, new TaskProgress(taskid));
+      TaskMeta mtask = new TaskMeta(taskid, newjob.getJobId(), minfo, new TaskProgress(taskid));
 
       mapTasks.put(taskid, mtask);
       newjob.addMapperTask(taskid);
-
-      System.out.println("Create a map task " + taskid);
     }
 
     // create new reduce tasks for this job
@@ -354,12 +354,10 @@ public class JobTracker {
       int taskid = this.requestTaskId();
       TaskInfo rinfo = new TaskInfo(taskid, "", 0, 0, newjob.getReducerClassName(), "",
               newjob.getReducerNum(), TaskType.REDUCER);
-      TaskMeta rtask = new TaskMeta(taskid, rinfo, new TaskProgress(taskid));
+      TaskMeta rtask = new TaskMeta(taskid, newjob.getJobId(), rinfo, new TaskProgress(taskid));
 
       reduceTasks.put(taskid, rtask);
       newjob.addReducerTask(taskid);
-
-      System.out.println("Create a reduce task " + taskid);
     }
 
     System.out.println("Add " + mapTasks.size() + " mapper tasks.");
@@ -370,6 +368,17 @@ public class JobTracker {
     this.reduceTasks.putAll(reduceTasks);
     this.mapTasksQueue.addAll(mapTasks.values());
     this.reduceTasksQueue.addAll(reduceTasks.values());
+    
+    this.jobs.put(newjob.getJobId(), newjob);
+    newjob.setStatus(JobMeta.JobStatus.INPROGRESS);
+  }
+  
+  public void submitTask(TaskMeta task) {
+    if (task.isMapper()) {
+      this.mapTasksQueue.offer(task);
+    } else {
+      this.reduceTasksQueue.offer(task);
+    }
   }
 
   public static void main(String[] args) {

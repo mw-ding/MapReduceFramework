@@ -1,4 +1,7 @@
 public class TaskMeta {
+  /* the id of the job to which this task belongs */
+  private int jobID;
+
   /* the id of the task */
   private int taskID;
 
@@ -8,17 +11,23 @@ public class TaskMeta {
   /* the progress and status of one task */
   private TaskProgress taskProgress;
 
-  public TaskMeta(int TaskID, TaskInfo taskInfo, TaskProgress taskProgress) {
-	this.taskID = TaskID;
+  public TaskMeta(int TaskID, int JobID, TaskInfo taskInfo, TaskProgress taskProgress) {
+    this.jobID = JobID;
+    this.taskID = TaskID;
     this.taskInfo = taskInfo;
     this.taskProgress = taskProgress;
   }
 
-  public TaskMeta(int taskID, TaskInfo taskInfo) {
+  public TaskMeta(int taskID, int JobID, TaskInfo taskInfo) {
+    this.jobID = JobID;
     this.taskID = taskID;
     this.taskInfo = taskInfo;
   }
 
+  public int getJobID() {
+    return this.jobID;
+  }
+  
   public int getTaskID() {
     return this.taskID;
   }
@@ -44,14 +53,14 @@ public class TaskMeta {
   }
 
   public TaskType getType() {
-	  return this.taskInfo.getType();
+    return this.taskInfo.getType();
   }
-  
+
   public boolean isMapper() {
-	  return this.getType() == TaskType.MAPPER;
+    return this.getType() == TaskType.MAPPER;
   }
-  
+
   public boolean isReducer() {
-	  return this.getType() == TaskType.REDUCER;
+    return this.getType() == TaskType.REDUCER;
   }
 }
