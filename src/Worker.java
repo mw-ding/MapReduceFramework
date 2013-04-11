@@ -13,15 +13,18 @@ public abstract class Worker {
   protected int taskID;
 
   protected String outputFile;
+  
+  protected String inputFile;
 
   protected StatusUpdater taskStatusUpdater;
 
   protected TaskProgress progress;
 
-  public Worker(int taskID, String outputFile, String taskTrackerServiceName) {
+  public Worker(int taskID, String infile, String outfile, String taskTrackerServiceName) {
 
     this.taskID = taskID;
-    this.outputFile = outputFile;
+    this.outputFile = outfile;
+    this.inputFile = infile;
     this.progress = new TaskProgress(this.taskID);
 
     /* get the task tracker status updater */

@@ -11,8 +11,6 @@ import java.util.Collections;
 /* TODO: the input format should be assigned by user, here it is fixed */
 public class MapperWorker extends Worker {
 
-  private String inputFile;
-
   private long offset;
 
   private int blockSize;
@@ -25,11 +23,10 @@ public class MapperWorker extends Worker {
 
   private InputFormat inputFormat;
 
-  public MapperWorker(int taskID, String inputFile, long offset, int blockSize, String outputFile,
+  public MapperWorker(int taskID, String infile, long offset, int blockSize, String outfile,
           String mapper, String partitioner, String inputFormat, int numReducer,
           String taskTrackerServiceName) {
-    super(taskID, outputFile, taskTrackerServiceName);
-    this.inputFile = inputFile;
+    super(taskID, infile, outfile, taskTrackerServiceName);
     this.offset = offset;
     this.blockSize = blockSize;
     this.reducerNum = numReducer;
@@ -39,7 +36,7 @@ public class MapperWorker extends Worker {
       /* initialize the output with user-defined or default partitioner */
       Partitioner part = (Partitioner) Class.forName(partitioner).getConstructor(Integer.class)
               .newInstance(this.reducerNum);
-      this.outputer = new Output(this.inputFile, part);
+      this.outputer = new Output(this.outputFile, part);
       /* initialize the user-defined or default input format */
       this.inputFormat = (InputFormat) Class.forName(inputFormat)
               .getConstructor(String.class, Long.class, Integer.class)

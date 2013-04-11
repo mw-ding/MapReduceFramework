@@ -1,7 +1,12 @@
+import java.io.File;
+
 public class ReducerTaskInfo extends TaskInfo {
-  
+
   private int taskId;
   
+  /* the order of this reduce task */
+  private int orderId;
+
   /* the input file path */
   private String inputPath;
 
@@ -14,18 +19,22 @@ public class ReducerTaskInfo extends TaskInfo {
   /* the output path */
   private String outputPath;
 
-  public ReducerTaskInfo(int taskID, String ip, String r,
-          String of, String op) {
+  public ReducerTaskInfo(int taskID, int order, String ip, String r, String of, String op) {
     super(taskID, TaskType.REDUCER);
     this.taskId = taskID;
+    this.orderId = order;
     this.inputPath = ip;
     this.reducer = r;
     this.outputFormat = of;
     this.outputPath = op;
   }
-  
+
   public int getTaskId() {
     return this.taskId;
+  }
+  
+  public int getOrderId() {
+    return this.orderId;
   }
 
   public String getInputPath() {

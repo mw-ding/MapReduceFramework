@@ -350,7 +350,7 @@ public class JobTracker {
     int reducerNum = newjob.getReducerNum();
     for (int i = 0; i < reducerNum; i++) {
       int taskid = this.requestTaskId();
-      TaskInfo rinfo = new ReducerTaskInfo(taskid, "", newjob.getReducerClassName(),
+      TaskInfo rinfo = new ReducerTaskInfo(taskid, i, "", newjob.getReducerClassName(),
               newjob.getOutputFormatClassName(), newjob.getOutputPath());
       TaskMeta rtask = new TaskMeta(taskid, newjob.getJobId(), rinfo, new TaskProgress(taskid));
 

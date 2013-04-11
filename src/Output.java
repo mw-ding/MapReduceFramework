@@ -65,7 +65,7 @@ public class Output {
     
     BufferedWriter bw = this.writers[part];
     try {
-      bw.write(key + Output.separator + value);
+      bw.write(key + Output.separator + value + "\n");
     } catch (IOException e) {
       e.printStackTrace();
     }
