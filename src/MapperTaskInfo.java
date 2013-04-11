@@ -24,8 +24,8 @@ public class MapperTaskInfo extends TaskInfo {
   private int reducerNum;
 
   public MapperTaskInfo(int taskID, String inputPath, long offset, int blockSize, String mapper,
-          String partitioner, String inputFormat, String outputPath, int reducerNum, TaskType type) {
-    super(taskID, type);
+          String partitioner, String inputFormat, String outputPath, int reducerNum) {
+    super(taskID, TaskType.MAPPER);
     this.inputPath = inputPath;
     this.offset = offset;
     this.blockSize = blockSize;

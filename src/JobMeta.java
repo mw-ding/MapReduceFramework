@@ -2,7 +2,7 @@ import java.io.File;
 import java.util.*;
 
 public class JobMeta {
-  
+
   public enum JobStatus {
     INIT, INPROGRESS, FAILED, SUCCEED
   }
@@ -43,6 +43,12 @@ public class JobMeta {
   private String mapperClassName;
 
   private String reducerClassName;
+  
+  private String partitionerClassName;
+  
+  private String inputFormatClassName;
+  
+  private String outputFormatClassName;
 
   private String inputPath;
 
@@ -69,6 +75,12 @@ public class JobMeta {
             + jconf.getMapperClassName();
     this.reducerClassName = JobTracker.JOB_CLASSPATH_PREFIX + this.jobId + "."
             + jconf.getReducerClassName();
+    this.partitionerClassName = JobTracker.JOB_CLASSPATH_PREFIX + this.jobId + "."
+            + jconf.getPartitionerClassName();
+    this.inputFormatClassName = JobTracker.JOB_CLASSPATH_PREFIX + this.jobId + "."
+            + jconf.getInputFormatClassName();
+    this.outputFormatClassName = JobTracker.JOB_CLASSPATH_PREFIX + this.jobId + "."
+            + jconf.getOutputFormatClassName();
     this.inputPath = jconf.getInputPath();
     this.outputPath = jconf.getOutputPath();
     this.blockSize = jconf.getBlockSize();
@@ -236,5 +248,29 @@ public class JobMeta {
 
   public void setStatus(JobStatus status) {
     this.status = status;
+  }
+
+  public String getPartitionerClassName() {
+    return partitionerClassName;
+  }
+
+  public void setPartitionerClassName(String partitionerClassName) {
+    this.partitionerClassName = partitionerClassName;
+  }
+  
+  public String getInputFormatClassName() {
+    return inputFormatClassName;
+  }
+
+  public void setInputFormatClassName(String inputFormatClassName) {
+    this.inputFormatClassName = inputFormatClassName;
+  }
+  
+  public String getOutputFormatClassName() {
+    return outputFormatClassName;
+  }
+
+  public void setOutputFormatClassName(String outputFormatClassName) {
+    this.outputFormatClassName = outputFormatClassName;
   }
 }

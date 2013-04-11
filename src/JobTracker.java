@@ -1,5 +1,4 @@
 import java.io.*;
-import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -164,15 +163,14 @@ public class JobTracker {
 
     if (this.tasktrackers.containsKey(ttname)) {
       this.tasktrackers.remove(ttname);
-      
-      
+
     }
   }
 
   public JobMeta getJob(int jid) {
     return this.jobs.get(jid);
   }
-  
+
   /**
    * get the map tasks list
    * 
@@ -339,9 +337,9 @@ public class JobTracker {
     // create new map tasks for this job
     for (JobMeta.InputBlock block : blocks) {
       int taskid = this.requestTaskId();
-      TaskInfo minfo = new TaskInfo(taskid, block.getFilePath(), block.getOffset(),
-              block.getLength(), newjob.getMapperClassName(), "", newjob.getReducerNum(),
-              TaskType.MAPPER);
+      TaskInfo minfo = new MapperTaskInfo(taskid, block.getFilePath(), block.getOffset(),
+              block.getLength(), newjob.getMapperClassName(), newjob.getPartitionerClassName(),
+              newjob.getInputFormatClassName(), "", newjob.getReducerNum());
       TaskMeta mtask = new TaskMeta(taskid, newjob.getJobId(), minfo, new TaskProgress(taskid));
 
       mapTasks.put(taskid, mtask);
@@ -352,8 +350,8 @@ public class JobTracker {
     int reducerNum = newjob.getReducerNum();
     for (int i = 0; i < reducerNum; i++) {
       int taskid = this.requestTaskId();
-      TaskInfo rinfo = new TaskInfo(taskid, "", 0, 0, newjob.getReducerClassName(), "",
-              newjob.getReducerNum(), TaskType.REDUCER);
+      TaskInfo rinfo = new ReducerTaskInfo(taskid, "", newjob.getReducerClassName(),
+              newjob.getOutputFormatClassName(), newjob.getOutputPath());
       TaskMeta rtask = new TaskMeta(taskid, newjob.getJobId(), rinfo, new TaskProgress(taskid));
 
       reduceTasks.put(taskid, rtask);
@@ -368,11 +366,11 @@ public class JobTracker {
     this.reduceTasks.putAll(reduceTasks);
     this.mapTasksQueue.addAll(mapTasks.values());
     this.reduceTasksQueue.addAll(reduceTasks.values());
-    
+
     this.jobs.put(newjob.getJobId(), newjob);
     newjob.setStatus(JobMeta.JobStatus.INPROGRESS);
   }
-  
+
   public void submitTask(TaskMeta task) {
     if (task.isMapper()) {
       this.mapTasksQueue.offer(task);

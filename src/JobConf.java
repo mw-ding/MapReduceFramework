@@ -3,137 +3,182 @@ import java.io.Serializable;
 public class JobConf implements Serializable {
   /* TODO: make set job id invisible to user */
 
-	// the id for current job
-	private int jobID;
+  // the id for current job
+  private int jobID;
 
-	// the name for current job
-	private String jobName;
+  // the name for current job
+  private String jobName;
 
-	// the input path
-	private String inputPath;
+  // the input path
+  private String inputPath;
 
-	// the output path
-	private String outputPath;
+  // the output path
+  private String outputPath;
 
-	// the block size
-	private int blockSize;
-	
-	// the number of reducers
-	private int reducerNum;
+  // the block size
+  private int blockSize;
 
-	// the mapper class name
-	private String mapperClassName;
+  // the number of reducers
+  private int reducerNum;
 
-	// the reducer class name
-	private String reducerClassName;
+  // the mapper class name
+  private String mapperClassName;
 
-	// TODO : now we assume that key and value are both String type
-	// the key class
-	// private Class<?> keyClass;
+  // the reducer class name
+  private String reducerClassName;
 
-	// the value class
-	// private Class<?> valueClass;
+  // the partitioner class name
+  private String partitionerClassName;
+  
+  // the inputformat class name
+  private String inputFormatClassName;
+  
+  // the outputformat class name
+  private String outputFormatClassName;
 
-	public JobConf() {
-		this.jobName = "";
-		this.inputPath = null;
-		this.outputPath = null;
-		this.mapperClassName = null;
-		this.reducerClassName = null;
-		// this.keyClass<?> = String.class;
-		// this.valueClass<?> = String.class;
-	}
+  // TODO : now we assume that key and value are both String type
+  // the key class
+  // private Class<?> keyClass;
 
-	/**
-	 * whether current josb configuration is valid for a job
-	 * 
-	 * @return
-	 */
-	public boolean isValid() {
-		// if any of the following field is null, then invalid
-		if (this.inputPath == null)
-			return false;
+  // the value class
+  // private Class<?> valueClass;
 
-		if (this.outputPath == null)
-			return false;
+  public JobConf() {
+    this.jobName = "";
+    this.inputPath = null;
+    this.outputPath = null;
+    this.mapperClassName = null;
+    this.reducerClassName = null;
+    this.partitionerClassName = null;
+    this.inputFormatClassName = null;
+    this.outputFormatClassName = null;
+    // this.keyClass<?> = String.class;
+    // this.valueClass<?> = String.class;
+  }
 
-		if (this.mapperClassName == null)
-			return false;
+  /**
+   * whether current jobs configuration is valid for a job
+   * 
+   * @return
+   */
+  public boolean isValid() {
+    // if any of the following field is null, then invalid
+    if (this.inputPath == null)
+      return false;
 
-		if (this.reducerClassName == null)
-			return false;
+    if (this.outputPath == null)
+      return false;
 
-		if (this.blockSize == 0)
-			return false;
-		
-		if(this.reducerNum == 0)
-		  return false;
+    if (this.mapperClassName == null)
+      return false;
 
-		return true;
-	}
+    if (this.reducerClassName == null)
+      return false;
 
-	// the getters and setters for all members
-	public String getJobName() {
-		return jobName;
-	}
+    if (this.partitionerClassName == null)
+      return false;
+    
+    if (this.inputFormatClassName == null)
+      return false;
+    
+    if (this.outputFormatClassName == null)
+      return false;
 
-	public void setJobName(String jobName) {
-		this.jobName = jobName;
-	}
+    if (this.blockSize == 0)
+      return false;
 
-	public String getInputPath() {
-		return inputPath;
-	}
+    if (this.reducerNum == 0)
+      return false;
 
-	public void setInputPath(String inputPath) {
-		this.inputPath = inputPath;
-	}
+    return true;
+  }
 
-	public String getOutputPath() {
-		return outputPath;
-	}
+  // the getters and setters for all members
+  public String getJobName() {
+    return jobName;
+  }
 
-	public void setOutputPath(String outputPath) {
-		this.outputPath = outputPath;
-	}
+  public void setJobName(String jobName) {
+    this.jobName = jobName;
+  }
 
-	public int getJobID() {
-		return jobID;
-	}
+  public String getInputPath() {
+    return inputPath;
+  }
 
-	public void setJobID(int jobID) {
-		this.jobID = jobID;
-	}
+  public void setInputPath(String inputPath) {
+    this.inputPath = inputPath;
+  }
 
-	public int getBlockSize() {
-		return blockSize;
-	}
+  public String getOutputPath() {
+    return outputPath;
+  }
 
-	public void setBlockSize(int blockSize) {
-		this.blockSize = blockSize;
-	}
+  public void setOutputPath(String outputPath) {
+    this.outputPath = outputPath;
+  }
 
-	public String getMapperClassName() {
-		return mapperClassName;
-	}
+  public int getJobID() {
+    return jobID;
+  }
 
-	public void setMapperClassName(String mapperClassName) {
-		this.mapperClassName = mapperClassName;
-	}
+  public void setJobID(int jobID) {
+    this.jobID = jobID;
+  }
 
-	public String getReducerClassName() {
-		return reducerClassName;
-	}
+  public int getBlockSize() {
+    return blockSize;
+  }
 
-	public void setReducerClassName(String reducerClassName) {
-		this.reducerClassName = reducerClassName;
-	}
-	
-	public int getReducerNum() {
-		return reducerNum;
-	}
+  public void setBlockSize(int blockSize) {
+    this.blockSize = blockSize;
+  }
 
-	public void setReducerNum(int reducerNum) {
-		this.reducerNum = reducerNum;
-	}
+  public String getMapperClassName() {
+    return mapperClassName;
+  }
+
+  public void setMapperClassName(String mapperClassName) {
+    this.mapperClassName = mapperClassName;
+  }
+
+  public String getReducerClassName() {
+    return reducerClassName;
+  }
+
+  public void setReducerClassName(String reducerClassName) {
+    this.reducerClassName = reducerClassName;
+  }
+
+  public int getReducerNum() {
+    return reducerNum;
+  }
+
+  public void setReducerNum(int reducerNum) {
+    this.reducerNum = reducerNum;
+  }
+
+  public String getPartitionerClassName() {
+    return partitionerClassName;
+  }
+
+  public void setPartitionerClassName(String partitionerClassName) {
+    this.partitionerClassName = partitionerClassName;
+  }
+  
+  public String getInputFormatClassName() {
+    return inputFormatClassName;
+  }
+
+  public void setInputFormatClassName(String inputFormatClassName) {
+    this.inputFormatClassName = inputFormatClassName;
+  }
+  
+  public String getOutputFormatClassName() {
+    return outputFormatClassName;
+  }
+
+  public void setOutputFormatClassName(String outputFormatClassName) {
+    this.outputFormatClassName = outputFormatClassName;
+  }
 }
