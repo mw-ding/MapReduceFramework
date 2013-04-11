@@ -1,6 +1,12 @@
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.Collections;
 
 /* TODO: the input format should be assigned by user, here it is fixed */
 public class MapperWorker extends Worker {
@@ -75,13 +81,50 @@ public class MapperWorker extends Worker {
     System.exit(0);
   }
 
-  public float getPercentage() {
+  protected float getPercentage() {
     try {
       return (float) (offset - this.inputFormat.raf.getFilePointer()) / this.blockSize;
     } catch (IOException e) {
       e.printStackTrace();
     }
     return 0;
+  }
+
+  private void sort() {
+    for (int i = 0; i < this.reducerNum; i++) {
+      ArrayList<Record> list = new ArrayList<Record>();
+      String filename = output.outputDir + System.getProperty("file.separator")
+              + Output.defaultName + i;
+      /* read file for each partition, wrap to records, store to list */
+      try {
+        BufferedReader br = new BufferedReader(new FileReader(filename));
+        String line;
+        while ((line = br.readLine()) != null) {
+          int ind = line.indexOf('\t');
+          String key = line.substring(0, ind);
+          String value = line.substring(ind + 1);
+          Record record = new Record(key, value);
+          list.add(record);
+        }
+      } catch (FileNotFoundException e) {
+        e.printStackTrace();
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+      /* sort the records */
+      Collections.sort(list);
+      /* write the sorted records to file */
+      BufferedWriter bw;
+      try {
+        bw = new BufferedWriter(new FileWriter(filename, true));
+        for (Record r : list) {
+          bw.write(r.key + Output.separator + r.value);
+        }
+        bw.close();
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    }
   }
 
   public static void main(String[] args) {
