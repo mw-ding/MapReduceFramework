@@ -2,24 +2,26 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.util.ArrayList;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 public abstract class Worker {
 
-  private int taskID;
+  protected int taskID;
 
-  String outputFile;
+  protected String outputFile;
 
-  String code;
+  protected StatusUpdater taskStatusUpdater;
 
-  private StatusUpdater taskStatusUpdater;
+  protected TaskProgress progress;
 
-  private TaskProgress progress;
-
-  public Worker(int taskID, String outputFile, String code, String taskTrackerServiceName) {
+  public Worker(int taskID, String outputFile, String taskTrackerServiceName) {
 
     this.taskID = taskID;
     this.outputFile = outputFile;
-    this.code = code;
     this.progress = new TaskProgress(this.taskID);
 
     /* get the task tracker status updater */
@@ -34,24 +36,40 @@ public abstract class Worker {
     } catch (NotBoundException e) {
       e.printStackTrace();
     }
-
   }
 
   public abstract void run();
 
+  public void updateStatusToTaskTracker() {
+    /* periodically send status progress to job tracker */
+    ScheduledExecutorService schExec = Executors.newScheduledThreadPool(8);
+    ScheduledFuture<?> schFuture = schExec.scheduleAtFixedRate(new Runnable() {
+      public void run() {
+        updateStatus();
+      }
+    }, 0, Integer.parseInt(Utility.getParam("HEART_BEAT_PERIOD")), TimeUnit.SECONDS);
+  }
+
   public void updateStatus() {
     try {
-      taskStatusUpdater.update(getProgress());
+      progress.setPercentage(this.getPercentage());
+      progress.setStatus(TaskStatus.INPROGRESS);
+      progress.setTimestamp(System.currentTimeMillis());
+      taskStatusUpdater.update(progress);
     } catch (RemoteException e) {
       e.printStackTrace();
     }
   }
 
-  public TaskProgress getProgress() {
-    progress.setPercentage(this.getPercentage());
-    progress.setStatus(TaskStatus.INPROGRESS);
-    progress.setTimestamp(System.currentTimeMillis());
-    return this.progress;
+  public void updateStatusSucceed() {
+    try {
+      progress.setPercentage(this.getPercentage());
+      progress.setStatus(TaskStatus.SUCCEED);
+      progress.setTimestamp(System.currentTimeMillis());
+      taskStatusUpdater.update(progress);
+    } catch (RemoteException e) {
+      e.printStackTrace();
+    }
   }
 
   public abstract float getPercentage();

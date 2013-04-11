@@ -18,5 +18,5 @@ public abstract class Mapper {
 	  
 	}
 	
-	public abstract void map(String key, String value);
+	public abstract void map(String key, String value, Output out);
 }

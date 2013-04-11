@@ -25,14 +25,17 @@ public class TaskTrackerServices extends UnicastRemoteObject implements TaskLaun
     /* TODO: need to make it asynchronized */
     /* if this is a mapper task */
     if (taskInfo.getType() == TaskType.MAPPER) {
+      MapperTaskInfo mapperTaskInfo = (MapperTaskInfo) taskInfo;
       /* if there is free mapper slots */
       if (taskTracker.mapperCounter.incrementAndGet() <= taskTracker.NUM_OF_MAPPER_SLOTS) {
         /* TODO: start new process */
         String[] args = new String[] { MapperWorker.class.getName(),
-            String.valueOf(taskInfo.getTaskID()), taskInfo.getInputPath(),
-            String.valueOf(taskInfo.getOffset()), String.valueOf(taskInfo.getBlockSize()),
-            taskInfo.getOutputPath(), taskInfo.getCodePath(),
-            String.valueOf(taskInfo.getReducerNum()), taskTracker.getTaskTrackerName() };
+            String.valueOf(mapperTaskInfo.getTaskID()), mapperTaskInfo.getInputPath(),
+            String.valueOf(mapperTaskInfo.getOffset()),
+            String.valueOf(mapperTaskInfo.getBlockSize()), mapperTaskInfo.getOutputPath(),
+            mapperTaskInfo.getMapper(), mapperTaskInfo.getPartitioner(),
+            mapperTaskInfo.getInputFormat(), String.valueOf(mapperTaskInfo.getReducerNum()),
+            taskTracker.getTaskTrackerName() };
         try {
           Utility.startJavaProcess(args);
         } catch (Exception e) {
