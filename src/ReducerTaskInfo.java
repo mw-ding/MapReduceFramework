@@ -19,11 +19,11 @@ public class ReducerTaskInfo extends TaskInfo {
   /* the output path */
   private String outputPath;
 
-  public ReducerTaskInfo(int taskID, int order, String ip, String r, String of, String op) {
+  public ReducerTaskInfo(int taskID, int order, String jobMapperOutputDir, String r, String of, String op) {
     super(taskID, TaskType.REDUCER);
     this.taskId = taskID;
     this.orderId = order;
-    this.inputPath = ip;
+    this.inputPath = jobMapperOutputDir;
     this.reducer = r;
     this.outputFormat = of;
     this.outputPath = op;

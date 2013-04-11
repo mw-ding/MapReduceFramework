@@ -14,6 +14,10 @@ public class JobTracker {
 
   public final static String JOBTRACKER_SERVICE_NAME = "job_tracker_service";
 
+  public final static String JOB_MAPPER_OUTPUT_PREFIX = "mapper_output_job_";
+  
+  public final static String TASK_MAPPER_OUTPUT_PREFIX = "mapper_output_task_";
+
   // all the tasktrackers running under current system
   private Map<String, TaskTrackerMeta> tasktrackers;
 
@@ -329,6 +333,11 @@ public class JobTracker {
     newjob.splitInput();
     List<JobMeta.InputBlock> blocks = newjob.getInputBlocks();
 
+    // prepare the temporary output dir of mapper for this job
+    String jobMapperOutputDirPath = this.getSystemTempDir() + File.separator
+            + JobTracker.JOB_MAPPER_OUTPUT_PREFIX + newjob.getJobId();
+    (new File(jobMapperOutputDirPath)).mkdir();
+
     System.out.println("get " + blocks.size() + " splits.");
 
     Map<Integer, TaskMeta> mapTasks = new HashMap<Integer, TaskMeta>();
@@ -339,7 +348,7 @@ public class JobTracker {
       int taskid = this.requestTaskId();
       TaskInfo minfo = new MapperTaskInfo(taskid, block.getFilePath(), block.getOffset(),
               block.getLength(), newjob.getMapperClassName(), newjob.getPartitionerClassName(),
-              newjob.getInputFormatClassName(), "", newjob.getReducerNum());
+              newjob.getInputFormatClassName(), jobMapperOutputDirPath, newjob.getReducerNum());
       TaskMeta mtask = new TaskMeta(taskid, newjob.getJobId(), minfo, new TaskProgress(taskid));
 
       mapTasks.put(taskid, mtask);
@@ -350,7 +359,7 @@ public class JobTracker {
     int reducerNum = newjob.getReducerNum();
     for (int i = 0; i < reducerNum; i++) {
       int taskid = this.requestTaskId();
-      TaskInfo rinfo = new ReducerTaskInfo(taskid, i, "", newjob.getReducerClassName(),
+      TaskInfo rinfo = new ReducerTaskInfo(taskid, i, jobMapperOutputDirPath, newjob.getReducerClassName(),
               newjob.getOutputFormatClassName(), newjob.getOutputPath());
       TaskMeta rtask = new TaskMeta(taskid, newjob.getJobId(), rinfo, new TaskProgress(taskid));
 
@@ -385,5 +394,9 @@ public class JobTracker {
     } catch (RemoteException e) {
       e.printStackTrace();
     }
+  }
+
+  public static String getSystemTempDir() {
+    return "";
   }
 }

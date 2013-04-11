@@ -1,3 +1,5 @@
+import java.io.File;
+
 public class MapperTaskInfo extends TaskInfo {
 
   /* the input file path */
@@ -24,7 +26,7 @@ public class MapperTaskInfo extends TaskInfo {
   private int reducerNum;
 
   public MapperTaskInfo(int taskID, String inputPath, long offset, int blockSize, String mapper,
-          String partitioner, String inputFormat, String outputPath, int reducerNum) {
+          String partitioner, String inputFormat, String jobOutputPath, int reducerNum) {
     super(taskID, TaskType.MAPPER);
     this.inputPath = inputPath;
     this.offset = offset;
@@ -33,6 +35,10 @@ public class MapperTaskInfo extends TaskInfo {
     this.partitioner = partitioner;
     this.inputFormat = inputFormat;
     this.reducerNum = reducerNum;
+
+    this.outputPath = jobOutputPath + File.separator + JobTracker.TASK_MAPPER_OUTPUT_PREFIX
+            + this.getTaskID();
+    (new File(this.outputPath)).mkdir();
   }
 
   public String getInputPath() {
