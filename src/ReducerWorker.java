@@ -72,12 +72,16 @@ public class ReducerWorker extends Worker {
    * @return
    */
   private List<File> locateMapOutput() {
-    while (!mapStatusChecker.isAllMapperFinished(this.taskID)) {
-      try {
-        Thread.sleep(this.SLEEP_CIRCLE);
-      } catch (InterruptedException e) {
-        e.printStackTrace();
+    try {
+      while (!mapStatusChecker.isAllMapperFinished(this.taskID)) {
+        try {
+          Thread.sleep(this.SLEEP_CIRCLE);
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }
       }
+    } catch (RemoteException e) {
+      e.printStackTrace();
     }
     List<File> result = new ArrayList<File>();
 

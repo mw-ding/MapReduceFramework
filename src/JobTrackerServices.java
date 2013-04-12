@@ -27,8 +27,6 @@ public class JobTrackerServices extends UnicastRemoteObject implements StatusUpd
     String taskName = taskTrackerPkg.getTaskTrackerName();
     TaskTrackerMeta ttmeta = this.jobTracker.getTaskTracker(taskName);
 
-    System.err.println("Processing update from - " + taskName);
-
     if (ttmeta == null) {
       // register this tasktracker first
       try {
@@ -122,7 +120,7 @@ public class JobTrackerServices extends UnicastRemoteObject implements StatusUpd
   }
 
   @Override
-  public boolean isAllMapperFinished(int tid) {
+  public boolean isAllMapperFinished(int tid) throws RemoteException {
     return this.jobTracker.isAllMapperFinished(tid);
   }
 
