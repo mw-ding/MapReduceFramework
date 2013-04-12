@@ -71,6 +71,7 @@ public class TaskTrackerServices extends UnicastRemoteObject implements TaskLaun
     if (statuspck.getClass().getName() != TaskProgress.class.getName())
       return;
     TaskProgress taskProgress = (TaskProgress) statuspck;
+    System.out.println("Receive update from " + taskProgress.getType() + " worker : " + taskProgress.getStatus());
     Map<Integer, TaskProgress> taskStatus = this.taskTracker.getTaskStatus();
     synchronized (taskStatus) {
       // taskProgress.setTimestamp(System.currentTimeMillis());
