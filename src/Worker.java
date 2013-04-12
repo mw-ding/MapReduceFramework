@@ -17,8 +17,6 @@ public abstract class Worker {
   protected String inputFile;
 
   protected StatusUpdater taskStatusUpdater;
-  
-  protected MapStatusChecker mapStatusChecker;
 
   protected TaskProgress progress;
 

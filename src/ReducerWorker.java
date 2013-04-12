@@ -1,10 +1,12 @@
 import java.io.*;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.util.*;
 import java.util.Map.Entry;
 
 public class ReducerWorker extends Worker {
-
-  private int taskId;
 
   private int orderId;
 
@@ -14,11 +16,15 @@ public class ReducerWorker extends Worker {
 
   private Reducer reducer;
 
+  private MapStatusChecker mapStatusChecker;
+
   private float copyPercentage;
 
   private float groupPercentage;
 
   private float reducePercentage;
+
+  private static int SLEEP_CIRCLE = 100;
 
   public ReducerWorker(int taskID, int order, String reducer, String oformater, String indir,
           String outdir, String taskTrackerServiceName) {
@@ -27,7 +33,6 @@ public class ReducerWorker extends Worker {
     File outdirfile = new File(this.outputFile);
     outdirfile.mkdir();
 
-    this.taskId = taskID;
     this.orderId = order;
     try {
       this.reducer = (Reducer) Class.forName(reducer).newInstance();
@@ -42,6 +47,20 @@ public class ReducerWorker extends Worker {
       e.printStackTrace();
     }
 
+    /* get the task tracker status updater */
+    String registryHostName = Utility.getParam("REGISTRY_HOST");
+    int registryPort = Integer.parseInt(Utility.getParam("REGISTRY_PORT"));
+
+    try {
+      Registry reg = LocateRegistry.getRegistry(registryHostName, registryPort);
+      mapStatusChecker = (MapStatusChecker) reg
+              .lookup(Utility.getParam("JOB_TRACKER_SERVICE_NAME"));
+    } catch (RemoteException e) {
+      e.printStackTrace();
+    } catch (NotBoundException e) {
+      e.printStackTrace();
+    }
+
     this.copyPercentage = 0;
     this.groupPercentage = 0;
     this.reducePercentage = 0;
@@ -53,6 +72,13 @@ public class ReducerWorker extends Worker {
    * @return
    */
   private List<File> locateMapOutput() {
+    while (!mapStatusChecker.isAllMapperFinished(this.taskID)) {
+      try {
+        Thread.sleep(this.SLEEP_CIRCLE);
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
+    }
     List<File> result = new ArrayList<File>();
 
     File indirfile = new File(this.inputFile);
