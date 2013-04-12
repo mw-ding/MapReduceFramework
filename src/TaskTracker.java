@@ -96,7 +96,7 @@ public class TaskTracker {
     taskStatusChecker.start();
     /* periodically send status progress to job tracker */
     ScheduledExecutorService schExec = Executors.newScheduledThreadPool(8);
-    ScheduledFuture<?> schFuture = schExec.scheduleAtFixedRate(new Runnable() {
+    Thread thread = new Thread(new Runnable() {
       public void run() {
         ArrayList<TaskProgress> taskList;
         synchronized (taskStatus) {
@@ -127,7 +127,10 @@ public class TaskTracker {
           e.printStackTrace();
         }
       }
-    }, 0, HEART_BEAT_PERIOD, TimeUnit.SECONDS);
+    });
+    thread.setDaemon(true);
+    ScheduledFuture<?> schFuture = schExec.scheduleAtFixedRate(thread, 0, HEART_BEAT_PERIOD,
+            TimeUnit.SECONDS);
   }
 
   public String getTaskTrackerName() {

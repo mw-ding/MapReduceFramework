@@ -40,19 +40,22 @@ public abstract class Worker {
     } catch (NotBoundException e) {
       e.printStackTrace();
     }
-    
+
   }
 
   public abstract void run();
 
   public void updateStatusToTaskTracker() {
-    /* periodically send status progress to job tracker */
+    /* periodically send status progress to task tracker */
     ScheduledExecutorService schExec = Executors.newScheduledThreadPool(8);
-    ScheduledFuture<?> schFuture = schExec.scheduleAtFixedRate(new Runnable() {
+    Thread thread = new Thread(new Runnable() {
       public void run() {
         updateStatus();
       }
-    }, 0, Integer.parseInt(Utility.getParam("HEART_BEAT_PERIOD")), TimeUnit.SECONDS);
+    });
+    thread.setDaemon(true);
+    ScheduledFuture<?> schFuture = schExec.scheduleAtFixedRate(thread, 0,
+            Integer.parseInt(Utility.getParam("HEART_BEAT_PERIOD")), TimeUnit.SECONDS);
   }
 
   public void updateStatus() {
