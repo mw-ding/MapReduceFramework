@@ -1,12 +1,15 @@
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class MapperOutputer extends Outputer {
   
   private Partitioner partitioner;
 
   private BufferedWriter[] writers;
+  
+  //private ArrayList<Record>[] buffer;
 
   public MapperOutputer(String dir, Partitioner partitioner) {
     super(dir);
