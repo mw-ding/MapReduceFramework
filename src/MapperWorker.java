@@ -1,5 +1,6 @@
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -92,9 +93,10 @@ public class MapperWorker extends Worker {
       ArrayList<Record> list = new ArrayList<Record>();
       String filename = outputer.outputDir + System.getProperty("file.separator")
               + Outputer.defaultName + i;
+      File file = new File(filename);
       /* read file for each partition, wrap to records, store to list */
       try {
-        BufferedReader br = new BufferedReader(new FileReader(filename));
+        BufferedReader br = new BufferedReader(new FileReader(file));
         String line;
         while ((line = br.readLine()) != null) {
           int ind = line.indexOf('\t');
@@ -108,14 +110,17 @@ public class MapperWorker extends Worker {
       } catch (IOException e) {
         e.printStackTrace();
       }
+      /* delete the file */
+      file.delete();
       /* sort the records */
       Collections.sort(list);
       /* write the sorted records to file */
       BufferedWriter bw;
       try {
-        bw = new BufferedWriter(new FileWriter(filename, true));
+        bw = new BufferedWriter(new FileWriter(file, true));
         for (Record r : list) {
           bw.write(r.key + Outputer.separator + r.value);
+          bw.newLine();
         }
         bw.close();
       } catch (IOException e) {

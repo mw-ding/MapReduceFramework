@@ -38,7 +38,8 @@ public class MapperOutputer extends Outputer {
     
     BufferedWriter bw = this.writers[part];
     try {
-      bw.write(key + MapperOutputer.separator + value + "\n");
+      bw.write(key + MapperOutputer.separator + value);
+      bw.newLine();
     } catch (IOException e) {
       e.printStackTrace();
     }
