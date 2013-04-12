@@ -63,4 +63,8 @@ public class TaskMeta {
   public boolean isReducer() {
     return this.getType() == TaskType.REDUCER;
   }
+  
+  public boolean isDone() {
+    return this.getTaskProgress().getStatus() == TaskStatus.SUCCEED;
+  }
 }

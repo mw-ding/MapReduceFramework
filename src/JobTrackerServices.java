@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 public class JobTrackerServices extends UnicastRemoteObject implements StatusUpdater,
-        JobTrackerJobSubmitter {
+        JobTrackerJobSubmitter, MapStatusChecker {
 
   private JobTracker jobTracker;
 
@@ -119,6 +119,11 @@ public class JobTrackerServices extends UnicastRemoteObject implements StatusUpd
     this.jobTracker.distributeTasks();
 
     return true;
+  }
+
+  @Override
+  public boolean isAllMapperFinished(int jid) {
+    return this.jobTracker.isAllMapperFinished(jid);
   }
 
 }

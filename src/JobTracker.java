@@ -387,6 +387,22 @@ public class JobTracker {
       this.reduceTasksQueue.offer(task);
     }
   }
+  
+  public boolean isAllMapperFinished(int jid) {
+    JobMeta job = this.jobs.get(jid);
+    
+    if (job == null) {
+      return false;
+    }
+    
+    Set<Integer> mapTasks = job.getMapTasks();
+    for (int mid : mapTasks) {
+      if (this.mapTasks.containsKey(mid) && !this.mapTasks.get(mid).isDone())
+        return false;
+    }
+    
+    return true;
+  }
 
   public static void main(String[] args) {
     try {
@@ -397,6 +413,13 @@ public class JobTracker {
   }
 
   public static String getSystemTempDir() {
-    return "";
+    
+    File tmp = new File("tmp");
+    if (!tmp.exists()) {
+      tmp.mkdir();
+    }
+    
+    return "tmp";
   }
+
 }
