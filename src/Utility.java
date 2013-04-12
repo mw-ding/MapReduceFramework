@@ -41,16 +41,18 @@ public class Utility {
     return "";
   }
 
-  public static void startJavaProcess(String[] args) throws Exception {
+  public static void startJavaProcess(String[] args, int jid) throws Exception {
     System.out.println("start new process " + args[0]);
     String separator = System.getProperty("file.separator");
     String classpath = System.getProperty("java.class.path");
     String path = System.getProperty("java.home") + separator + "bin" + separator + "java";
-    String[] newargs = new String[args.length + 3]; /* three more args for path, -cp, classpath */
+    String[] newargs = new String[args.length + 4]; /* three more args for path, -cp, classpath */
     newargs[0] = path;
     newargs[1] = "-cp";
-    newargs[2] = classpath;
-    for (int i = 3, j = 0; j < args.length; i++, j++) {
+    newargs[2] = classpath + File.pathSeparator + classpath + separator + "job" + jid;
+    // for test
+    newargs[3] = "-Djava.rmi.server.codebase=file:/Users/dmw1989/Documents/workspace/MapReduceFramework/bin/";
+    for (int i = 4, j = 0; j < args.length; i++, j++) {
       newargs[i] = args[j];
     }
     ProcessBuilder processBuilder = new ProcessBuilder(newargs);

@@ -346,7 +346,7 @@ public class JobTracker {
     // create new map tasks for this job
     for (JobMeta.InputBlock block : blocks) {
       int taskid = this.requestTaskId();
-      TaskInfo minfo = new MapperTaskInfo(taskid, block.getFilePath(), block.getOffset(),
+      TaskInfo minfo = new MapperTaskInfo(newjob.getJobId(), taskid, block.getFilePath(), block.getOffset(),
               block.getLength(), newjob.getMapperClassName(), newjob.getPartitionerClassName(),
               newjob.getInputFormatClassName(), jobMapperOutputDirPath, newjob.getReducerNum());
       TaskMeta mtask = new TaskMeta(taskid, newjob.getJobId(), minfo, new TaskProgress(taskid, TaskType.MAPPER));
@@ -359,7 +359,7 @@ public class JobTracker {
     int reducerNum = newjob.getReducerNum();
     for (int i = 0; i < reducerNum; i++) {
       int taskid = this.requestTaskId();
-      TaskInfo rinfo = new ReducerTaskInfo(taskid, i, jobMapperOutputDirPath, newjob.getReducerClassName(),
+      TaskInfo rinfo = new ReducerTaskInfo(newjob.getJobId(), taskid, i, jobMapperOutputDirPath, newjob.getReducerClassName(),
               newjob.getOutputFormatClassName(), newjob.getOutputPath());
       TaskMeta rtask = new TaskMeta(taskid, newjob.getJobId(), rinfo, new TaskProgress(taskid, TaskType.REDUCER));
 

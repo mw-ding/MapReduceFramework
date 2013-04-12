@@ -46,14 +46,16 @@ public class JobTrackerServices extends UnicastRemoteObject implements StatusUpd
     }
 
     /* update slot and timestamp information */
+    System.out.println("update slots to mapper: " + taskTrackerPkg.getNumOfMapperSlots()
+            + ", reducer : " + taskTrackerPkg.getNumOfReducerSlots());
     ttmeta.setNumOfMapperSlots(taskTrackerPkg.getNumOfMapperSlots());
     ttmeta.setNumOfReducerSlots(taskTrackerPkg.getNumOfReducerSlots());
     ttmeta.setTimestamp(System.currentTimeMillis());
-    
+
     /* update the tasks the taskTracker maintains */
     this.updateTaskStatus(taskTrackerPkg);
   }
-  
+
   public void updateTaskStatus(TaskTrackerUpdatePkg taskTrackerPkg) {
     List<TaskProgress> taskStatus = taskTrackerPkg.getTaskStatus();
     Map<Integer, TaskMeta> allMapTasks = this.jobTracker.getMapTasks();

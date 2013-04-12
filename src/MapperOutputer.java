@@ -28,6 +28,7 @@ public class MapperOutputer extends Outputer {
   public void closeAll() {
     for (BufferedWriter bw : writers) {
       try {
+        bw.flush();
         bw.close();
       } catch (IOException e) {
         e.printStackTrace();
@@ -43,6 +44,7 @@ public class MapperOutputer extends Outputer {
     try {
       bw.write(key + MapperOutputer.separator + value);
       bw.newLine();
+      bw.flush();
     } catch (IOException e) {
       e.printStackTrace();
     }

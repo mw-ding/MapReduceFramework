@@ -2,9 +2,13 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,17 +35,21 @@ public class MapperWorker extends Worker {
     this.offset = offset;
     this.blockSize = blockSize;
     this.reducerNum = numReducer;
+    
     try {
       /* initialize the mapper */
       this.mapper = (Mapper) Class.forName(mapper).newInstance();
+      
       /* initialize the output with user-defined or default partitioner */
       Partitioner part = (Partitioner) Class.forName(partitioner).getConstructor(Integer.class)
-              .newInstance(this.reducerNum);
+              .newInstance(new Integer(this.reducerNum));
+      
       this.outputer = new MapperOutputer(this.outputFile, part);
+      
       /* initialize the user-defined or default input format */
       this.inputFormat = (InputFormat) Class.forName(inputFormat)
               .getConstructor(String.class, Long.class, Integer.class)
-              .newInstance(this.inputFile, this.offset, this.blockSize);
+              .newInstance(this.inputFile, new Long(this.offset), new Integer(this.blockSize));   
     } catch (InstantiationException e) {
       e.printStackTrace();
     } catch (IllegalAccessException e) {
@@ -61,19 +69,26 @@ public class MapperWorker extends Worker {
 
   @Override
   public void run() {
+    System.out.println("step1");
     /* periodically update status to task tracker */
     updateStatusToTaskTracker();
+    System.out.println("step2");
     /* do setup */
     mapper.setup();
+    System.out.println("step3");
     /* do map */
     while (this.inputFormat.hasNext()) {
       Record record = this.inputFormat.next();
+      System.out.println("step1111");
       mapper.map(record.key, record.value, this.outputer);
     }
+    System.out.println("step4");
     /* close the files */
     this.outputer.closeAll();
+    System.out.println("step5");
     /* do cleanup */
     mapper.cleanup();
+    System.out.println("step6");
     /* report to task tracker that this task is done */
     this.updateStatusSucceed();
     System.exit(0);
@@ -143,11 +158,23 @@ public class MapperWorker extends Worker {
     }
   }
 
-  public static void main(String[] args) {
+  public static void main(String[] args) {    
     if (args.length != 10) {
       System.out.println("Illegal arguments");
     }
     int taskID = Integer.parseInt(args[0]);
+    
+    // for test
+    try {
+      PrintStream out = new PrintStream(new FileOutputStream(new File("/Users/dmw1989/Documents/workspace/MapReduceFramework/mapout" + taskID)));
+      PrintStream err = new PrintStream(new FileOutputStream(new File("/Users/dmw1989/Documents/workspace/MapReduceFramework/maperr" + taskID)));
+      System.setErr(err);
+      System.setOut(out);
+      System.out.println(System.getProperty("java.class.path"));
+    } catch (FileNotFoundException e) {
+      e.printStackTrace();
+    }
+    
     String inputFile = args[1];
     long offset = Long.parseLong(args[2]);
     int blockSize = Integer.parseInt(args[3]);

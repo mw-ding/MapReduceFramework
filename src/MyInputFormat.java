@@ -5,7 +5,7 @@ import java.util.Iterator;
 
 public class MyInputFormat extends InputFormat {
 
-  public MyInputFormat(String filename, long offset, int blockSize) throws IOException {
+  public MyInputFormat(String filename, Long offset, Integer blockSize) throws IOException {
     super(filename, offset, blockSize);
   }
 

@@ -1,3 +1,9 @@
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -22,12 +28,12 @@ public abstract class Worker {
 
   public Worker(int taskID, String infile, String outfile, String taskTrackerServiceName,
           TaskType type) {
-
+    
     this.taskID = taskID;
     this.outputFile = outfile;
     this.inputFile = infile;
     this.progress = new TaskProgress(this.taskID, type);
-
+    
     /* get the task tracker status updater */
     String registryHostName = Utility.getParam("REGISTRY_HOST");
     int registryPort = Integer.parseInt(Utility.getParam("REGISTRY_PORT"));
@@ -40,6 +46,7 @@ public abstract class Worker {
     } catch (NotBoundException e) {
       e.printStackTrace();
     }
+
   }
 
   public abstract void run();

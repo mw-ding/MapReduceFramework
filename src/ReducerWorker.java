@@ -207,6 +207,17 @@ public class ReducerWorker extends Worker {
       System.out.println("Illegal arguments");
     }
     int taskID = Integer.parseInt(args[0]);
+    
+    // for test
+    try {
+      PrintStream out = new PrintStream(new FileOutputStream(new File("/Users/dmw1989/Documents/workspace/MapReduceFramework/reduceout" + taskID)));
+      PrintStream err = new PrintStream(new FileOutputStream(new File("/Users/dmw1989/Documents/workspace/MapReduceFramework/reduceerr" + taskID)));
+      System.setErr(err);
+      System.setOut(out);
+    } catch (FileNotFoundException e) {
+      e.printStackTrace();
+    }
+    
     int order = Integer.parseInt(args[1]);
     String reducer = args[2];
     String outputFormat = args[3];

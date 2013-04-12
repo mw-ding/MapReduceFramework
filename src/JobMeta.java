@@ -71,16 +71,21 @@ public class JobMeta {
   public JobMeta(JobConf jconf) {
     this.jobId = jconf.getJobID();
     this.jobName = jconf.getJobName();
-    this.mapperClassName = JobTracker.JOB_CLASSPATH_PREFIX + this.jobId + "."
-            + jconf.getMapperClassName();
-    this.reducerClassName = JobTracker.JOB_CLASSPATH_PREFIX + this.jobId + "."
-            + jconf.getReducerClassName();
-    this.partitionerClassName = JobTracker.JOB_CLASSPATH_PREFIX + this.jobId + "."
-            + jconf.getPartitionerClassName();
-    this.inputFormatClassName = JobTracker.JOB_CLASSPATH_PREFIX + this.jobId + "."
-            + jconf.getInputFormatClassName();
-    this.outputFormatClassName = JobTracker.JOB_CLASSPATH_PREFIX + this.jobId + "."
-            + jconf.getOutputFormatClassName();
+//    this.mapperClassName = JobTracker.JOB_CLASSPATH_PREFIX + this.jobId + "."
+//            + jconf.getMapperClassName();
+//    this.reducerClassName = JobTracker.JOB_CLASSPATH_PREFIX + this.jobId + "."
+//            + jconf.getReducerClassName();
+//    this.partitionerClassName = JobTracker.JOB_CLASSPATH_PREFIX + this.jobId + "."
+//            + jconf.getPartitionerClassName();
+//    this.inputFormatClassName = JobTracker.JOB_CLASSPATH_PREFIX + this.jobId + "."
+//            + jconf.getInputFormatClassName();
+//    this.outputFormatClassName = JobTracker.JOB_CLASSPATH_PREFIX + this.jobId + "."
+//            + jconf.getOutputFormatClassName();
+    this.mapperClassName = jconf.getMapperClassName();
+    this.reducerClassName = jconf.getReducerClassName();
+    this.partitionerClassName = jconf.getPartitionerClassName();
+    this.inputFormatClassName = jconf.getInputFormatClassName();
+    this.outputFormatClassName = jconf.getOutputFormatClassName();
     this.inputPath = jconf.getInputPath();
     this.outputPath = jconf.getOutputPath();
     this.blockSize = jconf.getBlockSize();
