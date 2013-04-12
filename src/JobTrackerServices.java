@@ -122,8 +122,8 @@ public class JobTrackerServices extends UnicastRemoteObject implements StatusUpd
   }
 
   @Override
-  public boolean isAllMapperFinished(int jid) {
-    return this.jobTracker.isAllMapperFinished(jid);
+  public boolean isAllMapperFinished(int tid) {
+    return this.jobTracker.isAllMapperFinished(tid);
   }
 
 }
