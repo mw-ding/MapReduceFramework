@@ -46,9 +46,20 @@ public class TaskTrackerServices extends UnicastRemoteObject implements TaskLaun
         return false;
       }
     } else {
+      ReducerTaskInfo reducerTaskInfo = (ReducerTaskInfo) taskInfo;
       /* if there is free reducer slots */
       if (taskTracker.reducerCounter.incrementAndGet() <= taskTracker.NUM_OF_REDUCER_SLOTS) {
         /* TODO: start new process */
+        String[] args = new String[] { ReducerWorker.class.getName(),
+            String.valueOf(reducerTaskInfo.getTaskID()),
+            String.valueOf(reducerTaskInfo.getOrderId()), reducerTaskInfo.getReducer(),
+            reducerTaskInfo.getOutputFormat(), reducerTaskInfo.getInputPath(),
+            reducerTaskInfo.getOutputPath(), taskTracker.getTaskTrackerName() };
+        try {
+          Utility.startJavaProcess(args);
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
         return true;
       } else {
         return false;

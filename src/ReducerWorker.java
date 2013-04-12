@@ -3,13 +3,13 @@ import java.util.*;
 import java.util.Map.Entry;
 
 public class ReducerWorker extends Worker {
-  
+
   private int taskId;
-  
+
   private int orderId;
 
   private ReducerOutputer outputer;
-  
+
   private OutputFormat formater;
 
   private Reducer reducer;
@@ -20,19 +20,20 @@ public class ReducerWorker extends Worker {
 
   private float reducePercentage;
 
-  public ReducerWorker(int taskID, int order, String reducer, String oformater, String indir, String outdir,
-          String taskTrackerServiceName) {
+  public ReducerWorker(int taskID, int order, String reducer, String oformater, String indir,
+          String outdir, String taskTrackerServiceName) {
     super(taskID, indir, outdir, taskTrackerServiceName);
-    
+
     File outdirfile = new File(this.outputFile);
     outdirfile.mkdir();
-    
+
     this.taskId = taskID;
     this.orderId = order;
     try {
       this.reducer = (Reducer) Class.forName(reducer).newInstance();
       this.formater = (OutputFormat) Class.forName(oformater).newInstance();
-      this.outputer = new ReducerOutputer(this.outputFile + File.separator + Outputer.defaultName + this.orderId, this.formater);
+      this.outputer = new ReducerOutputer(this.outputFile + File.separator + Outputer.defaultName
+              + this.orderId, this.formater);
     } catch (InstantiationException e) {
       e.printStackTrace();
     } catch (IllegalAccessException e) {
@@ -40,65 +41,67 @@ public class ReducerWorker extends Worker {
     } catch (ClassNotFoundException e) {
       e.printStackTrace();
     }
-    
+
     this.copyPercentage = 0;
     this.groupPercentage = 0;
     this.reducePercentage = 0;
   }
-  
+
   /**
    * locate all mapper's output files for this reducer
+   * 
    * @return
    */
   private List<File> locateMapOutput() {
     List<File> result = new ArrayList<File>();
-    
+
     File indirfile = new File(this.inputFile);
     if (!indirfile.isDirectory()) {
       System.out.println("Invalid Reducer input dir.");
       return result;
     }
-    
+
     File[] mapOutputDirs = indirfile.listFiles();
     String filename = Outputer.defaultName + this.orderId;
     for (File mapOutputDir : mapOutputDirs) {
       result.add(new File(mapOutputDir.getAbsolutePath() + File.separator + filename));
     }
-    
+
     return result;
   }
 
   /**
    * read and parse all key/value pairs from mapper's output files
+   * 
    * @return
    */
   private List<Record> copy() {
     List<Record> result = new ArrayList<Record>();
     List<File> mapOutput = this.locateMapOutput();
-    
+
     final float csize = mapOutput.size();
     float cfinished = (float) 0.0;
-    
+
     for (File f : mapOutput) {
       try {
         BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(f)));
-        
+
         String line = null;
-        while( (line = reader.readLine()) != null ) {
+        while ((line = reader.readLine()) != null) {
           String[] fields = line.split(Outputer.separator);
           result.add(new Record(fields[0], fields[1]));
         }
-        
+
       } catch (FileNotFoundException e) {
         e.printStackTrace();
       } catch (IOException e) {
         e.printStackTrace();
       }
-      
+
       cfinished += (float) 1.0;
       this.copyPercentage = cfinished / csize;
     }
-    
+
     this.copyPercentage = (float) 1.0;
     return null;
   }
@@ -167,6 +170,22 @@ public class ReducerWorker extends Worker {
   @Override
   public float getPercentage() {
     return (this.copyPercentage + this.groupPercentage + this.reducePercentage) / (float) 3.0;
+  }
+
+  public static void main(String[] args) {
+    if (args.length != 7) {
+      System.out.println("Illegal arguments");
+    }
+    int taskID = Integer.parseInt(args[0]);
+    int order = Integer.parseInt(args[1]);
+    String reducer = args[2];
+    String outputFormat = args[3];
+    String indir = args[4];
+    String outdir = args[5];
+    String taskTrackerServiceName = args[6];
+    ReducerWorker worker = new ReducerWorker(taskID, order, reducer, outputFormat, indir, outdir,
+            taskTrackerServiceName);
+    worker.run();
   }
 
 }
