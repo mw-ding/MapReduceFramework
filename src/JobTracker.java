@@ -388,7 +388,15 @@ public class JobTracker {
     }
   }
   
-  public boolean isAllMapperFinished(int jid) {
+  public boolean isAllMapperFinished(int tid) {
+    TaskMeta task = this.reduceTasks.get(tid);
+    
+    if (task == null) {
+      return false;
+    }
+    
+    int jid = task.getJobID();
+    
     JobMeta job = this.jobs.get(jid);
     
     if (job == null) {
