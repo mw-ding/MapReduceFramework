@@ -107,7 +107,8 @@ public class TaskTracker {
             if (taskStatus.get(id).getStatus() != TaskStatus.INPROGRESS)
               toDelete.add(id);
             /* free slots */
-            if (taskStatus.get(id).getType() == TaskType.MAPPER)
+            if (taskStatus.get(id).getType() == TaskType.MAPPER
+                    && taskStatus.get(id).getStatus() == TaskStatus.SUCCEED)
               mapperCounter.decrementAndGet();
             else
               reducerCounter.decrementAndGet();
