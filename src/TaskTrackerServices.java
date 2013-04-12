@@ -34,8 +34,8 @@ public class TaskTrackerServices extends UnicastRemoteObject implements TaskLaun
             String.valueOf(mapperTaskInfo.getOffset()),
             String.valueOf(mapperTaskInfo.getBlockSize()), mapperTaskInfo.getOutputPath(),
             mapperTaskInfo.getMapper(), mapperTaskInfo.getPartitioner(),
-            mapperTaskInfo.getInputFormat(), String.valueOf(mapperTaskInfo.getReducerNum()),
-            taskTracker.getTaskTrackerName() };
+            mapperTaskInfo.getInputFormat(), taskTracker.getTaskTrackerName(),
+            String.valueOf(mapperTaskInfo.getReducerNum()) };
         try {
           Utility.startJavaProcess(args, taskInfo.getJobID());
         } catch (Exception e) {
