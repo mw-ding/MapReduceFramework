@@ -54,8 +54,9 @@ public abstract class Worker {
       }
     });
     thread.setDaemon(true);
-    ScheduledFuture<?> schFuture = schExec.scheduleAtFixedRate(thread, 0,
-            Integer.parseInt(Utility.getParam("HEART_BEAT_PERIOD")), TimeUnit.SECONDS);
+    schExec.scheduleAtFixedRate(thread, 0, Integer.parseInt(Utility.getParam("HEART_BEAT_PERIOD")),
+            TimeUnit.SECONDS);
+    ;
   }
 
   public void updateStatus() {

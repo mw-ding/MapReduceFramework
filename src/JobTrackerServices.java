@@ -89,6 +89,8 @@ public class JobTrackerServices extends UnicastRemoteObject implements StatusUpd
         if (job.isDone()) {
           job.setStatus(JobMeta.JobStatus.SUCCEED);
         }
+        // 4. do task scheduling
+        this.jobTracker.distributeTasks();
       }
     }
   }
@@ -123,7 +125,9 @@ public class JobTrackerServices extends UnicastRemoteObject implements StatusUpd
 
   @Override
   public boolean isAllMapperFinished(int tid) throws RemoteException {
-    return this.jobTracker.isAllMapperFinished(tid);
+    boolean result = this.jobTracker.isAllMapperFinished(tid);
+    System.out.println("request is all mapper finished " + tid + " - " + result);
+    return result;
   }
 
 }

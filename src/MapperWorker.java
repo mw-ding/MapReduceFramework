@@ -43,6 +43,7 @@ public class MapperWorker extends Worker {
       /* initialize the output with user-defined or default partitioner */
       Partitioner part = (Partitioner) Class.forName(partitioner).getConstructor(Integer.class)
               .newInstance(new Integer(this.reducerNum));
+      System.out.println(part.getReducerNum());
       
       this.outputer = new MapperOutputer(this.outputFile, part);
       
@@ -69,26 +70,19 @@ public class MapperWorker extends Worker {
 
   @Override
   public void run() {
-    System.out.println("step1");
     /* periodically update status to task tracker */
     updateStatusToTaskTracker();
-    System.out.println("step2");
     /* do setup */
     mapper.setup();
-    System.out.println("step3");
     /* do map */
     while (this.inputFormat.hasNext()) {
       Record record = this.inputFormat.next();
-      System.out.println("step1111");
       mapper.map(record.key, record.value, this.outputer);
     }
-    System.out.println("step4");
     /* close the files */
     this.outputer.closeAll();
-    System.out.println("step5");
     /* do cleanup */
     mapper.cleanup();
-    System.out.println("step6");
     /* report to task tracker that this task is done */
     this.updateStatusSucceed();
     System.exit(0);
