@@ -104,14 +104,14 @@ public class TaskTracker {
           /* delete the job that has failed or succeeded */
           ArrayList<Integer> toDelete = new ArrayList<Integer>();
           for (int id : taskStatus.keySet()) {
-            if (taskStatus.get(id).getStatus() != TaskStatus.INPROGRESS)
+            if (taskStatus.get(id).getStatus() != TaskStatus.INPROGRESS) {
               toDelete.add(id);
-            /* free slots */
-            if (taskStatus.get(id).getType() == TaskType.MAPPER
-                    && taskStatus.get(id).getStatus() == TaskStatus.SUCCEED)
-              mapperCounter.decrementAndGet();
-            else if(taskStatus.get(id).getStatus() == TaskStatus.SUCCEED)
-              reducerCounter.decrementAndGet();
+              /* free slots */
+              if (taskStatus.get(id).getType() == TaskType.MAPPER)
+                mapperCounter.decrementAndGet();
+              else
+                reducerCounter.decrementAndGet();
+            }
           }
           for (int id : toDelete) {
             taskStatus.remove(id);
