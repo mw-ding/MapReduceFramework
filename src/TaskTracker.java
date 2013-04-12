@@ -18,9 +18,9 @@ public class TaskTracker {
 
   private String taskTrackerName;
 
-  public AtomicInteger mapperCounter;
+  public Integer mapperCounter;
 
-  public AtomicInteger reducerCounter;
+  public Integer reducerCounter;
 
   private StatusUpdater jobTrackerStatusUpdater;
 
@@ -50,8 +50,8 @@ public class TaskTracker {
             + "_NUM_MAPPER"));
     this.NUM_OF_REDUCER_SLOTS = Integer.parseInt(Utility.getParam("TASK_TRACKER_" + taskTrackerSeq
             + "_NUM_REDUCER"));
-    this.mapperCounter = new AtomicInteger();
-    this.reducerCounter = new AtomicInteger();
+    this.mapperCounter = new Integer(0);
+    this.reducerCounter = new Integer(0);
     /* initiate task status */
     this.taskStatus = new HashMap<Integer, TaskProgress>();
 
@@ -108,23 +108,35 @@ public class TaskTracker {
               toDelete.add(id);
               /* free slots */
               if (taskStatus.get(id).getType() == TaskType.MAPPER)
-                mapperCounter.decrementAndGet();
+                synchronized (mapperCounter) {
+                  mapperCounter--;
+                }
               else
-                reducerCounter.decrementAndGet();
+                synchronized (reducerCounter) {
+                  reducerCounter--;
+                }
             }
           }
           for (int id : toDelete) {
             taskStatus.remove(id);
           }
           /* delete done */
-          TaskTrackerUpdatePkg pkg = new TaskTrackerUpdatePkg(taskTrackerName, NUM_OF_MAPPER_SLOTS
-                  - mapperCounter.get(), NUM_OF_REDUCER_SLOTS - reducerCounter.get(),
-                  TaskTracker.TASKTRACKER_SERVICE_NAME, taskList);
-          try {
-            jobTrackerStatusUpdater.update(pkg);
-          } catch (RemoteException e) {
-            e.printStackTrace();
+          /* build update package */
+          TaskTrackerUpdatePkg pkg = null;
+          synchronized (mapperCounter) {
+            synchronized (reducerCounter) {
+              pkg = new TaskTrackerUpdatePkg(taskTrackerName, NUM_OF_MAPPER_SLOTS - mapperCounter,
+                      NUM_OF_REDUCER_SLOTS - reducerCounter, TaskTracker.TASKTRACKER_SERVICE_NAME,
+                      taskList);
+            }
           }
+          /* send update package */
+          if (pkg != null)
+            try {
+              jobTrackerStatusUpdater.update(pkg);
+            } catch (RemoteException e) {
+              e.printStackTrace();
+            }
         }
       }
     });

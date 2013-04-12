@@ -27,42 +27,48 @@ public class TaskTrackerServices extends UnicastRemoteObject implements TaskLaun
     if (taskInfo.getType() == TaskType.MAPPER) {
       MapperTaskInfo mapperTaskInfo = (MapperTaskInfo) taskInfo;
       /* if there is free mapper slots */
-      if (taskTracker.mapperCounter.incrementAndGet() <= taskTracker.NUM_OF_MAPPER_SLOTS) {
-        /* TODO: start new process */
-        String[] args = new String[] { MapperWorker.class.getName(),
-            String.valueOf(mapperTaskInfo.getTaskID()), mapperTaskInfo.getInputPath(),
-            String.valueOf(mapperTaskInfo.getOffset()),
-            String.valueOf(mapperTaskInfo.getBlockSize()), mapperTaskInfo.getOutputPath(),
-            mapperTaskInfo.getMapper(), mapperTaskInfo.getPartitioner(),
-            mapperTaskInfo.getInputFormat(), String.valueOf(mapperTaskInfo.getReducerNum()),
-            taskTracker.getTaskTrackerName() };
-        try {
-          Utility.startJavaProcess(args, taskInfo.getJobID());
-        } catch (Exception e) {
-          e.printStackTrace();
+      synchronized (taskTracker.mapperCounter) {
+        if (taskTracker.mapperCounter < taskTracker.NUM_OF_MAPPER_SLOTS) {
+          taskTracker.mapperCounter++;
+          /* TODO: start new process */
+          String[] args = new String[] { MapperWorker.class.getName(),
+              String.valueOf(mapperTaskInfo.getTaskID()), mapperTaskInfo.getInputPath(),
+              String.valueOf(mapperTaskInfo.getOffset()),
+              String.valueOf(mapperTaskInfo.getBlockSize()), mapperTaskInfo.getOutputPath(),
+              mapperTaskInfo.getMapper(), mapperTaskInfo.getPartitioner(),
+              mapperTaskInfo.getInputFormat(), String.valueOf(mapperTaskInfo.getReducerNum()),
+              taskTracker.getTaskTrackerName() };
+          try {
+            Utility.startJavaProcess(args, taskInfo.getJobID());
+          } catch (Exception e) {
+            e.printStackTrace();
+          }
+          return true;
+        } else {
+          return false;
         }
-        return true;
-      } else {
-        return false;
       }
     } else {
       ReducerTaskInfo reducerTaskInfo = (ReducerTaskInfo) taskInfo;
       /* if there is free reducer slots */
-      if (taskTracker.reducerCounter.incrementAndGet() <= taskTracker.NUM_OF_REDUCER_SLOTS) {
-        /* TODO: start new process */
-        String[] args = new String[] { ReducerWorker.class.getName(),
-            String.valueOf(reducerTaskInfo.getTaskID()),
-            String.valueOf(reducerTaskInfo.getOrderId()), reducerTaskInfo.getReducer(),
-            reducerTaskInfo.getOutputFormat(), reducerTaskInfo.getInputPath(),
-            reducerTaskInfo.getOutputPath(), taskTracker.getTaskTrackerName() };
-        try {
-          Utility.startJavaProcess(args, taskInfo.getJobID());
-        } catch (Exception e) {
-          e.printStackTrace();
+      synchronized (taskTracker.reducerCounter) {
+        if (taskTracker.reducerCounter < taskTracker.NUM_OF_REDUCER_SLOTS) {
+          taskTracker.reducerCounter++;
+          /* TODO: start new process */
+          String[] args = new String[] { ReducerWorker.class.getName(),
+              String.valueOf(reducerTaskInfo.getTaskID()),
+              String.valueOf(reducerTaskInfo.getOrderId()), reducerTaskInfo.getReducer(),
+              reducerTaskInfo.getOutputFormat(), reducerTaskInfo.getInputPath(),
+              reducerTaskInfo.getOutputPath(), taskTracker.getTaskTrackerName() };
+          try {
+            Utility.startJavaProcess(args, taskInfo.getJobID());
+          } catch (Exception e) {
+            e.printStackTrace();
+          }
+          return true;
+        } else {
+          return false;
         }
-        return true;
-      } else {
-        return false;
       }
     }
   }
