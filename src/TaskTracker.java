@@ -110,7 +110,7 @@ public class TaskTracker {
             if (taskStatus.get(id).getType() == TaskType.MAPPER
                     && taskStatus.get(id).getStatus() == TaskStatus.SUCCEED)
               mapperCounter.decrementAndGet();
-            else
+            else if(taskStatus.get(id).getStatus() == TaskStatus.SUCCEED)
               reducerCounter.decrementAndGet();
           }
           for (int id : toDelete) {
