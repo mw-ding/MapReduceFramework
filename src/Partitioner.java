@@ -6,7 +6,7 @@ public class Partitioner {
   }
 
   public int getPartition(String key) {
-    return key.hashCode() / this.reducerNum;
+    return key.hashCode() % this.reducerNum;
   }
 
   public int getReducerNum() {
