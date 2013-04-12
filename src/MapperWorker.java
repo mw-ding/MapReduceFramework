@@ -95,8 +95,9 @@ public class MapperWorker extends Worker {
               + Outputer.defaultName + i;
       File file = new File(filename);
       /* read file for each partition, wrap to records, store to list */
+      BufferedReader br = null;
       try {
-        BufferedReader br = new BufferedReader(new FileReader(file));
+        br = new BufferedReader(new FileReader(file));
         String line;
         while ((line = br.readLine()) != null) {
           int ind = line.indexOf('\t');
@@ -109,22 +110,35 @@ public class MapperWorker extends Worker {
         e.printStackTrace();
       } catch (IOException e) {
         e.printStackTrace();
+      } finally {
+        if (br != null)
+          try {
+            br.close();
+          } catch (IOException e) {
+            e.printStackTrace();
+          }
       }
       /* delete the file */
       file.delete();
       /* sort the records */
       Collections.sort(list);
       /* write the sorted records to file */
-      BufferedWriter bw;
+      BufferedWriter bw = null;
       try {
         bw = new BufferedWriter(new FileWriter(file, true));
         for (Record r : list) {
           bw.write(r.key + Outputer.separator + r.value);
           bw.newLine();
         }
-        bw.close();
       } catch (IOException e) {
         e.printStackTrace();
+      } finally {
+        if (bw != null)
+          try {
+            bw.close();
+          } catch (IOException e) {
+            e.printStackTrace();
+          }
       }
     }
   }
