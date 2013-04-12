@@ -117,14 +117,14 @@ public class TaskTracker {
             taskStatus.remove(id);
           }
           /* delete done */
-        }
-        TaskTrackerUpdatePkg pkg = new TaskTrackerUpdatePkg(taskTrackerName, NUM_OF_MAPPER_SLOTS
-                - mapperCounter.get(), NUM_OF_REDUCER_SLOTS - reducerCounter.get(),
-                TaskTracker.TASKTRACKER_SERVICE_NAME, taskList);
-        try {
-          jobTrackerStatusUpdater.update(pkg);
-        } catch (RemoteException e) {
-          e.printStackTrace();
+          TaskTrackerUpdatePkg pkg = new TaskTrackerUpdatePkg(taskTrackerName, NUM_OF_MAPPER_SLOTS
+                  - mapperCounter.get(), NUM_OF_REDUCER_SLOTS - reducerCounter.get(),
+                  TaskTracker.TASKTRACKER_SERVICE_NAME, taskList);
+          try {
+            jobTrackerStatusUpdater.update(pkg);
+          } catch (RemoteException e) {
+            e.printStackTrace();
+          }
         }
       }
     });

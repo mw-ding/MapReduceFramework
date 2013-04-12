@@ -59,24 +59,30 @@ public abstract class Worker {
   }
 
   public void updateStatus() {
-    try {
-      progress.setPercentage(this.getPercentage());
-      progress.setStatus(TaskStatus.INPROGRESS);
-      progress.setTimestamp(System.currentTimeMillis());
-      taskStatusUpdater.update(progress);
-    } catch (RemoteException e) {
-      e.printStackTrace();
+    synchronized (progress) {
+      if (progress.getStatus() != TaskStatus.SUCCEED) {
+        try {
+          progress.setPercentage(this.getPercentage());
+          progress.setStatus(TaskStatus.INPROGRESS);
+          progress.setTimestamp(System.currentTimeMillis());
+          taskStatusUpdater.update(progress);
+        } catch (RemoteException e) {
+          e.printStackTrace();
+        }
+      }
     }
   }
 
   public void updateStatusSucceed() {
-    try {
-      progress.setPercentage(this.getPercentage());
-      progress.setStatus(TaskStatus.SUCCEED);
-      progress.setTimestamp(System.currentTimeMillis());
-      taskStatusUpdater.update(progress);
-    } catch (RemoteException e) {
-      e.printStackTrace();
+    synchronized (progress) {
+      try {
+        progress.setPercentage(this.getPercentage());
+        progress.setStatus(TaskStatus.SUCCEED);
+        progress.setTimestamp(System.currentTimeMillis());
+        taskStatusUpdater.update(progress);
+      } catch (RemoteException e) {
+        e.printStackTrace();
+      }
     }
   }
 
