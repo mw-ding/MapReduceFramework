@@ -24,7 +24,7 @@ public class ReducerWorker extends Worker {
 
   private float reducePercentage;
 
-  private static int SLEEP_CIRCLE = 100;
+  private static int SLEEP_CIRCLE = 2000;
 
   public ReducerWorker(int taskID, int order, String reducer, String oformater, String indir,
           String outdir, String taskTrackerServiceName) {
@@ -133,7 +133,7 @@ public class ReducerWorker extends Worker {
     }
 
     this.copyPercentage = (float) 1.0;
-    return null;
+    return result;
   }
 
   private Map<String, List<String>> group(List<Record> records) {

@@ -21,14 +21,13 @@ public class TaskTrackerMeta {
 	public TaskTrackerMeta(String name, TaskLauncher services) {
 		this.taskTrackerName = name;
 		this.taskLauncher = services;
+		this.tasks = new HashSet<Integer>();
+		this.numOfMapperSlots = 0;
+		this.numOfReducerSlots = 0;
 	}
 	
 	public TaskLauncher getTaskLauncher() {
 		return this.taskLauncher;
-	}
-	
-	public void setTaskLauncher(TaskLauncher tl) {
-		this.taskLauncher = tl;
 	}
 
 	public int getNumOfMapperSlots() {
@@ -49,10 +48,6 @@ public class TaskTrackerMeta {
 
 	public Set<Integer> getTasks() {
 		return tasks;
-	}
-
-	public void setTasks(Set<Integer> tasks) {
-		this.tasks = tasks;
 	}
 
 	public String getTaskTrackerName() {
