@@ -27,7 +27,7 @@ public class MapperWorker extends Worker {
   public MapperWorker(int taskID, String infile, long offset, int blockSize, String outfile,
           String mapper, String partitioner, String inputFormat, int numReducer,
           String taskTrackerServiceName) {
-    super(taskID, infile, outfile, taskTrackerServiceName);
+    super(taskID, infile, outfile, taskTrackerServiceName, TaskType.MAPPER);
     this.offset = offset;
     this.blockSize = blockSize;
     this.reducerNum = numReducer;

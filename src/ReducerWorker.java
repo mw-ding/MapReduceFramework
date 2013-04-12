@@ -28,7 +28,7 @@ public class ReducerWorker extends Worker {
 
   public ReducerWorker(int taskID, int order, String reducer, String oformater, String indir,
           String outdir, String taskTrackerServiceName) {
-    super(taskID, indir, outdir, taskTrackerServiceName);
+    super(taskID, indir, outdir, taskTrackerServiceName, TaskType.REDUCER);
 
     File outdirfile = new File(this.outputFile);
     outdirfile.mkdir();
