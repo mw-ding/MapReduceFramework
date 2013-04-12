@@ -13,19 +13,20 @@ public abstract class Worker {
   protected int taskID;
 
   protected String outputFile;
-  
+
   protected String inputFile;
 
   protected StatusUpdater taskStatusUpdater;
 
   protected TaskProgress progress;
 
-  public Worker(int taskID, String infile, String outfile, String taskTrackerServiceName) {
+  public Worker(int taskID, String infile, String outfile, String taskTrackerServiceName,
+          TaskType type) {
 
     this.taskID = taskID;
     this.outputFile = outfile;
     this.inputFile = infile;
-    this.progress = new TaskProgress(this.taskID);
+    this.progress = new TaskProgress(this.taskID, type);
 
     /* get the task tracker status updater */
     String registryHostName = Utility.getParam("REGISTRY_HOST");
