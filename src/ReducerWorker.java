@@ -175,19 +175,25 @@ public class ReducerWorker extends Worker {
     Map<String, List<String>> grouped = this.group(unsorted);
     this.groupPercentage = (float) 1.0;
 
-    // 4. execute the reduce function
-    final float gsize = grouped.size();
-    float gfinished = (float) 0.0;
-    for (Entry<String, List<String>> entry : grouped.entrySet()) {
-      this.reducer.reduce(entry.getKey(), entry.getValue(), this.outputer);
+    try {
+      // 4. execute the reduce function
+      final float gsize = grouped.size();
+      float gfinished = (float) 0.0;
+      for (Entry<String, List<String>> entry : grouped.entrySet()) {
+        this.reducer.reduce(entry.getKey(), entry.getValue(), this.outputer);
 
-      gfinished += 1.0;
-      this.reducePercentage = gfinished / gsize;
+        gfinished += 1.0;
+        this.reducePercentage = gfinished / gsize;
+      }
+      this.reducePercentage = (float) 1.0;
+
+      // 5. close the outputer
+      this.outputer.close();
+    }/* if runtime exception happens in user's code, exit jvm */
+    catch (RuntimeException e) {
+      e.printStackTrace();
+      System.exit(0);
     }
-    this.reducePercentage = (float) 1.0;
-
-    // 5. close the outputer
-    this.outputer.close();
 
     // 6. do cleanup
     this.reducer.cleanup();
@@ -207,17 +213,19 @@ public class ReducerWorker extends Worker {
       System.out.println("Illegal arguments");
     }
     int taskID = Integer.parseInt(args[0]);
-    
+
     // for test
     try {
-      PrintStream out = new PrintStream(new FileOutputStream(new File("/Users/dmw1989/Documents/workspace/MapReduceFramework/reduceout" + taskID)));
-      PrintStream err = new PrintStream(new FileOutputStream(new File("/Users/dmw1989/Documents/workspace/MapReduceFramework/reduceerr" + taskID)));
+      PrintStream out = new PrintStream(new FileOutputStream(new File(
+              "/Users/dmw1989/Documents/workspace/MapReduceFramework/reduceout" + taskID)));
+      PrintStream err = new PrintStream(new FileOutputStream(new File(
+              "/Users/dmw1989/Documents/workspace/MapReduceFramework/reduceerr" + taskID)));
       System.setErr(err);
       System.setOut(out);
     } catch (FileNotFoundException e) {
       e.printStackTrace();
     }
-    
+
     int order = Integer.parseInt(args[1]);
     String reducer = args[2];
     String outputFormat = args[3];

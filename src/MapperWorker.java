@@ -13,7 +13,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 
-/* TODO: the input format should be assigned by user, here it is fixed */
 public class MapperWorker extends Worker {
 
   private long offset;
@@ -35,22 +34,22 @@ public class MapperWorker extends Worker {
     this.offset = offset;
     this.blockSize = blockSize;
     this.reducerNum = numReducer;
-    
+
     try {
       /* initialize the mapper */
       this.mapper = (Mapper) Class.forName(mapper).newInstance();
-      
+
       /* initialize the output with user-defined or default partitioner */
       Partitioner part = (Partitioner) Class.forName(partitioner).getConstructor(Integer.class)
               .newInstance(new Integer(this.reducerNum));
       System.out.println(part.getReducerNum());
-      
+
       this.outputer = new MapperOutputer(this.outputFile, part);
-      
+
       /* initialize the user-defined or default input format */
       this.inputFormat = (InputFormat) Class.forName(inputFormat)
               .getConstructor(String.class, Long.class, Integer.class)
-              .newInstance(this.inputFile, new Long(this.offset), new Integer(this.blockSize));   
+              .newInstance(this.inputFile, new Long(this.offset), new Integer(this.blockSize));
     } catch (InstantiationException e) {
       e.printStackTrace();
     } catch (IllegalAccessException e) {
@@ -75,12 +74,20 @@ public class MapperWorker extends Worker {
     /* do setup */
     mapper.setup();
     /* do map */
-    while (this.inputFormat.hasNext()) {
-      Record record = this.inputFormat.next();
-      mapper.map(record.key, record.value, this.outputer);
+    try {
+      while (this.inputFormat.hasNext()) {
+        Record record = this.inputFormat.next();
+        mapper.map(record.key, record.value, this.outputer);
+      }
+      /* close the files */
+      this.outputer.closeAll();
+    }/* if runtime exception happens in user's code, exit jvm */
+    catch (RuntimeException e) {
+      e.printStackTrace();
+      System.exit(0);
     }
-    /* close the files */
-    this.outputer.closeAll();
+    /* sort the files */
+    this.sort();
     /* do cleanup */
     mapper.cleanup();
     /* report to task tracker that this task is done */
@@ -152,23 +159,25 @@ public class MapperWorker extends Worker {
     }
   }
 
-  public static void main(String[] args) {    
+  public static void main(String[] args) {
     if (args.length != 10) {
       System.out.println("Illegal arguments");
     }
     int taskID = Integer.parseInt(args[0]);
-    
+
     // for test
     try {
-      PrintStream out = new PrintStream(new FileOutputStream(new File("/Users/dmw1989/Documents/workspace/MapReduceFramework/mapout" + taskID)));
-      PrintStream err = new PrintStream(new FileOutputStream(new File("/Users/dmw1989/Documents/workspace/MapReduceFramework/maperr" + taskID)));
+      PrintStream out = new PrintStream(new FileOutputStream(new File(
+              "/Users/dmw1989/Documents/workspace/MapReduceFramework/mapout" + taskID)));
+      PrintStream err = new PrintStream(new FileOutputStream(new File(
+              "/Users/dmw1989/Documents/workspace/MapReduceFramework/maperr" + taskID)));
       System.setErr(err);
       System.setOut(out);
       System.out.println(System.getProperty("java.class.path"));
     } catch (FileNotFoundException e) {
       e.printStackTrace();
     }
-    
+
     String inputFile = args[1];
     long offset = Long.parseLong(args[2]);
     int blockSize = Integer.parseInt(args[3]);
