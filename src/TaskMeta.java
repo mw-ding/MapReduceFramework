@@ -10,18 +10,24 @@ public class TaskMeta {
 
   /* the progress and status of one task */
   private TaskProgress taskProgress;
+  
+  private int attempts;
+  
+  public final static int MAX_ATTEMPTS = 1;
 
   public TaskMeta(int TaskID, int JobID, TaskInfo taskInfo, TaskProgress taskProgress) {
     this.jobID = JobID;
     this.taskID = TaskID;
     this.taskInfo = taskInfo;
     this.taskProgress = taskProgress;
+    this.attempts = 1;
   }
 
   public TaskMeta(int taskID, int JobID, TaskInfo taskInfo) {
     this.jobID = JobID;
     this.taskID = taskID;
     this.taskInfo = taskInfo;
+    this.attempts = 1;
   }
 
   public int getJobID() {
@@ -66,5 +72,13 @@ public class TaskMeta {
   
   public boolean isDone() {
     return this.getTaskProgress().getStatus() == TaskStatus.SUCCEED;
+  }
+  
+  public void increaseAttempts() {
+    this.attempts ++;
+  }
+  
+  public int getAttempts() {
+    return this.attempts;
   }
 }

@@ -19,8 +19,6 @@ public class TaskTrackerServices extends UnicastRemoteObject implements TaskLaun
    * @return the task is submitted successfully or not
    */
   public boolean runTask(TaskInfo taskInfo) throws RemoteException {
-    System.out.println("task tracker " + this.taskTracker.getTaskTrackerName()
-            + " received runTask request taskid:" + taskInfo.getTaskID());
     System.out.println("task type " + taskInfo.getType());
     /* TODO: need to make it asynchronized */
     /* if this is a mapper task */
@@ -29,6 +27,10 @@ public class TaskTrackerServices extends UnicastRemoteObject implements TaskLaun
       /* if there is free mapper slots */
       synchronized (taskTracker.mapperCounter) {
         if (taskTracker.mapperCounter < taskTracker.NUM_OF_MAPPER_SLOTS) {
+
+          System.out.println("task tracker " + this.taskTracker.getTaskTrackerName()
+                  + " received runTask request taskid:" + taskInfo.getTaskID());
+          
           taskTracker.mapperCounter++;
           /* TODO: start new process */
           String[] args = new String[] { MapperWorker.class.getName(),
@@ -77,7 +79,7 @@ public class TaskTrackerServices extends UnicastRemoteObject implements TaskLaun
     if (statuspck.getClass().getName() != TaskProgress.class.getName())
       return;
     TaskProgress taskProgress = (TaskProgress) statuspck;
-    System.out.println("Receive update from " + taskProgress.getType() + " worker : " + taskProgress.getStatus());
+    System.out.println(System.currentTimeMillis() + " Receive update from " + taskProgress.getType() + " worker " + taskProgress.getTaskID() + " : " + taskProgress.getStatus());
     Map<Integer, TaskProgress> taskStatus = this.taskTracker.getTaskStatus();
     synchronized (taskStatus) {
       // taskProgress.setTimestamp(System.currentTimeMillis());

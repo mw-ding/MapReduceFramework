@@ -89,6 +89,16 @@ public class JobTrackerServices extends UnicastRemoteObject implements StatusUpd
         }
         // 4. do task scheduling
         this.jobTracker.distributeTasks();
+      } else if (taskProg.getStatus() == TaskStatus.FAILED) {
+        task.increaseAttempts();
+        if (task.getAttempts() <= TaskMeta.MAX_ATTEMPTS) {
+          // retry this task
+          this.jobTracker.submitTask(task);
+        } else {
+          // mark the job to which this task belongs as FAILED
+          JobMeta job = this.jobTracker.getJob(task.getJobID());
+          job.setStatus(JobMeta.JobStatus.FAILED);
+        }
       }
     }
   }
