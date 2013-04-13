@@ -1,13 +1,16 @@
 package example.degreecount;
-public class Partitioner {
+
+import mapreduce.Partitioner;
+
+public class MyPartitioner implements Partitioner {
   private int reducerNum;
 
-  public Partitioner(Integer reducerNum) {
+  public MyPartitioner(Integer reducerNum) {
     this.reducerNum = reducerNum;
   }
 
   public int getPartition(String key) {
-    return key.hashCode() % this.reducerNum;
+    return Math.abs(key.hashCode()) % this.reducerNum;
   }
 
   public int getReducerNum() {

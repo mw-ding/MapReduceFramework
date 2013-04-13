@@ -44,7 +44,6 @@ public class MapperWorker extends Worker {
       /* initialize the output with user-defined or default partitioner */
       Partitioner part = (Partitioner) Class.forName(partitioner).getConstructor(Integer.class)
               .newInstance(new Integer(this.reducerNum));
-      System.out.println(part.getReducerNum());
 
       this.outputer = new MapperOutputer(this.outputFile, part);
 

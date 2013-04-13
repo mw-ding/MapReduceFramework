@@ -39,6 +39,8 @@ public class MapperOutputer extends Outputer {
 
   @Override
   public void collect(String key, String value) {
+    if (this.partitioner == null)
+      System.out.println("partitioner null");
     int part = this.partitioner.getPartition(key);
     
     BufferedWriter bw = this.writers[part];

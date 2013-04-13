@@ -1,11 +1,12 @@
-package example.wordcount;
+package example.io;
 
 import mapreduce.Partitioner;
 
-public class WCPartitioner implements Partitioner {
+
+public class MyPartitioner implements Partitioner {
   private int reducerNum;
 
-  public WCPartitioner(Integer reducerNum) {
+  public MyPartitioner(Integer reducerNum) {
     this.reducerNum = reducerNum;
   }
 

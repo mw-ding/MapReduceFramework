@@ -5,8 +5,8 @@ import mapreduce.*;
 public class Main {
 
   public static void main(String[] args) {
-    if (args.length != 2) {
-      System.out.println("Usage: wordcount <input_path> <output_path>");
+    if (args.length != 3) {
+      System.out.println("Usage: wordcount <input_path> <output_path> <jar_path>");
       return ;
     }
     
@@ -15,8 +15,9 @@ public class Main {
     
     jconf.setInputPath(args[0]);
     jconf.setOutputPath(args[1]);
+    jconf.setJarFilePath(args[2]);
     
-    jconf.setBlockSize(1000);
+    jconf.setBlockSize(100000);
     
     jconf.setMapperClassName("example.wordcount.WCMapper");
     jconf.setReducerClassName("example.wordcount.WCReducer");

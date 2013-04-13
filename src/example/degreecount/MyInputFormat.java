@@ -28,7 +28,7 @@ public class MyInputFormat extends InputFormat {
       /* read next line */
       String line = this.raf.readLine();
       /* split the current line into key and value by tab */
-      int tabInd = line.indexOf('\t');
+      int tabInd = line.indexOf(' ');
       String key = line.substring(0, tabInd);
       String value = line.substring(tabInd + 1);
       /* return a record built with the key and value */
