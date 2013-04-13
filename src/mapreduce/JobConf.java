@@ -16,6 +16,7 @@ public class JobConf implements Serializable {
   // the output path
   private String outputPath;
   
+  // the path of the jar file which contains all the codes of a job
   private String jarFilePath;
 
   // the block size
@@ -39,13 +40,6 @@ public class JobConf implements Serializable {
   // the outputformat class name
   private String outputFormatClassName;
 
-  // TODO : now we assume that key and value are both String type
-  // the key class
-  // private Class<?> keyClass;
-
-  // the value class
-  // private Class<?> valueClass;
-
   public JobConf() {
     this.jobName = "";
     this.inputPath = null;
@@ -53,10 +47,9 @@ public class JobConf implements Serializable {
     this.mapperClassName = null;
     this.reducerClassName = null;
     this.partitionerClassName = null;
+    this.partitionerClassName = null;
     this.inputFormatClassName = null;
     this.outputFormatClassName = null;
-    // this.keyClass<?> = String.class;
-    // this.valueClass<?> = String.class;
   }
 
   /**

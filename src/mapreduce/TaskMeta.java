@@ -9,6 +9,9 @@ public class TaskMeta {
     MAPPER, REDUCER
   }
 
+  // the maximum number of attempts, after which this task is
+  // sentenced to death
+  public final static int MAX_ATTEMPTS = 1;
   
   /* the id of the job to which this task belongs */
   private int jobID;
@@ -22,9 +25,8 @@ public class TaskMeta {
   /* the progress and status of one task */
   private TaskProgress taskProgress;
   
-  private int attempts;
-  
-  public final static int MAX_ATTEMPTS = 1;
+  // the number of tries to execute this task
+  private int attempts;  
 
   public TaskMeta(int TaskID, int JobID, TaskInfo taskInfo, TaskProgress taskProgress) {
     this.jobID = JobID;

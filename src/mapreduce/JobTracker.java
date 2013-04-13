@@ -18,6 +18,16 @@ public class JobTracker {
   public static String JOB_MAPPER_OUTPUT_PREFIX = "mapper_output_job_";
 
   public static String TASK_MAPPER_OUTPUT_PREFIX = "mapper_output_task_";
+  
+  public final static int SCHEDULER_POOL_SIZE = 8;
+
+  public final static int ALIVE_CHECK_CYCLE_SEC = 4;
+
+  // the directory to which all the classes that user submits are extracted
+  public final static String JOB_CLASSPATH = "bin" + File.separator;
+
+  // the prefix of the directories that stores the classes for different jobs
+  public final static String JOB_CLASSPATH_PREFIX = "job";
 
   // all the tasktrackers running under current system
   private Map<String, TaskTrackerMeta> tasktrackers;
@@ -50,17 +60,8 @@ public class JobTracker {
   // the maximum assigned task id currently
   private int currentMaxTaskId;
 
+  // the RMI registry
   private Registry rmiReg;
-
-  public final static int SCHEDULER_POOL_SIZE = 8;
-
-  public final static int ALIVE_CHECK_CYCLE_SEC = 4;
-
-  // the directory to which all the classes that user submits are extracted
-  public final static String JOB_CLASSPATH = "bin" + File.separator;
-
-  // the prefix of the directories that stores the classes for different jobs
-  public final static String JOB_CLASSPATH_PREFIX = "job";
 
   /*****************************************/
 
@@ -74,6 +75,8 @@ public class JobTracker {
     this.jobs = Collections.synchronizedMap(new HashMap<Integer, JobMeta>());
     JOBTRACKER_SERVICE_NAME = Utility.getParam("JOB_TRACKER_SERVICE_NAME");
 
+    // all tasks are queued in a priority queue, which the job id is the priority
+    // the smaller the id is, the higher the priority is
     this.mapTasksQueue = (Queue<TaskMeta>) (new PriorityQueue<TaskMeta>(10,
             new Comparator<TaskMeta>() {
 
@@ -94,12 +97,15 @@ public class JobTracker {
 
             }));
 
+    // the task schedule of the system
     this.scheduler = new DefaultTaskScheduler(this);
 
     this.services = new JobTrackerServices(this);
+    
+    // register the RMI service this jobtracker provides
     this.rmiReg = LocateRegistry.getRegistry(rh, rp);
     this.rmiReg.rebind(JOBTRACKER_SERVICE_NAME, this.services);
-
+    
     ScheduledExecutorService serviceSche = Executors.newScheduledThreadPool(SCHEDULER_POOL_SIZE);
 
     // start the task tracker alive checking
@@ -107,6 +113,7 @@ public class JobTracker {
     serviceSche.scheduleAtFixedRate(alivechecker, ALIVE_CHECK_CYCLE_SEC, ALIVE_CHECK_CYCLE_SEC,
             TimeUnit.SECONDS);
     
+    // the command console to display the statistics of this job tracker
     this.controlConsole();
   }
 
@@ -164,6 +171,10 @@ public class JobTracker {
     }
   }
 
+  /**
+   * deregister a task tracker
+   * @param ttname
+   */
   public void deleteTaskTracker(String ttname) {
     if (ttname == null)
       return;
@@ -174,6 +185,11 @@ public class JobTracker {
     }
   }
 
+  /**
+   * Retrieve the information of a job
+   * @param jid
+   * @return
+   */
   public JobMeta getJob(int jid) {
     return this.jobs.get(jid);
   }
@@ -216,10 +232,20 @@ public class JobTracker {
     return result;
   }
 
+  /**
+   * get the RMI registry
+   * @return
+   */
   public Registry getRMIRegistry() {
     return rmiReg;
   }
   
+  /**
+   * get next mapper task. First, check whether the job, to which
+   * this task belongs, has already failed. If so, throw this task;
+   * otherwise, return this task.
+   * @return
+   */
   public TaskMeta getNextMapperTask() {
     while (!this.mapTasksQueue.isEmpty()) {
       TaskMeta task = this.mapTasksQueue.poll();
@@ -236,6 +262,12 @@ public class JobTracker {
     return null;
   }
   
+  /**
+   * get next reducer task. First, check whether the job, to which
+   * this task belongs, has already failed. If so, throw this task;
+   * otherwise, return this task.
+   * @return
+   */
   public TaskMeta getNextReducerTask() {
     while (!this.reduceTasksQueue.isEmpty()) {
       TaskMeta task = this.reduceTasksQueue.poll();
@@ -257,6 +289,8 @@ public class JobTracker {
    */
   public void distributeTasks() {
     Map<Integer, String> schestrategies = null;
+    
+    // use the system's scheduler to generate the scheduling schemes
     synchronized (this.tasktrackers) {
       schestrategies = this.scheduler.scheduleTask();
     }
@@ -264,6 +298,7 @@ public class JobTracker {
     if (schestrategies == null)
       return;
 
+    // assign tasks according to the scheduling task
     for (Entry<Integer, String> entry : schestrategies.entrySet()) {
       Integer taskid = entry.getKey();
 
@@ -316,6 +351,8 @@ public class JobTracker {
     try {
       JarFile jar = new JarFile(jarpath);
       Enumeration enums = jar.entries();
+      
+      // find the path to which the jar file should be extracted
       String destDirPath = JobTracker.JOB_CLASSPATH + JobTracker.JOB_CLASSPATH_PREFIX + jobid
               + File.separator;
 
@@ -409,6 +446,10 @@ public class JobTracker {
     newjob.setStatus(JobMeta.JobStatus.INPROGRESS);
   }
 
+  /**
+   * register a new task by inserting it into a queue
+   * @param task
+   */
   public void submitTask(TaskMeta task) {
     if (task.isMapper()) {
       this.mapTasksQueue.offer(task);
@@ -417,6 +458,14 @@ public class JobTracker {
     }
   }
 
+  /**
+   * Check the status of the Map phase of a job. This method
+   * is used by the reducer to check how is everything going
+   * in the mapper phase
+   * @param tid
+   *    the task id of the reduce task which send the retrieval request
+   * @return
+   */
   public MapStatusChecker.MapStatus checkMapStatus(int tid) {
     TaskMeta task = this.reduceTasks.get(tid);
 
@@ -428,6 +477,7 @@ public class JobTracker {
 
     JobMeta job = this.jobs.get(jid);
 
+    // if the job is failed, then return FAILED
     if (job == null || job.getStatus() == JobMeta.JobStatus.FAILED) {
       return MapStatusChecker.MapStatus.FAILED;
     }
@@ -437,10 +487,14 @@ public class JobTracker {
       if (this.mapTasks.containsKey(mid) && !this.mapTasks.get(mid).isDone())
         return MapStatusChecker.MapStatus.INPROGRESS;
     }
-
+    
+    // if all map tasks finished, then return FINISHED
     return MapStatusChecker.MapStatus.FINISHED;
   }
 
+  /**
+   * the command line tool to control the job tracker
+   */
   public void controlConsole() {
     Scanner scanner = new Scanner(System.in);
     System.out.println(">> ");
@@ -485,6 +539,9 @@ public class JobTracker {
     }
   }
 
+  /**
+   * list the statistic of all jobs
+   */
   private void listAllJobs() {
     System.out.println("========== All Jobs ==========");
     System.out
@@ -503,6 +560,10 @@ public class JobTracker {
     }
   }
 
+  /**
+   * list the statistic of a specific job
+   * @param jid
+   */
   private void listJob(int jid) {
     if (!this.jobs.containsKey(jid)) {
       System.out.println("Job " + jid + " does not exist.");
@@ -536,6 +597,9 @@ public class JobTracker {
     }
   }
   
+  /**
+   * list all task trackers connected to current job tracker
+   */
   private void listTaskTrackers() {
     System.out.println("========== Task Trackers ==========");
     System.out.println("Name\tAvailableMapperSlots\tAvailableReducerSlots");

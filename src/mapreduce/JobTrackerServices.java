@@ -1,10 +1,15 @@
 package mapreduce;
+
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * This class provides all the RMI services for remote procedure call. Generally
+ * speaking, this is the communication module for job tracker
+ */
 public class JobTrackerServices extends UnicastRemoteObject implements StatusUpdater,
         JobTrackerJobSubmitter, MapStatusChecker {
 
@@ -15,6 +20,10 @@ public class JobTrackerServices extends UnicastRemoteObject implements StatusUpd
     this.jobTracker = jt;
   }
 
+  /**
+   * The method is called remotely by each task tracker to send their
+   * update information. This could be regarded as heartbeat.
+   */
   @Override
   public void update(Object statusPkg) throws RemoteException {
 
@@ -55,7 +64,11 @@ public class JobTrackerServices extends UnicastRemoteObject implements StatusUpd
     this.updateTaskStatus(taskTrackerPkg);
   }
 
-  public void updateTaskStatus(TaskTrackerUpdatePkg taskTrackerPkg) {
+  /**
+   * the method to update the status of all involved tasks in a task tracker
+   * @param taskTrackerPkg
+   */
+  private void updateTaskStatus(TaskTrackerUpdatePkg taskTrackerPkg) {
     List<TaskProgress> taskStatus = taskTrackerPkg.getTaskStatus();
     Map<Integer, TaskMeta> allMapTasks = this.jobTracker.getMapTasks();
     Map<Integer, TaskMeta> allReduceTasks = this.jobTracker.getReduceTasks();
@@ -105,11 +118,17 @@ public class JobTrackerServices extends UnicastRemoteObject implements StatusUpd
     }
   }
 
+  /**
+   * the method to request next available job id
+   */
   @Override
   public int requestJobID() throws RemoteException {
     return this.jobTracker.requestJobId();
   }
 
+  /**
+   * the method to submit a job
+   */
   @Override
   public boolean submitJob(JobConf jconf) throws RemoteException {
     if (jconf == null)
@@ -133,6 +152,9 @@ public class JobTrackerServices extends UnicastRemoteObject implements StatusUpd
     return true;
   }
 
+  /**
+   * the method for reducers to check the status of the mapper phase
+   */
   @Override
   public MapStatusChecker.MapStatus checkMapStatus(int tid) throws RemoteException {
     MapStatusChecker.MapStatus result = this.jobTracker.checkMapStatus(tid);

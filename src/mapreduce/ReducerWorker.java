@@ -147,6 +147,7 @@ public class ReducerWorker extends Worker {
     return result;
   }
 
+  // TODO: the merge sort
   private Map<String, List<String>> group(List<Record> records) {
     // use tree map to make sure that the all the result are sorted by key
     Map<String, List<String>> result = new TreeMap<String, List<String>>();
