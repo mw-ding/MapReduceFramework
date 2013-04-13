@@ -608,15 +608,21 @@ public class JobTracker {
     }
   }
 
-  // TODO : read the tmp directory dir from config file
+  /**
+   * get the system's temporary dir which holds mapper's output
+   * @return
+   */
   public static String getSystemTempDir() {
-
-    File tmp = new File("tmp");
-    if (!tmp.exists()) {
-      tmp.mkdir();
+    String res = Utility.getParam("SYSTEM_TEMP_DIR");
+    if (res.compareTo("") == 0)
+      res = System.getProperty("java.io.tmpdir");
+    
+    File tmpdir = new File(res);
+    if (!tmpdir.exists()) {
+      tmpdir.mkdirs();
     }
-
-    return "tmp";
+    
+    return res;
   }
 
   public static void main(String[] args) {

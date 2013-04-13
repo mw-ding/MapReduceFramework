@@ -1,5 +1,6 @@
 package example.wordcount;
 
+import java.util.Iterator;
 import java.util.List;
 
 import mapreduce.*;
@@ -7,11 +8,11 @@ import mapreduce.*;
 public class WCReducer extends Reducer {
 
   @Override
-  public void reduce(String key, List<String> values, Outputer out) {
+  public void reduce(String key, Iterator<String> values, Outputer out) {
     long sum = 0;
     
-    for (String value : values) {
-      sum += Long.parseLong(value);
+   while(values.hasNext()) {
+      sum += Long.parseLong(values.next());
     }
     
     out.collect(key, Long.toString(sum));

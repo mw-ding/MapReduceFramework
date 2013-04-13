@@ -14,7 +14,7 @@ public class Main {
     JobConf jobConf = new JobConf();
     jobConf.setJarFilePath(args[2]);
     jobConf.setInputPath(args[0]);
-    jobConf.setBlockSize(10);
+    jobConf.setBlockSize(64);
     jobConf.setJobName("test");
     jobConf.setMapperClassName("example.io.TestMapper");
     jobConf.setReducerClassName("example.io.TestReducer");

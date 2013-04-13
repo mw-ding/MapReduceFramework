@@ -9,6 +9,122 @@ import java.util.*;
 import java.util.Map.Entry;
 
 public class ReducerWorker extends Worker {
+  
+  // the stream for merge sort in reducer
+  private class MergeStream {
+    
+    private Record next;
+    
+    private Scanner scanner;
+    
+    public MergeStream(Scanner s) {
+      this.scanner = s;
+      this.next = null;
+    }
+    
+    public void tryFetchNext() {
+      if (this.scanner.hasNext()) {
+        String line = this.scanner.nextLine();
+        String[] fields = line.split("\t");
+        this.next = new Record(fields[0], fields[1]);
+      } else {
+        this.next = null;
+      }
+    }
+    
+    public Record getNext() {
+      return this.next;
+    }
+  }
+  
+  // the key/value iterator for reduce()
+  private class KeyValueIterator implements Iterator<String> {
+    
+    private PriorityQueue<MergeStream> streams;
+    
+    private String curKey;
+    
+    public KeyValueIterator(List<File> flist) {
+      if (flist == null)
+        return ;
+      
+      // initializ the heap
+      int size = flist.size();
+      this.streams = new PriorityQueue<MergeStream>(size, new Comparator<MergeStream>() {
+
+        @Override
+        public int compare(MergeStream stream1, MergeStream stream2) {
+          return stream1.getNext().key.compareTo(stream2.getNext().key);
+        }
+        
+      });
+      
+      for (File f : flist) {
+        try {
+          Scanner newscanner = new Scanner(new FileInputStream(f));
+          MergeStream newstream = new MergeStream(newscanner);
+          
+          // try to fetch the first line
+          newstream.tryFetchNext();
+          
+          // if failed to fetch the first line, do not add
+          // it into the queue; otherwise, add it in.
+          if (newstream.getNext() != null) {
+            this.streams.add(newstream);
+          }
+          
+        } catch (FileNotFoundException e) {
+          e.printStackTrace();
+        }
+      }
+      
+      this.curKey = null;
+    }
+
+    @Override
+    public boolean hasNext() {
+      return (!this.streams.isEmpty() && this.streams.peek().getNext().key.compareTo(this.curKey) == 0);
+    }
+
+    @Override
+    public String next() {
+      if (!this.streams.isEmpty()) {
+        MergeStream curstream = this.streams.poll();
+        String result = curstream.getNext().value;
+
+        // try to fetch next record from this stream;
+        // it the next record exists, insert this stream back
+        // to the heap; otherwise, drop this stream, because
+        // it reaches the end
+        curstream.tryFetchNext();
+        if (curstream.getNext() != null) {
+          this.streams.add(curstream);
+        }
+
+        return result;
+      } else {
+        return null;
+      }
+    }
+
+    @Override
+    public void remove() {
+      // do not support remove operation
+    }
+    
+    public String currentKey() {
+      return this.streams.peek().getNext().key;
+    }
+    
+    public boolean continueNextKey() {
+      if (this.streams.isEmpty()) return false;
+      else {
+        // set curKey to nextKey to allow next iteration
+        this.curKey = this.currentKey();
+        return true;
+      }
+    }
+  }
 
   private int orderId;
 
@@ -116,38 +232,17 @@ public class ReducerWorker extends Worker {
    * 
    * @return
    */
-  private List<Record> copy() {
-    List<Record> result = new ArrayList<Record>();
-    List<File> mapOutput = this.locateMapOutput();
-
-    final float csize = mapOutput.size();
-    float cfinished = (float) 0.0;
-
-    for (File f : mapOutput) {
-      try {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(f)));
-
-        String line = null;
-        while ((line = reader.readLine()) != null) {
-          String[] fields = line.split(Outputer.separator);
-          result.add(new Record(fields[0], fields[1]));
-        }
-
-      } catch (FileNotFoundException e) {
-        e.printStackTrace();
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
-
-      cfinished += (float) 1.0;
-      this.copyPercentage = cfinished / csize;
-    }
-
+  private List<File> copy() {
+    // in current scenario, all we need to do in copy phase is
+    // locating the temporary output files from mappers, which
+    // could be done almost at once
+    List<File> result = this.locateMapOutput();
+    
     this.copyPercentage = (float) 1.0;
+    
     return result;
   }
 
-  // TODO: the merge sort
   private Map<String, List<String>> group(List<Record> records) {
     // use tree map to make sure that the all the result are sorted by key
     Map<String, List<String>> result = new TreeMap<String, List<String>>();
@@ -181,31 +276,31 @@ public class ReducerWorker extends Worker {
     this.reducer.setup();
 
     // 2. copy key/value pairs from mappers
-    List<Record> unsorted = this.copy();
+    List<File> mapperOutputFiles = this.copy();
 
     // 3. sort and group all key/value pairs
-    Map<String, List<String>> grouped = this.group(unsorted);
     this.groupPercentage = (float) 1.0;
-
-    try {
-      // 4. execute the reduce function
-      final float gsize = grouped.size();
-      float gfinished = (float) 0.0;
-      for (Entry<String, List<String>> entry : grouped.entrySet()) {
-        this.reducer.reduce(entry.getKey(), entry.getValue(), this.outputer);
-
-        gfinished += 1.0;
-        this.reducePercentage = gfinished / gsize;
+    
+    // 4. call the reduce and feed it with key/value pairs
+    KeyValueIterator kviterator = new KeyValueIterator(mapperOutputFiles);
+    while(kviterator.continueNextKey()) {
+      String key = kviterator.currentKey();
+      System.out.println("reduce framework key : " + key );
+      try {
+        this.reducer.reduce(key, kviterator, this.outputer);
+      } catch (RuntimeException e) {
+        e.printStackTrace();
+        System.exit(0);
       }
-      this.reducePercentage = (float) 1.0;
-
-      // 5. close the outputer
-      this.outputer.close();
-    }/* if runtime exception happens in user's code, exit jvm */
-    catch (RuntimeException e) {
-      e.printStackTrace();
-      System.exit(0);
+      
+      // skip to next key, if the user does not fetch all values
+      while(kviterator.hasNext()) {
+        kviterator.next();
+      }
     }
+    
+    // 5. close the outputer
+    this.outputer.close();
 
     // 6. do cleanup
     this.reducer.cleanup();
