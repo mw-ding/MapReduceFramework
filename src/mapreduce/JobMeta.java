@@ -41,49 +41,54 @@ public class JobMeta {
   // the name for each map/reduce job
   private String jobName;
 
+  // the class name of the mapper
   private String mapperClassName;
 
+  // the class name of the reducer
   private String reducerClassName;
   
+  // the class name of the partitioner
   private String partitionerClassName;
   
+  // the class name of the input formatter
   private String inputFormatClassName;
   
+  // the class name of the output formatter
   private String outputFormatClassName;
 
+  // the input path of this job
   private String inputPath;
 
+  // the output path of this job
   private String outputPath;
 
+  // the input block size
   private int blockSize;
 
+  // the number of reducers
   private int reducerNum;
 
+  // the ids of all mappers in this job
   private Set<Integer> mapTasks;
 
+  // the ids of all reducers in this job
   private Set<Integer> reduceTasks;
   
+  // the number of tasks that finished
   private int taskFinishedMapperNum;
   
+  // the number of tasks that finished
   private int taskFinishedReducerNum;
 
+  // the input blocks
   private List<InputBlock> inputBlocks;
   
+  // the status of this job
   private JobStatus status;
 
   public JobMeta(JobConf jconf) {
     this.jobId = jconf.getJobID();
     this.jobName = jconf.getJobName();
-//    this.mapperClassName = JobTracker.JOB_CLASSPATH_PREFIX + this.jobId + "."
-//            + jconf.getMapperClassName();
-//    this.reducerClassName = JobTracker.JOB_CLASSPATH_PREFIX + this.jobId + "."
-//            + jconf.getReducerClassName();
-//    this.partitionerClassName = JobTracker.JOB_CLASSPATH_PREFIX + this.jobId + "."
-//            + jconf.getPartitionerClassName();
-//    this.inputFormatClassName = JobTracker.JOB_CLASSPATH_PREFIX + this.jobId + "."
-//            + jconf.getInputFormatClassName();
-//    this.outputFormatClassName = JobTracker.JOB_CLASSPATH_PREFIX + this.jobId + "."
-//            + jconf.getOutputFormatClassName();
     this.mapperClassName = jconf.getMapperClassName();
     this.reducerClassName = jconf.getReducerClassName();
     this.partitionerClassName = jconf.getPartitionerClassName();
@@ -151,10 +156,18 @@ public class JobMeta {
     return result;
   }
   
+  /**
+   * check whether this job is done
+   * @return
+   */
   public boolean isDone() {
     return ((this.taskFinishedMapperNum + this.taskFinishedReducerNum) == (this.mapTasks.size() + this.reduceTasks.size()));
   }
   
+  /**
+   * update the finished task status
+   * @param tid
+   */
   public void reportFinishedTask(int tid) {
     if (this.mapTasks.contains(tid)) {
       this.taskFinishedMapperNum ++;
@@ -165,6 +178,15 @@ public class JobMeta {
     }
   }
   
+  public void addMapperTask(int taskid) {
+    this.mapTasks.add(taskid);
+  }
+
+  public void addReducerTask(int taskid) {
+    this.reduceTasks.add(taskid);
+  }
+  
+  // the following are the getters of all fields
   public int getFinishedMapperNumber() {
     return this.taskFinishedMapperNum;
   }
@@ -176,57 +198,29 @@ public class JobMeta {
   public int getJobId() {
     return jobId;
   }
-
-  public void setJobId(int jobId) {
-    this.jobId = jobId;
-  }
-
+  
   public String getJobName() {
     return jobName;
-  }
-
-  public void setJobName(String jobName) {
-    this.jobName = jobName;
   }
 
   public String getMapperClassName() {
     return mapperClassName;
   }
 
-  public void setMapperClassName(String mapperClassName) {
-    this.mapperClassName = mapperClassName;
-  }
-
   public String getReducerClassName() {
     return reducerClassName;
-  }
-
-  public void setReducerClassName(String reducerClassName) {
-    this.reducerClassName = reducerClassName;
   }
 
   public String getInputPath() {
     return inputPath;
   }
 
-  public void setInputPath(String inputPath) {
-    this.inputPath = inputPath;
-  }
-
   public String getOutputPath() {
     return outputPath;
   }
 
-  public void setOutputPath(String outputPath) {
-    this.outputPath = outputPath;
-  }
-
   public int getBlockSize() {
     return blockSize;
-  }
-
-  public void setBlockSize(int blockSize) {
-    this.blockSize = blockSize;
   }
 
   public Set<Integer> getMapTasks() {
@@ -244,44 +238,24 @@ public class JobMeta {
   public int getReducerNum() {
     return reducerNum;
   }
-
-  public void addMapperTask(int taskid) {
-    this.mapTasks.add(taskid);
-  }
-
-  public void addReducerTask(int taskid) {
-    this.reduceTasks.add(taskid);
-  }
   
   public JobStatus getStatus() {
     return status;
   }
-
-  public void setStatus(JobStatus status) {
-    this.status = status;
+  
+  public void setStatus(JobStatus s) {
+    this.status = s;
   }
-
+  
   public String getPartitionerClassName() {
     return partitionerClassName;
   }
 
-  public void setPartitionerClassName(String partitionerClassName) {
-    this.partitionerClassName = partitionerClassName;
-  }
-  
   public String getInputFormatClassName() {
     return inputFormatClassName;
   }
 
-  public void setInputFormatClassName(String inputFormatClassName) {
-    this.inputFormatClassName = inputFormatClassName;
-  }
-  
   public String getOutputFormatClassName() {
     return outputFormatClassName;
-  }
-
-  public void setOutputFormatClassName(String outputFormatClassName) {
-    this.outputFormatClassName = outputFormatClassName;
   }
 }
