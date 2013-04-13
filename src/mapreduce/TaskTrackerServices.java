@@ -33,7 +33,6 @@ public class TaskTrackerServices extends UnicastRemoteObject implements TaskLaun
    * @return the task is submitted successfully or not
    */
   public boolean runTask(TaskInfo taskInfo) throws RemoteException {
-    System.out.println("task type " + taskInfo.getType());
     /* if this is a mapper task */
     if (taskInfo.getType() == TaskMeta.TaskType.MAPPER) {
       MapperTaskInfo mapperTaskInfo = (MapperTaskInfo) taskInfo;
