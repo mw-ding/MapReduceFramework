@@ -84,8 +84,10 @@ public class MapperWorker extends Worker {
     }/* if runtime exception happens in user's code, exit jvm */
     catch (RuntimeException e) {
       e.printStackTrace();
+      System.out.println("the jvm is going to shut down");
       System.exit(0);
     }
+    System.out.println("the jvm should have been shut down");
     /* sort the files */
     this.sort();
     /* do cleanup */
