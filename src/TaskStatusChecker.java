@@ -29,14 +29,15 @@ public class TaskStatusChecker implements Runnable {
         synchronized (taskStatus) {
           for (TaskProgress taskProgress : taskStatus.values()) {
             long curTime = System.currentTimeMillis();
+            System.out.println("Task " + taskProgress.getTaskID() + "    " + (curTime - taskProgress.getTimestamp()));
             if ((curTime - taskProgress.getTimestamp() > ALIVE_CYCLE)
                     && taskProgress.getStatus() != TaskStatus.SUCCEED) {
               System.out.println("#### set task " + taskProgress.getTaskID() + " failed.");
-            }
               taskProgress.setStatus(TaskStatus.FAILED);
             }
           }
         }
+      }
     });
     thread.setDaemon(true);
     ScheduledFuture<?> schFuture = schExec.scheduleAtFixedRate(thread, 0, HEART_BEAT_PERIOD,
