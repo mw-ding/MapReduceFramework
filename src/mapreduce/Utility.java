@@ -8,10 +8,28 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Map;
 
+/**
+ * 
+ * This is a utility class. methods included are: 
+ * 1. String getParam(String key) 
+ * 2. void startJavaProcess(String[] args, int jid) throws Exception 
+ * 3. void startProcess(String[] args) throws Exception
+ */
 public class Utility {
+
+  /* MAPREDUCE_HOME used to locate config file */
   private static String MAPREDUCE_HOME = System.getenv().get("MAPREDUCE_HOME");
 
+  /**
+   * method used to read config information from config file
+   * 
+   * @param key
+   *          of config info
+   * @return value of config info
+   */
   public static String getParam(String key) {
+
+    /* locate the path of config file */
     String configPath = MAPREDUCE_HOME + "/config/config";
     FileInputStream fis = null;
     BufferedReader br = null;
@@ -44,8 +62,15 @@ public class Utility {
     return "";
   }
 
+  /**
+   * method used to start of new java process
+   * 
+   * @param args
+   * @param jid
+   * @throws Exception
+   */
   public static void startJavaProcess(String[] args, int jid) throws Exception {
-    System.out.println("start new process " + args[0]);
+    /* build arguments */
     String separator = System.getProperty("file.separator");
     String classpath = System.getProperty("java.class.path");
     String path = System.getProperty("java.home") + separator + "bin" + separator + "java";
@@ -53,15 +78,24 @@ public class Utility {
     newargs[0] = path;
     newargs[1] = "-cp";
     newargs[2] = classpath + File.pathSeparator + classpath + separator + "job" + jid;
-    // for test
+
+    /* get the rmi codebase path */
     newargs[3] = "-Djava.rmi.server.codebase=file:" + Utility.getParam("RMI_CODE_BASE");
     for (int i = 4, j = 0; j < args.length; i++, j++) {
       newargs[i] = args[j];
     }
+
+    /* start a process with above arguments */
     ProcessBuilder processBuilder = new ProcessBuilder(newargs);
     processBuilder.start();
   }
 
+  /**
+   * method used to start a general process
+   * 
+   * @param args
+   * @throws Exception
+   */
   public static void startProcess(String[] args) throws Exception {
     ProcessBuilder processBuilder = new ProcessBuilder(args);
     processBuilder.start();

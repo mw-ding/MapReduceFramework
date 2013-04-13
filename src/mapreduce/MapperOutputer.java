@@ -4,13 +4,16 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 
+/**
+ * how the result of mapper is output to different partition file
+ * 
+ */
 public class MapperOutputer extends Outputer {
   
   private Partitioner partitioner;
 
+  /* the writers for different partition */
   private BufferedWriter[] writers;
-  
-  //private ArrayList<Record>[] buffer;
 
   public MapperOutputer(String dir, Partitioner partitioner) {
     super(dir);
@@ -18,6 +21,7 @@ public class MapperOutputer extends Outputer {
     this.writers = new BufferedWriter[this.partitioner.getReducerNum()];
     for (int i = 0; i < this.writers.length; i++) {
       try {
+        /* build writers for different partitions */
         writers[i] = new BufferedWriter(new FileWriter(this.outputDir
                 + System.getProperty("file.separator") + MapperOutputer.defaultName + i, true));
       } catch (IOException e) {
@@ -25,7 +29,10 @@ public class MapperOutputer extends Outputer {
       }
     }
   }
-
+  
+  /**
+   * After the writes are done, close all files
+   */
   public void closeAll() {
     for (BufferedWriter bw : writers) {
       try {
@@ -36,7 +43,10 @@ public class MapperOutputer extends Outputer {
       }
     }
   }
-
+  
+  /**
+   * write to different partitions
+   */
   @Override
   public void collect(String key, String value) {
     if (this.partitioner == null)

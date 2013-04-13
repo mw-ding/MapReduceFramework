@@ -1,4 +1,5 @@
 package mapreduce;
+
 public class Record implements Comparable<Record>{
   public String key;
   public String value;

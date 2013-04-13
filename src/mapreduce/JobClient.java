@@ -46,7 +46,7 @@ public class JobClient {
   }
 
   /**
-   * submit a job with a configuration
+   * submit a job with a configuration to job tracker
    * 
    * @param jconf
    */

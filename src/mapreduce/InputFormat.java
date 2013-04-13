@@ -4,14 +4,25 @@ import java.io.RandomAccessFile;
 import java.util.Iterator;
 
 public abstract class InputFormat implements Iterator<Record> {
+  
+  /* this file name */
   protected String filename;
 
+  /* the offset of the block */
   protected long offset;
 
+  /* the block size */
   protected int blockSize;
 
   protected RandomAccessFile raf;
-
+  
+  /**
+   * constructor method
+   * @param filename
+   * @param offset
+   * @param blockSize
+   * @throws IOException
+   */
   protected InputFormat(String filename, Long offset, Integer blockSize) throws IOException {
     this.filename = filename;
     this.offset = offset;
@@ -29,7 +40,9 @@ public abstract class InputFormat implements Iterator<Record> {
       this.raf.seek(offset);
   }
 
-  /* there are still bytes in this block */
+  /**
+   *  check if there are still bytes in this block 
+   *  */
   protected boolean hasByte() throws IOException {
     if (this.raf.getFilePointer() < (this.offset + this.blockSize))
       return true;

@@ -26,6 +26,19 @@ public class MapperTaskInfo extends TaskInfo {
   /* the number of reducer */
   private int reducerNum;
 
+  /**
+   * contructor method 
+   * @param jid
+   * @param taskID
+   * @param inputPath
+   * @param offset
+   * @param blockSize
+   * @param mapper
+   * @param partitioner
+   * @param inputFormat
+   * @param jobOutputPath
+   * @param reducerNum
+   */
   public MapperTaskInfo(int jid, int taskID, String inputPath, long offset, int blockSize, String mapper,
           String partitioner, String inputFormat, String jobOutputPath, int reducerNum) {
     super(jid, taskID, TaskMeta.TaskType.MAPPER);

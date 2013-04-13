@@ -1,4 +1,5 @@
 package mapreduce;
+
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -9,18 +10,37 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * 
+ * This class is used to run mapper tasks or reducer task
+ * 
+ */
 public abstract class Worker {
 
+  /* the id of the task */
   protected int taskID;
 
+  /* the output path */
   protected String outputFile;
 
+  /* the input path */
   protected String inputFile;
 
+  /* the service used to update task status to task tracker */
   protected StatusUpdater taskStatusUpdater;
 
+  /* the progress of the task, including percentage, failed, succeed, or in progress etc */
   protected TaskProgress progress;
 
+  /**
+   * constructor method
+   * 
+   * @param taskID
+   * @param infile
+   * @param outfile
+   * @param taskTrackerServiceName
+   * @param type
+   */
   public Worker(int taskID, String infile, String outfile, String taskTrackerServiceName,
           TaskMeta.TaskType type) {
 
@@ -29,7 +49,7 @@ public abstract class Worker {
     this.inputFile = infile;
     this.progress = new TaskProgress(this.taskID, type);
 
-    /* get the task tracker status updater */
+    /* get the task tracker status updater from rmi */
     String registryHostName = Utility.getParam("REGISTRY_HOST");
     int registryPort = Integer.parseInt(Utility.getParam("REGISTRY_PORT"));
 
@@ -44,11 +64,18 @@ public abstract class Worker {
 
   }
 
+  /**
+   * abstract method used to run task
+   */
   public abstract void run();
 
+  /**
+   * periodically update task status to task tracker
+   */
   public void updateStatusToTaskTracker() {
     /* periodically send status progress to task tracker */
-    ScheduledExecutorService schExec = Executors.newScheduledThreadPool(8);
+    int poolSize = Integer.parseInt(Utility.getParam("THREAD_POOL_SIZE"));
+    ScheduledExecutorService schExec = Executors.newScheduledThreadPool(poolSize);
     Thread thread = new Thread(new Runnable() {
       public void run() {
         updateStatus();
@@ -60,14 +87,27 @@ public abstract class Worker {
     ;
   }
 
+  /**
+   * update in-progress status to task tracker
+   */
   public void updateStatus() {
+    /* need to change progress, so first lock it */
     synchronized (progress) {
+      /* if already succeed, stop. if not, send in-progress status */
       if (progress.getStatus() != TaskMeta.TaskStatus.SUCCEED) {
         try {
+          /* set percentage of work already done */
           progress.setPercentage(this.getPercentage());
+
+          /* set status as in-progress */
           progress.setStatus(TaskMeta.TaskStatus.INPROGRESS);
+
+          /* set the current time stamp, for task tacker to detect if alive */
           progress.setTimestamp(System.currentTimeMillis());
+
+          /* update to task tracker */
           taskStatusUpdater.update(progress);
+
         } catch (RemoteException e) {
           e.printStackTrace();
         }
@@ -75,12 +115,23 @@ public abstract class Worker {
     }
   }
 
+  /**
+   * update succeed status to task tracker only used when the task is done
+   */
   public void updateStatusSucceed() {
+    /* lock progress before change it */
     synchronized (progress) {
       try {
+        /* set percentage */
         progress.setPercentage(this.getPercentage());
+
+        /* set status as succeed */
         progress.setStatus(TaskMeta.TaskStatus.SUCCEED);
+
+        /* set the current time stamp */
         progress.setTimestamp(System.currentTimeMillis());
+
+        /* update to task tracker */
         taskStatusUpdater.update(progress);
       } catch (RemoteException e) {
         e.printStackTrace();
@@ -88,6 +139,9 @@ public abstract class Worker {
     }
   }
 
+  /**
+   * @return percentage of work already done
+   */
   protected abstract float getPercentage();
 
 }
