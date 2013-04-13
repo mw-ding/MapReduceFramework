@@ -14,11 +14,12 @@ import mapreduce.JobConf;
  * */
 public class Main {
   public static void main(String[] args) {
-    if (args.length != 2)
+    if (args.length != 3)
       return;
     String input = args[0];
     String output = args[1];
     JobConf jobConf = new JobConf();
+    jobConf.setJarFilePath(args[2]);
     jobConf.setInputPath(input);
     jobConf.setBlockSize(100000);
     jobConf.setJobName("degree count");
@@ -26,8 +27,8 @@ public class Main {
     jobConf.setReducerClassName("example.degreecount.DegreeCountReducer");
     jobConf.setInputFormatClassName("example.degreecount.MyInputFormat");
     jobConf.setOutputFormatClassName("example.degreecount.MyOutputFormat");
-    jobConf.setPartitionerClassName("example.degreecount.Partitioner");
-    jobConf.setOutputPath(output + Math.random());
+    jobConf.setPartitionerClassName("example.degreecount.MyPartitioner");
+    jobConf.setOutputPath(output);
     jobConf.setReducerNum(3);
     Job job = new Job(jobConf);
     job.run();

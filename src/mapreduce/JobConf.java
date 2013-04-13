@@ -15,6 +15,8 @@ public class JobConf implements Serializable {
 
   // the output path
   private String outputPath;
+  
+  private String jarFilePath;
 
   // the block size
   private int blockSize;
@@ -68,6 +70,9 @@ public class JobConf implements Serializable {
       return false;
 
     if (this.outputPath == null)
+      return false;
+    
+    if (this.jarFilePath == null)
       return false;
 
     if (this.mapperClassName == null)
@@ -181,5 +186,13 @@ public class JobConf implements Serializable {
 
   public void setOutputFormatClassName(String outputFormatClassName) {
     this.outputFormatClassName = outputFormatClassName;
+  }
+  
+  public String getJarFilePath() {
+    return this.jarFilePath;
+  }
+  
+  public void setJarFilePath(String path) {
+    this.jarFilePath = path;
   }
 }
