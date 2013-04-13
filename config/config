@@ -6,3 +6,5 @@ TASK_TRACKER_1_NUM_REDUCER=4
 JOB_TRACKER_SERVICE_NAME=job_tracker_service
 CLIENT_SERVICE_NAME=client_service
 HEART_BEAT_PERIOD=2
+MAPPER_STANDARD_OUT_REDIRECT=/Users/dmw1989/Documents/workspace/MapReduceFramework/mapout
+MAPPER_STANDARD_ERR_REDIRECT=/Users/dmw1989/Documents/workspace/MapReduceFramework/maperr

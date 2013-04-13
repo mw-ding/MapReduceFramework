@@ -1,4 +1,5 @@
 package mapreduce;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -171,12 +172,11 @@ public class MapperWorker extends Worker {
     // for test
     try {
       PrintStream out = new PrintStream(new FileOutputStream(new File(
-              "/Users/dmw1989/Documents/workspace/MapReduceFramework/mapout" + taskID)));
+              Utility.getParam("MAPPER_STANDARD_OUT_REDIRECT") + taskID)));
       PrintStream err = new PrintStream(new FileOutputStream(new File(
-              "/Users/dmw1989/Documents/workspace/MapReduceFramework/maperr" + taskID)));
+              Utility.getParam("MAPPER_STANDARD_ERR_REDIRECT") + taskID)));
       System.setErr(err);
       System.setOut(out);
-      System.out.println(System.getProperty("java.class.path"));
     } catch (FileNotFoundException e) {
       e.printStackTrace();
     }

@@ -13,11 +13,11 @@ import java.util.jar.JarFile;
 
 public class JobTracker {
 
-  public final static String JOBTRACKER_SERVICE_NAME = "job_tracker_service";
+  public static String JOBTRACKER_SERVICE_NAME;
 
-  public final static String JOB_MAPPER_OUTPUT_PREFIX = "mapper_output_job_";
+  public static String JOB_MAPPER_OUTPUT_PREFIX = "mapper_output_job_";
 
-  public final static String TASK_MAPPER_OUTPUT_PREFIX = "mapper_output_task_";
+  public static String TASK_MAPPER_OUTPUT_PREFIX = "mapper_output_task_";
 
   // all the tasktrackers running under current system
   private Map<String, TaskTrackerMeta> tasktrackers;
@@ -72,6 +72,7 @@ public class JobTracker {
     this.mapTasks = Collections.synchronizedMap(new HashMap<Integer, TaskMeta>());
     this.reduceTasks = Collections.synchronizedMap(new HashMap<Integer, TaskMeta>());
     this.jobs = Collections.synchronizedMap(new HashMap<Integer, JobMeta>());
+    JOBTRACKER_SERVICE_NAME = Utility.getParam("JOB_TRACKER_SERVICE_NAME");
 
     this.mapTasksQueue = (Queue<TaskMeta>) (new PriorityQueue<TaskMeta>(10,
             new Comparator<TaskMeta>() {
