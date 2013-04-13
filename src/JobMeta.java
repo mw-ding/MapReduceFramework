@@ -62,7 +62,9 @@ public class JobMeta {
 
   private Set<Integer> reduceTasks;
   
-  private int taskFinishedNum;
+  private int taskFinishedMapperNum;
+  
+  private int taskFinishedReducerNum;
 
   private List<InputBlock> inputBlocks;
   
@@ -90,7 +92,8 @@ public class JobMeta {
     this.outputPath = jconf.getOutputPath();
     this.blockSize = jconf.getBlockSize();
     this.reducerNum = jconf.getReducerNum();
-    this.taskFinishedNum = 0;
+    this.taskFinishedMapperNum = 0;
+    this.taskFinishedReducerNum = 0;
     this.status = JobStatus.INIT;
 
     this.mapTasks = new HashSet<Integer>();
@@ -102,7 +105,6 @@ public class JobMeta {
    * split all the input files
    */
   public void splitInput() {
-    System.out.println("Splitting input file");
     if (this.inputBlocks == null)
       this.inputBlocks = new ArrayList<InputBlock>();
     else
@@ -127,7 +129,6 @@ public class JobMeta {
    * @return
    */
   private List<InputBlock> splitOneInputFile(File file) {
-    System.out.println("Splitting file " + file.getName());
     List<InputBlock> result = new ArrayList<InputBlock>();
 
     long len = file.length();
@@ -150,13 +151,25 @@ public class JobMeta {
   }
   
   public boolean isDone() {
-    return (this.taskFinishedNum == (this.mapTasks.size() + this.reduceTasks.size()));
+    return ((this.taskFinishedMapperNum + this.taskFinishedReducerNum) == (this.mapTasks.size() + this.reduceTasks.size()));
   }
   
   public void reportFinishedTask(int tid) {
-    if (this.mapTasks.contains(tid) || this.reduceTasks.contains(tid)) {
-      this.taskFinishedNum ++;
+    if (this.mapTasks.contains(tid)) {
+      this.taskFinishedMapperNum ++;
     }
+    
+    if (this.reduceTasks.contains(tid)) {
+      this.taskFinishedReducerNum ++;
+    }
+  }
+  
+  public int getFinishedMapperNumber() {
+    return this.taskFinishedMapperNum;
+  }
+  
+  public int getFinishedReducerNumber() {
+    return this.taskFinishedReducerNum;
   }
 
   public int getJobId() {
@@ -219,16 +232,8 @@ public class JobMeta {
     return mapTasks;
   }
 
-  public void setMapTasks(Set<Integer> mapTasks) {
-    this.mapTasks = mapTasks;
-  }
-
   public Set<Integer> getReduceTasks() {
     return reduceTasks;
-  }
-
-  public void setReduceTasks(Set<Integer> reduceTasks) {
-    this.reduceTasks = reduceTasks;
   }
 
   public List<InputBlock> getInputBlocks() {

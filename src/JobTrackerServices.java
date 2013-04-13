@@ -46,8 +46,6 @@ public class JobTrackerServices extends UnicastRemoteObject implements StatusUpd
     }
 
     /* update slot and timestamp information */
-    System.out.println("update slots to mapper: " + taskTrackerPkg.getNumOfMapperSlots()
-            + ", reducer : " + taskTrackerPkg.getNumOfReducerSlots());
     ttmeta.setNumOfMapperSlots(taskTrackerPkg.getNumOfMapperSlots());
     ttmeta.setNumOfReducerSlots(taskTrackerPkg.getNumOfReducerSlots());
     ttmeta.setTimestamp(System.currentTimeMillis());
@@ -126,7 +124,6 @@ public class JobTrackerServices extends UnicastRemoteObject implements StatusUpd
   @Override
   public boolean isAllMapperFinished(int tid) throws RemoteException {
     boolean result = this.jobTracker.isAllMapperFinished(tid);
-    System.out.println("request is all mapper finished " + tid + " - " + result);
     return result;
   }
 

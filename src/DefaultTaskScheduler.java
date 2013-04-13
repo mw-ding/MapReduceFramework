@@ -20,7 +20,6 @@ public class DefaultTaskScheduler implements TaskScheduler {
 
   @Override
   public Map<Integer, String> scheduleTask() {
-    System.out.println("Scheduling tasks.");
     Map<Integer, String> result = new HashMap<Integer, String>();
 
     for (Entry<String, TaskTrackerMeta> entry : taskTrackers.entrySet()) {

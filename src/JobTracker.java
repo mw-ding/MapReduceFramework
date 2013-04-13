@@ -15,7 +15,7 @@ public class JobTracker {
   public final static String JOBTRACKER_SERVICE_NAME = "job_tracker_service";
 
   public final static String JOB_MAPPER_OUTPUT_PREFIX = "mapper_output_job_";
-  
+
   public final static String TASK_MAPPER_OUTPUT_PREFIX = "mapper_output_task_";
 
   // all the tasktrackers running under current system
@@ -105,6 +105,8 @@ public class JobTracker {
     TaskTrackerAliveChecker alivechecker = new TaskTrackerAliveChecker(this);
     serviceSche.scheduleAtFixedRate(alivechecker, ALIVE_CHECK_CYCLE_SEC, ALIVE_CHECK_CYCLE_SEC,
             TimeUnit.SECONDS);
+    
+    this.controlConsole();
   }
 
   /**
@@ -221,7 +223,6 @@ public class JobTracker {
    * trigger the task scheduling to fill all those idle slots
    */
   public void distributeTasks() {
-    System.out.println("Distributing tasks.");
     Map<Integer, String> schestrategies = null;
     synchronized (this.tasktrackers) {
       schestrategies = this.scheduler.scheduleTask();
@@ -256,8 +257,6 @@ public class JobTracker {
 
         if (res) {
           // if this task has been submitted to a tasktracker successfully
-          System.out.println("Assign task " + task.getTaskID() + " to tasktracker "
-                  + targetTasktracker.getTaskTrackerName());
           task.getTaskProgress().setStatus(TaskStatus.INPROGRESS);
         } else {
           // if this task is failed to be submitted, place it back to the queue
@@ -286,8 +285,6 @@ public class JobTracker {
       Enumeration enums = jar.entries();
       String destDirPath = JobTracker.JOB_CLASSPATH + JobTracker.JOB_CLASSPATH_PREFIX + jobid
               + File.separator;
-
-      System.out.println("Extracting file to " + destDirPath);
 
       // copy each file in jar archive one by one
       while (enums.hasMoreElements()) {
@@ -338,18 +335,18 @@ public class JobTracker {
             + JobTracker.JOB_MAPPER_OUTPUT_PREFIX + newjob.getJobId();
     (new File(jobMapperOutputDirPath)).mkdir();
 
-    System.out.println("get " + blocks.size() + " splits.");
-
     Map<Integer, TaskMeta> mapTasks = new HashMap<Integer, TaskMeta>();
     Map<Integer, TaskMeta> reduceTasks = new HashMap<Integer, TaskMeta>();
 
     // create new map tasks for this job
     for (JobMeta.InputBlock block : blocks) {
       int taskid = this.requestTaskId();
-      TaskInfo minfo = new MapperTaskInfo(newjob.getJobId(), taskid, block.getFilePath(), block.getOffset(),
-              block.getLength(), newjob.getMapperClassName(), newjob.getPartitionerClassName(),
-              newjob.getInputFormatClassName(), jobMapperOutputDirPath, newjob.getReducerNum());
-      TaskMeta mtask = new TaskMeta(taskid, newjob.getJobId(), minfo, new TaskProgress(taskid, TaskType.MAPPER));
+      TaskInfo minfo = new MapperTaskInfo(newjob.getJobId(), taskid, block.getFilePath(),
+              block.getOffset(), block.getLength(), newjob.getMapperClassName(),
+              newjob.getPartitionerClassName(), newjob.getInputFormatClassName(),
+              jobMapperOutputDirPath, newjob.getReducerNum());
+      TaskMeta mtask = new TaskMeta(taskid, newjob.getJobId(), minfo, new TaskProgress(taskid,
+              TaskType.MAPPER));
 
       mapTasks.put(taskid, mtask);
       newjob.addMapperTask(taskid);
@@ -359,16 +356,15 @@ public class JobTracker {
     int reducerNum = newjob.getReducerNum();
     for (int i = 0; i < reducerNum; i++) {
       int taskid = this.requestTaskId();
-      TaskInfo rinfo = new ReducerTaskInfo(newjob.getJobId(), taskid, i, jobMapperOutputDirPath, newjob.getReducerClassName(),
-              newjob.getOutputFormatClassName(), newjob.getOutputPath());
-      TaskMeta rtask = new TaskMeta(taskid, newjob.getJobId(), rinfo, new TaskProgress(taskid, TaskType.REDUCER));
+      TaskInfo rinfo = new ReducerTaskInfo(newjob.getJobId(), taskid, i, jobMapperOutputDirPath,
+              newjob.getReducerClassName(), newjob.getOutputFormatClassName(),
+              newjob.getOutputPath());
+      TaskMeta rtask = new TaskMeta(taskid, newjob.getJobId(), rinfo, new TaskProgress(taskid,
+              TaskType.REDUCER));
 
       reduceTasks.put(taskid, rtask);
       newjob.addReducerTask(taskid);
     }
-
-    System.out.println("Add " + mapTasks.size() + " mapper tasks.");
-    System.out.println("Add " + reduceTasks.size() + " reducer tasks.");
 
     // submit these tasks into the system
     this.mapTasks.putAll(mapTasks);
@@ -387,29 +383,143 @@ public class JobTracker {
       this.reduceTasksQueue.offer(task);
     }
   }
-  
+
   public boolean isAllMapperFinished(int tid) {
     TaskMeta task = this.reduceTasks.get(tid);
-    
+
     if (task == null) {
       return false;
     }
-    
+
     int jid = task.getJobID();
-    
+
     JobMeta job = this.jobs.get(jid);
-    
+
     if (job == null) {
       return false;
     }
-    
+
     Set<Integer> mapTasks = job.getMapTasks();
     for (int mid : mapTasks) {
       if (this.mapTasks.containsKey(mid) && !this.mapTasks.get(mid).isDone())
         return false;
     }
-    
+
     return true;
+  }
+
+  public void controlConsole() {
+    Scanner scanner = new Scanner(System.in);
+    System.out.println(">> ");
+    while (scanner.hasNext()) {
+      System.out.println(">> ");
+      String line = scanner.nextLine().trim();
+      String[] fields = line.split(" ");
+      String cmd = fields[0];
+
+      if (cmd.compareTo("ls") == 0) {
+        switch (fields.length) {
+          case 2: // ls job
+            if (fields[1].compareTo("job") == 0) {
+              this.listAllJobs();
+            } else if (fields[1].compareTo("tasktracker") == 0) {
+              this.listTaskTrackers();
+            } else {
+              System.out.println("Invalid command, type 'help' to see the mannul.");
+            }
+            break;
+          case 3:
+            if (fields[1].compareTo("job") == 0) {
+              try {
+                int jid = Integer.parseInt(fields[2]);
+                this.listJob(jid);
+              } catch (NumberFormatException e) {
+                System.out.println("Invalid job id.");
+              }
+            } else {
+              System.out.println("Invalid command, type 'help' to see the mannul.");
+            }
+            break;
+          default:
+            break;
+        }
+
+      } else if (cmd.compareTo("quit") == 0) {
+        System.exit(0);
+      } else if (cmd.compareTo("help") == 0) {
+
+      }
+    }
+  }
+
+  private void listAllJobs() {
+    System.out.println("========== All Jobs ==========");
+    System.out
+            .println("JobID\tJobName\tStatus\tTotalTasks\tMapperTasks\tCompleted\tReducerTasks\tCompleted");
+    for (JobMeta job : this.jobs.values()) {
+      int id = job.getJobId();
+      String name = job.getJobName();
+      JobMeta.JobStatus status = job.getStatus();
+      int mapNum = job.getMapTasks().size();
+      int reduceNum = job.getReduceTasks().size();
+      int mapfinNum = job.getFinishedMapperNumber();
+      int reducefinNum = job.getFinishedReducerNumber();
+
+      System.out.println(id + "\t" + name + "\t" + status + "\t" + (mapNum + reduceNum) + "\t"
+              + mapNum + "\t" + mapfinNum + "\t" + reduceNum + "\t" + reducefinNum);
+    }
+  }
+
+  private void listJob(int jid) {
+    if (!this.jobs.containsKey(jid)) {
+      System.out.println("Job " + jid + " does not exist.");
+      return;
+    }
+
+    JobMeta job = this.jobs.get(jid);
+    System.out.println("========== Job " + jid + " ==========");
+
+    System.out.println("Name: " + job.getJobName());
+    System.out.println("Status: " + job.getStatus());
+    System.out.println("Number of Mapper Tasks (finished/total): " + job.getFinishedMapperNumber()
+            + "/" + job.getMapTasks().size());
+    System.out.println("Number of Reducer Tasks (finished/total): "
+            + job.getFinishedReducerNumber() + "/" + job.getReduceTasks().size());
+    System.out.println("\nMap Tasks:");
+    Set<Integer> maps = job.getMapTasks();
+    System.out.println("TaskID\tTaskStatus\tTaskCompleteness");
+    for (int tid : maps) {
+      TaskMeta task = this.mapTasks.get(tid);
+      System.out.println(tid + "\t" + task.getTaskProgress().getStatus() + "\t"
+              + task.getTaskProgress().getPercentage());
+    }
+    System.out.println("\nReduce Tasks:");
+    System.out.println("TaskID\tTaskStatus\tTaskCompleteness");
+    Set<Integer> reduces = job.getReduceTasks();
+    for (int tid : reduces) {
+      TaskMeta task = this.reduceTasks.get(tid);
+      System.out.println(tid + "\t" + task.getTaskProgress().getStatus() + "\t"
+              + task.getTaskProgress().getPercentage());
+    }
+  }
+  
+  private void listTaskTrackers() {
+    System.out.println("========== Task Trackers ==========");
+    System.out.println("Name\tAvailableMapperSlots\tAvailableReducerSlots");
+    for (TaskTrackerMeta tt : this.tasktrackers.values()){
+      System.out.println(tt.getTaskTrackerName() + "\t" + tt.getNumOfMapperSlots() + "\t" + tt.getNumOfReducerSlots());
+    }
+  }
+
+  // TODO : read the tmp directory dir from config file
+  public static String getSystemTempDir() {
+
+    File tmp = new File("tmp");
+    if (!tmp.exists()) {
+      tmp.mkdir();
+    }
+
+    return "tmp";
   }
 
   public static void main(String[] args) {
@@ -418,16 +528,6 @@ public class JobTracker {
     } catch (RemoteException e) {
       e.printStackTrace();
     }
-  }
-
-  public static String getSystemTempDir() {
-    
-    File tmp = new File("tmp");
-    if (!tmp.exists()) {
-      tmp.mkdir();
-    }
-    
-    return "tmp";
   }
 
 }

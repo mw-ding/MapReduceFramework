@@ -12,7 +12,7 @@ public class Main {
     jobConf.setInputFormatClassName("MyInputFormat");
     jobConf.setOutputFormatClassName("MyOutputFormat");
     jobConf.setPartitionerClassName("Partitioner");
-    jobConf.setOutputPath("testoutput");
+    jobConf.setOutputPath("testoutput" + Math.random());
     jobConf.setReducerNum(3);
     Job job = new Job(jobConf);
     job.run();
