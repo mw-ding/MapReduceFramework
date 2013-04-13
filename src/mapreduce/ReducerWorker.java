@@ -1,4 +1,5 @@
 package mapreduce;
+
 import java.io.*;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -25,7 +26,7 @@ public class ReducerWorker extends Worker {
 
   private float reducePercentage;
 
-  private static int SLEEP_CIRCLE = 2000;
+  private final int SLEEP_CYCLE;
 
   public ReducerWorker(int taskID, int order, String reducer, String oformater, String indir,
           String outdir, String taskTrackerServiceName) {
@@ -65,6 +66,7 @@ public class ReducerWorker extends Worker {
     this.copyPercentage = 0;
     this.groupPercentage = 0;
     this.reducePercentage = 0;
+    SLEEP_CYCLE = Integer.parseInt(Utility.getParam("REDUCER_CHECK_MAPPER_CYCLE"));
   }
 
   /**
@@ -76,17 +78,17 @@ public class ReducerWorker extends Worker {
     try {
       MapStatusChecker.MapStatus res = mapStatusChecker.checkMapStatus(this.taskID);
       while (res != MapStatusChecker.MapStatus.FINISHED) {
-        
+
         if (res == MapStatusChecker.MapStatus.FAILED) {
           System.exit(0);
         }
-        
+
         try {
-          Thread.sleep(this.SLEEP_CIRCLE);
+          Thread.sleep(this.SLEEP_CYCLE);
         } catch (InterruptedException e) {
           e.printStackTrace();
         }
-        
+
         res = mapStatusChecker.checkMapStatus(this.taskID);
       }
     } catch (RemoteException e) {
@@ -96,7 +98,7 @@ public class ReducerWorker extends Worker {
 
     File indirfile = new File(this.inputFile);
     if (!indirfile.isDirectory()) {
-      System.out.println("Invalid Reducer input dir.");
+      System.err.println("Invalid Reducer input dir.");
       return result;
     }
 
@@ -226,9 +228,9 @@ public class ReducerWorker extends Worker {
     // for test
     try {
       PrintStream out = new PrintStream(new FileOutputStream(new File(
-              "/Users/dmw1989/Documents/workspace/MapReduceFramework/reduceout" + taskID)));
+              Utility.getParam("REDUCER_STANDARD_OUT_REDIRECT") + taskID)));
       PrintStream err = new PrintStream(new FileOutputStream(new File(
-              "/Users/dmw1989/Documents/workspace/MapReduceFramework/reduceerr" + taskID)));
+              Utility.getParam("REDUCER_STANDARD_ERR_REDIRECT") + taskID)));
       System.setErr(err);
       System.setOut(out);
     } catch (FileNotFoundException e) {

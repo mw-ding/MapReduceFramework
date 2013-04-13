@@ -1,4 +1,5 @@
 package mapreduce;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -32,12 +33,13 @@ public class Utility {
     } catch (IOException e) {
       e.printStackTrace();
     } finally {
-      try {
-        br.close();
-        fis.close();
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
+      if (br != null && fis != null)
+        try {
+          br.close();
+          fis.close();
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
     }
     return "";
   }
@@ -52,16 +54,16 @@ public class Utility {
     newargs[1] = "-cp";
     newargs[2] = classpath + File.pathSeparator + classpath + separator + "job" + jid;
     // for test
-    newargs[3] = "-Djava.rmi.server.codebase=file:/Users/dmw1989/Documents/workspace/MapReduceFramework/bin/";
+    newargs[3] = "-Djava.rmi.server.codebase=file:" + Utility.getParam("RMI_CODE_BASE");
     for (int i = 4, j = 0; j < args.length; i++, j++) {
       newargs[i] = args[j];
     }
     ProcessBuilder processBuilder = new ProcessBuilder(newargs);
-    Process process = processBuilder.start();
+    processBuilder.start();
   }
-  
-  public static void startProcess(String[] args) throws Exception{
+
+  public static void startProcess(String[] args) throws Exception {
     ProcessBuilder processBuilder = new ProcessBuilder(args);
-    Process process = processBuilder.start();
+    processBuilder.start();
   }
 }

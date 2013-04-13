@@ -1,14 +1,16 @@
 package mapreduce;
+
 import java.util.Map;
 
 public class TaskStatusChecker implements Runnable {
 
-  private final long ALIVE_CYCLE = 8000; // 8 seconds
+  private final long ALIVE_CYCLE; // 8 seconds
 
   private TaskTracker taskTracker;
 
   public TaskStatusChecker(TaskTracker taskTracker) {
     this.taskTracker = taskTracker;
+    ALIVE_CYCLE = Long.parseLong(Utility.getParam("ALIVE_CYCLE"));
   }
 
   public void run() {
@@ -23,5 +25,5 @@ public class TaskStatusChecker implements Runnable {
       }
     }
   }
-  
+
 }

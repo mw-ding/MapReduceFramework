@@ -1,75 +1,77 @@
 package mapreduce;
+
 import java.util.*;
 
 public class TaskTrackerMeta {
-	// the time period of how long at least the slave
-	// should send a heartbeat to keep it alive
-	private final long ALIVE_CYCLE = 8000; // 8 seconds
+  // the time period of how long at least the slave
+  // should send a heartbeat to keep it alive
+  private final int ALIVE_CYCLE; // 8 seconds
 
-	// the unique name of task tracker
-	private String taskTrackerName;
+  // the unique name of task tracker
+  private String taskTrackerName;
 
-	private int numOfMapperSlots;
+  private int numOfMapperSlots;
 
-	private int numOfReducerSlots;
+  private int numOfReducerSlots;
 
-	private long timestamp;
+  private long timestamp;
 
-	private TaskLauncher taskLauncher;
+  private TaskLauncher taskLauncher;
 
-	private Set<Integer> tasks;
+  private Set<Integer> tasks;
 
-	public TaskTrackerMeta(String name, TaskLauncher services) {
-		this.taskTrackerName = name;
-		this.taskLauncher = services;
-		this.tasks = new HashSet<Integer>();
-		this.numOfMapperSlots = 0;
-		this.numOfReducerSlots = 0;
-	}
-	
-	public TaskLauncher getTaskLauncher() {
-		return this.taskLauncher;
-	}
+  public TaskTrackerMeta(String name, TaskLauncher services) {
+    this.taskTrackerName = name;
+    this.taskLauncher = services;
+    this.tasks = new HashSet<Integer>();
+    this.numOfMapperSlots = 0;
+    this.numOfReducerSlots = 0;
+    this.ALIVE_CYCLE = Integer.parseInt(Utility.getParam("ALIVE_CYCLE"));
+  }
 
-	public int getNumOfMapperSlots() {
-		return numOfMapperSlots;
-	}
+  public TaskLauncher getTaskLauncher() {
+    return this.taskLauncher;
+  }
 
-	public void setNumOfMapperSlots(int numOfMapperSlots) {
-		this.numOfMapperSlots = numOfMapperSlots;
-	}
+  public int getNumOfMapperSlots() {
+    return numOfMapperSlots;
+  }
 
-	public int getNumOfReducerSlots() {
-		return numOfReducerSlots;
-	}
+  public void setNumOfMapperSlots(int numOfMapperSlots) {
+    this.numOfMapperSlots = numOfMapperSlots;
+  }
 
-	public void setNumOfReducerSlots(int numOfReducerSlots) {
-		this.numOfReducerSlots = numOfReducerSlots;
-	}
+  public int getNumOfReducerSlots() {
+    return numOfReducerSlots;
+  }
 
-	public Set<Integer> getTasks() {
-		return tasks;
-	}
+  public void setNumOfReducerSlots(int numOfReducerSlots) {
+    this.numOfReducerSlots = numOfReducerSlots;
+  }
 
-	public String getTaskTrackerName() {
-		return taskTrackerName;
-	}
+  public Set<Integer> getTasks() {
+    return tasks;
+  }
 
-	public long getTimestamp() {
-		return this.timestamp;
-	}
+  public String getTaskTrackerName() {
+    return taskTrackerName;
+  }
 
-	public void setTimestamp(long ctime) {
-		this.timestamp = ctime;
-	}
-	
-	public void removeTask(int id) {
-		if (this.tasks.contains(id)) {
-			this.tasks.remove(id);
-		}
-	}
+  public long getTimestamp() {
+    return this.timestamp;
+  }
 
-	public boolean isAlive() {
-		return (System.currentTimeMillis() - this.timestamp <= ALIVE_CYCLE);
-	}
+  public void setTimestamp(long ctime) {
+    this.timestamp = ctime;
+  }
+
+  public void removeTask(int id) {
+    if (this.tasks.contains(id)) {
+      this.tasks.remove(id);
+    }
+  }
+
+  public boolean isAlive() {
+    return (System.currentTimeMillis() - this.timestamp <= ALIVE_CYCLE);
+  }
 }
