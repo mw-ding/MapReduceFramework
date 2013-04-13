@@ -10,6 +10,8 @@ import java.util.Map.Entry;
 
 public class ReducerWorker extends Worker {
   
+  private final int SLEEP_CYCLE;
+  
   // the stream for merge sort in reducer
   private class MergeStream {
     
@@ -48,7 +50,7 @@ public class ReducerWorker extends Worker {
       if (flist == null)
         return ;
       
-      // initializ the heap
+      // initialize the heap
       int size = flist.size();
       this.streams = new PriorityQueue<MergeStream>(size, new Comparator<MergeStream>() {
 
@@ -59,6 +61,7 @@ public class ReducerWorker extends Worker {
         
       });
       
+      // prepare all input stream
       for (File f : flist) {
         try {
           Scanner newscanner = new Scanner(new FileInputStream(f));
@@ -83,6 +86,8 @@ public class ReducerWorker extends Worker {
 
     @Override
     public boolean hasNext() {
+      // if current key is the same with next key/value pairt, then return true;
+      // otherwise, return false;
       return (!this.streams.isEmpty() && this.streams.peek().getNext().key.compareTo(this.curKey) == 0);
     }
 
@@ -113,27 +118,33 @@ public class ReducerWorker extends Worker {
     }
     
     public String currentKey() {
-      return this.streams.peek().getNext().key;
+      return this.curKey;
     }
     
+    // continue the iteration to the next key
     public boolean continueNextKey() {
-      if (this.streams.isEmpty()) return false;
+      if (this.streams.isEmpty()) {
+        // no more keys any more, stop read key/value pair right here
+        return false;
+      }
       else {
         // set curKey to nextKey to allow next iteration
-        this.curKey = this.currentKey();
+        this.curKey = this.streams.peek().getNext().key;
         return true;
       }
     }
   }
 
+  // the order number of this reduce task among all reducer task
   private int orderId;
 
+  // the output formatter for the reducer
   private ReducerOutputer outputer;
 
-  private OutputFormat formater;
-
+  // the reducer class
   private Reducer reducer;
 
+  // to check whether all mappers finish
   private MapStatusChecker mapStatusChecker;
 
   private float copyPercentage;
@@ -142,21 +153,20 @@ public class ReducerWorker extends Worker {
 
   private float reducePercentage;
 
-  private final int SLEEP_CYCLE;
-
   public ReducerWorker(int taskID, int order, String reducer, String oformater, String indir,
           String outdir, String taskTrackerServiceName) {
     super(taskID, indir, outdir, taskTrackerServiceName, TaskMeta.TaskType.REDUCER);
 
+    // prepare the output dir
     File outdirfile = new File(this.outputFile);
     outdirfile.mkdir();
 
     this.orderId = order;
     try {
       this.reducer = (Reducer) Class.forName(reducer).newInstance();
-      this.formater = (OutputFormat) Class.forName(oformater).newInstance();
+      OutputFormat formater = (OutputFormat) Class.forName(oformater).newInstance();
       this.outputer = new ReducerOutputer(this.outputFile + File.separator + Outputer.defaultName
-              + this.orderId, this.formater);
+              + this.orderId, formater);
     } catch (InstantiationException e) {
       e.printStackTrace();
     } catch (IllegalAccessException e) {
@@ -182,6 +192,7 @@ public class ReducerWorker extends Worker {
     this.copyPercentage = 0;
     this.groupPercentage = 0;
     this.reducePercentage = 0;
+    
     SLEEP_CYCLE = Integer.parseInt(Utility.getParam("REDUCER_CHECK_MAPPER_CYCLE"));
   }
 
@@ -192,6 +203,7 @@ public class ReducerWorker extends Worker {
    */
   private List<File> locateMapOutput() {
     try {
+      // wait until all mappers finish
       MapStatusChecker.MapStatus res = mapStatusChecker.checkMapStatus(this.taskID);
       while (res != MapStatusChecker.MapStatus.FINISHED) {
 
@@ -212,12 +224,14 @@ public class ReducerWorker extends Worker {
     }
     List<File> result = new ArrayList<File>();
 
+    // enter the dir which contains all the output of mappers
     File indirfile = new File(this.inputFile);
     if (!indirfile.isDirectory()) {
       System.err.println("Invalid Reducer input dir.");
       return result;
     }
 
+    // locate the output splits for current reducer
     File[] mapOutputDirs = indirfile.listFiles();
     String filename = Outputer.defaultName + this.orderId;
     for (File mapOutputDir : mapOutputDirs) {
@@ -243,30 +257,6 @@ public class ReducerWorker extends Worker {
     return result;
   }
 
-  private Map<String, List<String>> group(List<Record> records) {
-    // use tree map to make sure that the all the result are sorted by key
-    Map<String, List<String>> result = new TreeMap<String, List<String>>();
-
-    final float lsize = records.size();
-    float lfinished = (float) 0.0;
-
-    for (Record record : records) {
-      String key = record.key;
-
-      if (!result.containsKey(key)) {
-        result.put(key, new ArrayList<String>());
-      }
-
-      result.get(key).add(record.value);
-
-      lfinished += (float) 1.0;
-      this.groupPercentage = lfinished / lsize;
-    }
-
-    this.groupPercentage = (float) 1.0;
-    return result;
-  }
-
   @Override
   public void run() {
     // periodically update status to task tracker
@@ -281,7 +271,8 @@ public class ReducerWorker extends Worker {
     // 3. sort and group all key/value pairs
     this.groupPercentage = (float) 1.0;
     
-    // 4. call the reduce and feed it with key/value pairs
+    // 4. call the reduce and feed it with key/value pairs. The iterator
+    // read next key/value pair on-demand
     KeyValueIterator kviterator = new KeyValueIterator(mapperOutputFiles);
     while(kviterator.continueNextKey()) {
       String key = kviterator.currentKey();
