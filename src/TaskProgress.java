@@ -5,15 +5,15 @@ public class TaskProgress implements Serializable {
 
   private float percentage;
 
-  private TaskStatus status;
+  private TaskMeta.TaskStatus status;
 
-  private TaskType type;
+  private TaskMeta.TaskType type;
 
   private long timestamp;
 
-  public TaskProgress(int taskID, TaskType type) {
+  public TaskProgress(int taskID, TaskMeta.TaskType type) {
     this.taskID = taskID;
-    this.status = TaskStatus.INIT;
+    this.status = TaskMeta.TaskStatus.INIT;
     this.type = type;
   }
 
@@ -25,11 +25,11 @@ public class TaskProgress implements Serializable {
     this.percentage = percentage;
   }
 
-  public TaskStatus getStatus() {
+  public TaskMeta.TaskStatus getStatus() {
     return status;
   }
 
-  public void setStatus(TaskStatus status) {
+  public void setStatus(TaskMeta.TaskStatus status) {
     this.status = status;
   }
 
@@ -49,7 +49,7 @@ public class TaskProgress implements Serializable {
     this.taskID = taskID;
   }
 
-  public TaskType getType() {
+  public TaskMeta.TaskType getType() {
     return this.type;
   }
 }

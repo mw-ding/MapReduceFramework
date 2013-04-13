@@ -28,7 +28,7 @@ public class ReducerWorker extends Worker {
 
   public ReducerWorker(int taskID, int order, String reducer, String oformater, String indir,
           String outdir, String taskTrackerServiceName) {
-    super(taskID, indir, outdir, taskTrackerServiceName, TaskType.REDUCER);
+    super(taskID, indir, outdir, taskTrackerServiceName, TaskMeta.TaskType.REDUCER);
 
     File outdirfile = new File(this.outputFile);
     outdirfile.mkdir();
@@ -73,12 +73,20 @@ public class ReducerWorker extends Worker {
    */
   private List<File> locateMapOutput() {
     try {
-      while (!mapStatusChecker.isAllMapperFinished(this.taskID)) {
+      MapStatusChecker.MapStatus res = mapStatusChecker.checkMapStatus(this.taskID);
+      while (res != MapStatusChecker.MapStatus.FINISHED) {
+        
+        if (res == MapStatusChecker.MapStatus.FAILED) {
+          System.exit(0);
+        }
+        
         try {
           Thread.sleep(this.SLEEP_CIRCLE);
         } catch (InterruptedException e) {
           e.printStackTrace();
         }
+        
+        res = mapStatusChecker.checkMapStatus(this.taskID);
       }
     } catch (RemoteException e) {
       e.printStackTrace();

@@ -4,6 +4,10 @@ import java.rmi.RemoteException;
 
 public interface MapStatusChecker extends Remote {
   
-  public boolean isAllMapperFinished(int tid) throws RemoteException;
+  public enum MapStatus {
+    INPROGRESS, FINISHED, FAILED
+  };
+  
+  public MapStatus checkMapStatus(int tid) throws RemoteException;
   
 }

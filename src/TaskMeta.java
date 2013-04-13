@@ -1,4 +1,14 @@
 public class TaskMeta {
+  
+  public enum TaskStatus {
+    INIT, INPROGRESS, FAILED, SUCCEED
+  }
+
+  public enum TaskType {
+    MAPPER, REDUCER
+  }
+
+  
   /* the id of the job to which this task belongs */
   private int jobID;
 

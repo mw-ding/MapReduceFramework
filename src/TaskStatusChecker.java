@@ -16,8 +16,8 @@ public class TaskStatusChecker implements Runnable {
       for (TaskProgress taskProgress : taskStatus.values()) {
         long curTime = System.currentTimeMillis();
         if ((curTime - taskProgress.getTimestamp() > ALIVE_CYCLE)
-                && taskProgress.getStatus() != TaskStatus.SUCCEED) {
-          taskProgress.setStatus(TaskStatus.FAILED);
+                && taskProgress.getStatus() != TaskMeta.TaskStatus.SUCCEED) {
+          taskProgress.setStatus(TaskMeta.TaskStatus.FAILED);
         }
       }
     }

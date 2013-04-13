@@ -21,7 +21,7 @@ public abstract class Worker {
   protected TaskProgress progress;
 
   public Worker(int taskID, String infile, String outfile, String taskTrackerServiceName,
-          TaskType type) {
+          TaskMeta.TaskType type) {
 
     this.taskID = taskID;
     this.outputFile = outfile;
@@ -61,10 +61,10 @@ public abstract class Worker {
 
   public void updateStatus() {
     synchronized (progress) {
-      if (progress.getStatus() != TaskStatus.SUCCEED) {
+      if (progress.getStatus() != TaskMeta.TaskStatus.SUCCEED) {
         try {
           progress.setPercentage(this.getPercentage());
-          progress.setStatus(TaskStatus.INPROGRESS);
+          progress.setStatus(TaskMeta.TaskStatus.INPROGRESS);
           progress.setTimestamp(System.currentTimeMillis());
           taskStatusUpdater.update(progress);
         } catch (RemoteException e) {
@@ -78,7 +78,7 @@ public abstract class Worker {
     synchronized (progress) {
       try {
         progress.setPercentage(this.getPercentage());
-        progress.setStatus(TaskStatus.SUCCEED);
+        progress.setStatus(TaskMeta.TaskStatus.SUCCEED);
         progress.setTimestamp(System.currentTimeMillis());
         taskStatusUpdater.update(progress);
       } catch (RemoteException e) {

@@ -102,10 +102,10 @@ public class TaskTracker {
           /* delete the job that has failed or succeeded */
           ArrayList<Integer> toDelete = new ArrayList<Integer>();
           for (int id : taskStatus.keySet()) {
-            if (taskStatus.get(id).getStatus() != TaskStatus.INPROGRESS) {
+            if (taskStatus.get(id).getStatus() != TaskMeta.TaskStatus.INPROGRESS) {
               toDelete.add(id);
               /* free slots */
-              if (taskStatus.get(id).getType() == TaskType.MAPPER)
+              if (taskStatus.get(id).getType() == TaskMeta.TaskType.MAPPER)
                 synchronized (mapperCounter) {
                   mapperCounter--;
                 }

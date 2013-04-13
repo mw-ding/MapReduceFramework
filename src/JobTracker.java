@@ -225,7 +225,7 @@ public class JobTracker {
       
       if (job.getStatus() == JobMeta.JobStatus.FAILED) {
         // this job has already failed
-        task.getTaskProgress().setStatus(TaskStatus.FAILED);
+        task.getTaskProgress().setStatus(TaskMeta.TaskStatus.FAILED);
       } else {
         return task;
       }
@@ -241,7 +241,7 @@ public class JobTracker {
       
       if (job.getStatus() == JobMeta.JobStatus.FAILED) {
         // this job has already failed;
-        task.getTaskProgress().setStatus(TaskStatus.FAILED);
+        task.getTaskProgress().setStatus(TaskMeta.TaskStatus.FAILED);
       } else {
         return task;
       }
@@ -288,7 +288,7 @@ public class JobTracker {
 
         if (res) {
           // if this task has been submitted to a tasktracker successfully
-          task.getTaskProgress().setStatus(TaskStatus.INPROGRESS);
+          task.getTaskProgress().setStatus(TaskMeta.TaskStatus.INPROGRESS);
         } else {
           // if this task is failed to be submitted, place it back to the queue
           if (task.isMapper()) {
@@ -377,7 +377,7 @@ public class JobTracker {
               newjob.getPartitionerClassName(), newjob.getInputFormatClassName(),
               jobMapperOutputDirPath, newjob.getReducerNum());
       TaskMeta mtask = new TaskMeta(taskid, newjob.getJobId(), minfo, new TaskProgress(taskid,
-              TaskType.MAPPER));
+              TaskMeta.TaskType.MAPPER));
 
       mapTasks.put(taskid, mtask);
       newjob.addMapperTask(taskid);
@@ -391,7 +391,7 @@ public class JobTracker {
               newjob.getReducerClassName(), newjob.getOutputFormatClassName(),
               newjob.getOutputPath());
       TaskMeta rtask = new TaskMeta(taskid, newjob.getJobId(), rinfo, new TaskProgress(taskid,
-              TaskType.REDUCER));
+              TaskMeta.TaskType.REDUCER));
 
       reduceTasks.put(taskid, rtask);
       newjob.addReducerTask(taskid);
@@ -415,28 +415,28 @@ public class JobTracker {
     }
   }
 
-  public boolean isAllMapperFinished(int tid) {
+  public MapStatusChecker.MapStatus checkMapStatus(int tid) {
     TaskMeta task = this.reduceTasks.get(tid);
 
     if (task == null) {
-      return false;
+      return MapStatusChecker.MapStatus.INPROGRESS;
     }
 
     int jid = task.getJobID();
 
     JobMeta job = this.jobs.get(jid);
 
-    if (job == null) {
-      return false;
+    if (job == null || job.getStatus() == JobMeta.JobStatus.FAILED) {
+      return MapStatusChecker.MapStatus.FAILED;
     }
 
     Set<Integer> mapTasks = job.getMapTasks();
     for (int mid : mapTasks) {
       if (this.mapTasks.containsKey(mid) && !this.mapTasks.get(mid).isDone())
-        return false;
+        return MapStatusChecker.MapStatus.INPROGRESS;
     }
 
-    return true;
+    return MapStatusChecker.MapStatus.FINISHED;
   }
 
   public void controlConsole() {

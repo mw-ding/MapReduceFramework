@@ -77,7 +77,7 @@ public class JobTrackerServices extends UnicastRemoteObject implements StatusUpd
 
       task.setTaskProgress(taskProg);
       /* do handling when a task finishes */
-      if (taskProg.getStatus() == TaskStatus.SUCCEED) {
+      if (taskProg.getStatus() == TaskMeta.TaskStatus.SUCCEED) {
         // 1. remove the task from the tasktracker
         this.jobTracker.getTaskTracker(taskTrackerPkg.getTaskTrackerName()).removeTask(taskid);
         // 2. report to the job this task belongs to
@@ -89,7 +89,7 @@ public class JobTrackerServices extends UnicastRemoteObject implements StatusUpd
         }
         // 4. do task scheduling
         this.jobTracker.distributeTasks();
-      } else if (taskProg.getStatus() == TaskStatus.FAILED) {
+      } else if (taskProg.getStatus() == TaskMeta.TaskStatus.FAILED) {
         System.out.println("Task " + taskProg.getTaskID() + " failed.");
         task.increaseAttempts();
         if (task.getAttempts() <= TaskMeta.MAX_ATTEMPTS) {
@@ -133,8 +133,8 @@ public class JobTrackerServices extends UnicastRemoteObject implements StatusUpd
   }
 
   @Override
-  public boolean isAllMapperFinished(int tid) throws RemoteException {
-    boolean result = this.jobTracker.isAllMapperFinished(tid);
+  public MapStatusChecker.MapStatus checkMapStatus(int tid) throws RemoteException {
+    MapStatusChecker.MapStatus result = this.jobTracker.checkMapStatus(tid);
     return result;
   }
 

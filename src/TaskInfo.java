@@ -8,9 +8,9 @@ public abstract class TaskInfo implements Serializable {
   private int taskID;
 
   /* worker type, mapper or reducer */
-  private TaskType type;
+  private TaskMeta.TaskType type;
 
-  public TaskInfo(int jid, int tid, TaskType type) {
+  public TaskInfo(int jid, int tid, TaskMeta.TaskType type) {
     this.jobID = jid;
     this.taskID = tid;
     this.type = type;
@@ -24,7 +24,7 @@ public abstract class TaskInfo implements Serializable {
     return taskID;
   }
 
-  public TaskType getType() {
+  public TaskMeta.TaskType getType() {
     return type;
   }
 
