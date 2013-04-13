@@ -92,8 +92,7 @@ public class JobTracker {
 
             }));
 
-    this.scheduler = new DefaultTaskScheduler(this.tasktrackers, this.mapTasksQueue,
-            this.reduceTasksQueue);
+    this.scheduler = new DefaultTaskScheduler(this);
 
     this.services = new JobTrackerServices(this);
     this.rmiReg = LocateRegistry.getRegistry(rh, rp);
@@ -217,6 +216,38 @@ public class JobTracker {
 
   public Registry getRMIRegistry() {
     return rmiReg;
+  }
+  
+  public TaskMeta getNextMapperTask() {
+    while (!this.mapTasksQueue.isEmpty()) {
+      TaskMeta task = this.mapTasksQueue.poll();
+      JobMeta job = this.jobs.get(task.getJobID());
+      
+      if (job.getStatus() == JobMeta.JobStatus.FAILED) {
+        // this job has already failed
+        task.getTaskProgress().setStatus(TaskStatus.FAILED);
+      } else {
+        return task;
+      }
+    }
+    
+    return null;
+  }
+  
+  public TaskMeta getNextReducerTask() {
+    while (!this.reduceTasksQueue.isEmpty()) {
+      TaskMeta task = this.reduceTasksQueue.poll();
+      JobMeta job = this.jobs.get(task.getJobID());
+      
+      if (job.getStatus() == JobMeta.JobStatus.FAILED) {
+        // this job has already failed;
+        task.getTaskProgress().setStatus(TaskStatus.FAILED);
+      } else {
+        return task;
+      }
+    }
+    
+    return null;
   }
 
   /**
@@ -487,18 +518,18 @@ public class JobTracker {
             + job.getFinishedReducerNumber() + "/" + job.getReduceTasks().size());
     System.out.println("\nMap Tasks:");
     Set<Integer> maps = job.getMapTasks();
-    System.out.println("TaskID\tTaskStatus\tTaskCompleteness");
+    System.out.println("TaskID\tAttempts\tTaskStatus\tTaskCompleteness");
     for (int tid : maps) {
       TaskMeta task = this.mapTasks.get(tid);
-      System.out.println(tid + "\t" + task.getTaskProgress().getStatus() + "\t"
+      System.out.println(tid + "\t" + task.getAttempts() + "\t" + task.getTaskProgress().getStatus() + "\t"
               + task.getTaskProgress().getPercentage());
     }
     System.out.println("\nReduce Tasks:");
-    System.out.println("TaskID\tTaskStatus\tTaskCompleteness");
+    System.out.println("TaskID\tAttempts\tTaskStatus\tTaskCompleteness");
     Set<Integer> reduces = job.getReduceTasks();
     for (int tid : reduces) {
       TaskMeta task = this.reduceTasks.get(tid);
-      System.out.println(tid + "\t" + task.getTaskProgress().getStatus() + "\t"
+      System.out.println(tid + "\t" + task.getAttempts() + "\t" + task.getTaskProgress().getStatus() + "\t"
               + task.getTaskProgress().getPercentage());
     }
   }

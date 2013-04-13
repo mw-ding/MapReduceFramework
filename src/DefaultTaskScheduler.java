@@ -7,15 +7,11 @@ public class DefaultTaskScheduler implements TaskScheduler {
   // find the available slots information
   private Map<String, TaskTrackerMeta> taskTrackers;
 
-  private Queue<TaskMeta> mapTaskQueue;
+  private JobTracker jobTracker;
 
-  private Queue<TaskMeta> reduceTaskQueue;
-
-  public DefaultTaskScheduler(Map<String, TaskTrackerMeta> tt, Queue<TaskMeta> mq,
-          Queue<TaskMeta> rq) {
-    this.taskTrackers = tt;
-    this.mapTaskQueue = mq;
-    this.reduceTaskQueue = rq;
+  public DefaultTaskScheduler(JobTracker tracker) {
+    this.jobTracker = tracker;
+    this.taskTrackers = this.jobTracker.getTaskTrackers();
   }
 
   @Override
@@ -27,21 +23,21 @@ public class DefaultTaskScheduler implements TaskScheduler {
 
       synchronized (tasktracker) {
         // fill up all the mapper slots
-        if (tasktracker.getNumOfMapperSlots() > 0 && !this.mapTaskQueue.isEmpty()) {
+        if (tasktracker.getNumOfMapperSlots() > 0) {
           int slotnum = tasktracker.getNumOfMapperSlots();
 
-          for (int i = 0; i < slotnum && !this.mapTaskQueue.isEmpty(); i++) {
-            TaskMeta task = this.mapTaskQueue.poll();
+          TaskMeta task = null;
+          for (int i = 0; i < slotnum && (task = this.jobTracker.getNextMapperTask()) != null; i++) {
             result.put(task.getTaskID(), tasktracker.getTaskTrackerName());
           }
         }
 
         // fill up all the reducer slots
-        if (tasktracker.getNumOfReducerSlots() > 0 && !this.reduceTaskQueue.isEmpty()) {
+        if (tasktracker.getNumOfReducerSlots() > 0) {
           int slotnum = tasktracker.getNumOfReducerSlots();
-          
-          for (int i = 0; i < slotnum && !this.reduceTaskQueue.isEmpty(); i++) {
-            TaskMeta task = this.reduceTaskQueue.poll();
+
+          TaskMeta task = null;
+          for (int i = 0; i < slotnum && (task = this.jobTracker.getNextReducerTask()) != null; i++) {
             result.put(task.getTaskID(), tasktracker.getTaskTrackerName());
           }
         }
