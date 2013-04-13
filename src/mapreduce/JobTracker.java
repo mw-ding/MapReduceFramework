@@ -61,7 +61,7 @@ public class JobTracker {
   private int currentMaxTaskId;
 
   // the RMI registry
-  private Registry rmiReg;
+//  private Registry rmiReg;
 
   /*****************************************/
 
@@ -103,8 +103,8 @@ public class JobTracker {
     this.services = new JobTrackerServices(this);
     
     // register the RMI service this jobtracker provides
-    this.rmiReg = LocateRegistry.getRegistry(rh, rp);
-    this.rmiReg.rebind(JOBTRACKER_SERVICE_NAME, this.services);
+    Registry rmiReg = LocateRegistry.getRegistry(rh, rp);
+    rmiReg.rebind(JOBTRACKER_SERVICE_NAME, this.services);
     
     ScheduledExecutorService serviceSche = Executors.newScheduledThreadPool(SCHEDULER_POOL_SIZE);
 
@@ -236,9 +236,9 @@ public class JobTracker {
    * get the RMI registry
    * @return
    */
-  public Registry getRMIRegistry() {
-    return rmiReg;
-  }
+//  public Registry getRMIRegistry() {
+//    return rmiReg;
+//  }
   
   /**
    * get next mapper task. First, check whether the job, to which

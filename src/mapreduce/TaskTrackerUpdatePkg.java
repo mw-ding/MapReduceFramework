@@ -1,5 +1,6 @@
 package mapreduce;
 import java.io.Serializable;
+import java.net.UnknownHostException;
 import java.util.List;
 
 /**
@@ -22,6 +23,10 @@ public class TaskTrackerUpdatePkg implements Serializable {
 	
 	/* the service name of task tracker: where to contact of necessary */
 	private String serviceName;
+	
+	private String rmiHostName;
+	
+	private int rmiPort;
 
 	/**
 	 * constructor method 
@@ -32,12 +37,19 @@ public class TaskTrackerUpdatePkg implements Serializable {
 	 * @param taskStatus
 	 */
 	public TaskTrackerUpdatePkg(String taskTrackerName, int numOfMapperSlots,
-			int numOfReducerSlots, String sn, List<TaskProgress> taskStatus) {
+			int numOfReducerSlots, String sn, List<TaskProgress> taskStatus, int rmiport) {
 		this.taskTrackerName = taskTrackerName;
 		this.numOfMapperSlots = numOfMapperSlots;
 		this.numOfReducerSlots = numOfReducerSlots;
 		this.taskStatus = taskStatus;
 		this.serviceName = sn;
+		
+		try {
+      this.rmiHostName = java.net.InetAddress.getLocalHost().getHostName();
+    } catch (UnknownHostException e) {
+      e.printStackTrace();
+    }
+		this.rmiPort = rmiport;
 	}
 
 	public int getNumOfMapperSlots() {
@@ -59,4 +71,12 @@ public class TaskTrackerUpdatePkg implements Serializable {
 	public String getServiceName() {
 		return serviceName;
 	}
+	
+  public String getRmiHostName() {
+    return rmiHostName;
+  }
+
+  public int getRmiPort() {
+    return rmiPort;
+  }
 }
