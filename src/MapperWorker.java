@@ -93,13 +93,13 @@ public class MapperWorker extends Worker {
     /* do cleanup */
     mapper.cleanup();
     /* report to task tracker that this task is done */
-    this.updateStatusSucceed(); 
+    this.updateStatusSucceed();
     System.exit(0);
   }
 
   protected float getPercentage() {
     try {
-      return (float) (offset - this.inputFormat.raf.getFilePointer()) / this.blockSize;
+      return (float) (this.inputFormat.raf.getFilePointer() - offset) / this.blockSize;
     } catch (IOException e) {
       e.printStackTrace();
     }
