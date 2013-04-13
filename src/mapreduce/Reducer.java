@@ -1,5 +1,5 @@
 package mapreduce;
-import java.util.List;
+import java.util.Iterator;
 
 
 public abstract class Reducer {
@@ -20,5 +20,5 @@ public abstract class Reducer {
 		
 	}
 	
-	public abstract void reduce(String key, List<String> values, Outputer out);
+	public abstract void reduce(String key, Iterator<String> values, Outputer out);
 }

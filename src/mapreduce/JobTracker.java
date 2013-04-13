@@ -61,9 +61,6 @@ public class JobTracker {
   // the maximum assigned task id currently
   private int currentMaxTaskId;
 
-  // the RMI registry
-  private Registry rmiReg;
-
   /*****************************************/
 
   public JobTracker(String rh, int rp) throws RemoteException {
@@ -104,8 +101,8 @@ public class JobTracker {
     this.services = new JobTrackerServices(this);
 
     // register the RMI service this jobtracker provides
-    this.rmiReg = LocateRegistry.getRegistry(rh, rp);
-    this.rmiReg.rebind(JOBTRACKER_SERVICE_NAME, this.services);
+    Registry rmiReg = LocateRegistry.getRegistry(rh, rp);
+    rmiReg.rebind(JOBTRACKER_SERVICE_NAME, this.services);
 
     ScheduledExecutorService serviceSche = Executors.newScheduledThreadPool(SCHEDULER_POOL_SIZE);
 
@@ -233,15 +230,6 @@ public class JobTracker {
   public int requestTaskId() {
     int result = (++this.currentMaxTaskId);
     return result;
-  }
-
-  /**
-   * get the RMI registry
-   * 
-   * @return
-   */
-  public Registry getRMIRegistry() {
-    return rmiReg;
   }
 
   /**
@@ -615,14 +603,21 @@ public class JobTracker {
     }
   }
 
-  // TODO : read the tmp directory dir from config file
+  /**
+   * get the system's temporary dir which holds mapper's output
+   * @return
+   */
   public static String getSystemTempDir() {
-
-    File tmp = new File("tmp");
-    if (!tmp.exists()) {
-      tmp.mkdir();
+    String res = Utility.getParam("SYSTEM_TEMP_DIR");
+    if (res.compareTo("") == 0)
+      res = System.getProperty("java.io.tmpdir");
+    
+    File tmpdir = new File(res);
+    if (!tmpdir.exists()) {
+      tmpdir.mkdirs();
     }
-    return "tmp";
+
+    return res;
   }
 
   public static void main(String[] args) {

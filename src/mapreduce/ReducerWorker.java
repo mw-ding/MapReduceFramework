@@ -9,15 +9,142 @@ import java.util.*;
 import java.util.Map.Entry;
 
 public class ReducerWorker extends Worker {
+  
+  private final int SLEEP_CYCLE;
+  
+  // the stream for merge sort in reducer
+  private class MergeStream {
+    
+    private Record next;
+    
+    private Scanner scanner;
+    
+    public MergeStream(Scanner s) {
+      this.scanner = s;
+      this.next = null;
+    }
+    
+    public void tryFetchNext() {
+      if (this.scanner.hasNext()) {
+        String line = this.scanner.nextLine();
+        String[] fields = line.split("\t");
+        this.next = new Record(fields[0], fields[1]);
+      } else {
+        this.next = null;
+      }
+    }
+    
+    public Record getNext() {
+      return this.next;
+    }
+  }
+  
+  // the key/value iterator for reduce()
+  private class KeyValueIterator implements Iterator<String> {
+    
+    private PriorityQueue<MergeStream> streams;
+    
+    private String curKey;
+    
+    public KeyValueIterator(List<File> flist) {
+      if (flist == null)
+        return ;
+      
+      // initialize the heap
+      int size = flist.size();
+      this.streams = new PriorityQueue<MergeStream>(size, new Comparator<MergeStream>() {
 
+        @Override
+        public int compare(MergeStream stream1, MergeStream stream2) {
+          return stream1.getNext().key.compareTo(stream2.getNext().key);
+        }
+        
+      });
+      
+      // prepare all input stream
+      for (File f : flist) {
+        try {
+          Scanner newscanner = new Scanner(new FileInputStream(f));
+          MergeStream newstream = new MergeStream(newscanner);
+          
+          // try to fetch the first line
+          newstream.tryFetchNext();
+          
+          // if failed to fetch the first line, do not add
+          // it into the queue; otherwise, add it in.
+          if (newstream.getNext() != null) {
+            this.streams.add(newstream);
+          }
+          
+        } catch (FileNotFoundException e) {
+          e.printStackTrace();
+        }
+      }
+      
+      this.curKey = null;
+    }
+
+    @Override
+    public boolean hasNext() {
+      // if current key is the same with next key/value pairt, then return true;
+      // otherwise, return false;
+      return (!this.streams.isEmpty() && this.streams.peek().getNext().key.compareTo(this.curKey) == 0);
+    }
+
+    @Override
+    public String next() {
+      if (!this.streams.isEmpty()) {
+        MergeStream curstream = this.streams.poll();
+        String result = curstream.getNext().value;
+
+        // try to fetch next record from this stream;
+        // it the next record exists, insert this stream back
+        // to the heap; otherwise, drop this stream, because
+        // it reaches the end
+        curstream.tryFetchNext();
+        if (curstream.getNext() != null) {
+          this.streams.add(curstream);
+        }
+
+        return result;
+      } else {
+        return null;
+      }
+    }
+
+    @Override
+    public void remove() {
+      // do not support remove operation
+    }
+    
+    public String currentKey() {
+      return this.curKey;
+    }
+    
+    // continue the iteration to the next key
+    public boolean continueNextKey() {
+      if (this.streams.isEmpty()) {
+        // no more keys any more, stop read key/value pair right here
+        return false;
+      }
+      else {
+        // set curKey to nextKey to allow next iteration
+        this.curKey = this.streams.peek().getNext().key;
+        return true;
+      }
+    }
+  }
+
+  // the order number of this reduce task among all reducer task
   private int orderId;
 
+  // the output formatter for the reducer
   private ReducerOutputer outputer;
 
-  private OutputFormat formater;
-
+  // the reducer class
   private Reducer reducer;
 
+  // to check whether all mappers finish
   private MapStatusChecker mapStatusChecker;
 
   private float copyPercentage;
@@ -26,21 +153,20 @@ public class ReducerWorker extends Worker {
 
   private float reducePercentage;
 
-  private final int SLEEP_CYCLE;
-
   public ReducerWorker(int taskID, int order, String reducer, String oformater, String indir,
           String outdir, String taskTrackerServiceName, int rPort) {
     super(taskID, indir, outdir, taskTrackerServiceName, TaskMeta.TaskType.REDUCER, rPort);
 
+    // prepare the output dir
     File outdirfile = new File(this.outputFile);
     outdirfile.mkdir();
 
     this.orderId = order;
     try {
       this.reducer = (Reducer) Class.forName(reducer).newInstance();
-      this.formater = (OutputFormat) Class.forName(oformater).newInstance();
+      OutputFormat formater = (OutputFormat) Class.forName(oformater).newInstance();
       this.outputer = new ReducerOutputer(this.outputFile + File.separator + Outputer.defaultName
-              + this.orderId, this.formater);
+              + this.orderId, formater);
     } catch (InstantiationException e) {
       e.printStackTrace();
     } catch (IllegalAccessException e) {
@@ -66,6 +192,7 @@ public class ReducerWorker extends Worker {
     this.copyPercentage = 0;
     this.groupPercentage = 0;
     this.reducePercentage = 0;
+    
     SLEEP_CYCLE = Integer.parseInt(Utility.getParam("REDUCER_CHECK_MAPPER_CYCLE"));
   }
 
@@ -76,6 +203,7 @@ public class ReducerWorker extends Worker {
    */
   private List<File> locateMapOutput() {
     try {
+      // wait until all mappers finish
       MapStatusChecker.MapStatus res = mapStatusChecker.checkMapStatus(this.taskID);
       while (res != MapStatusChecker.MapStatus.FINISHED) {
 
@@ -96,12 +224,14 @@ public class ReducerWorker extends Worker {
     }
     List<File> result = new ArrayList<File>();
 
+    // enter the dir which contains all the output of mappers
     File indirfile = new File(this.inputFile);
     if (!indirfile.isDirectory()) {
       System.err.println("Invalid Reducer input dir.");
       return result;
     }
 
+    // locate the output splits for current reducer
     File[] mapOutputDirs = indirfile.listFiles();
     String filename = Outputer.defaultName + this.orderId;
     for (File mapOutputDir : mapOutputDirs) {
@@ -116,59 +246,14 @@ public class ReducerWorker extends Worker {
    * 
    * @return
    */
-  private List<Record> copy() {
-    List<Record> result = new ArrayList<Record>();
-    List<File> mapOutput = this.locateMapOutput();
-
-    final float csize = mapOutput.size();
-    float cfinished = (float) 0.0;
-
-    for (File f : mapOutput) {
-      try {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(f)));
-
-        String line = null;
-        while ((line = reader.readLine()) != null) {
-          String[] fields = line.split(Outputer.separator);
-          result.add(new Record(fields[0], fields[1]));
-        }
-
-      } catch (FileNotFoundException e) {
-        e.printStackTrace();
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
-
-      cfinished += (float) 1.0;
-      this.copyPercentage = cfinished / csize;
-    }
-
+  private List<File> copy() {
+    // in current scenario, all we need to do in copy phase is
+    // locating the temporary output files from mappers, which
+    // could be done almost at once
+    List<File> result = this.locateMapOutput();
+    
     this.copyPercentage = (float) 1.0;
-    return result;
-  }
-
-  // TODO: the merge sort
-  private Map<String, List<String>> group(List<Record> records) {
-    // use tree map to make sure that the all the result are sorted by key
-    Map<String, List<String>> result = new TreeMap<String, List<String>>();
-
-    final float lsize = records.size();
-    float lfinished = (float) 0.0;
-
-    for (Record record : records) {
-      String key = record.key;
-
-      if (!result.containsKey(key)) {
-        result.put(key, new ArrayList<String>());
-      }
-
-      result.get(key).add(record.value);
-
-      lfinished += (float) 1.0;
-      this.groupPercentage = lfinished / lsize;
-    }
-
-    this.groupPercentage = (float) 1.0;
+    
     return result;
   }
 
@@ -181,31 +266,32 @@ public class ReducerWorker extends Worker {
     this.reducer.setup();
 
     // 2. copy key/value pairs from mappers
-    List<Record> unsorted = this.copy();
+    List<File> mapperOutputFiles = this.copy();
 
     // 3. sort and group all key/value pairs
-    Map<String, List<String>> grouped = this.group(unsorted);
     this.groupPercentage = (float) 1.0;
-
-    try {
-      // 4. execute the reduce function
-      final float gsize = grouped.size();
-      float gfinished = (float) 0.0;
-      for (Entry<String, List<String>> entry : grouped.entrySet()) {
-        this.reducer.reduce(entry.getKey(), entry.getValue(), this.outputer);
-
-        gfinished += 1.0;
-        this.reducePercentage = gfinished / gsize;
+    
+    // 4. call the reduce and feed it with key/value pairs. The iterator
+    // read next key/value pair on-demand
+    KeyValueIterator kviterator = new KeyValueIterator(mapperOutputFiles);
+    while(kviterator.continueNextKey()) {
+      String key = kviterator.currentKey();
+      System.out.println("reduce framework key : " + key );
+      try {
+        this.reducer.reduce(key, kviterator, this.outputer);
+      } catch (RuntimeException e) {
+        e.printStackTrace();
+        System.exit(0);
       }
-      this.reducePercentage = (float) 1.0;
-
-      // 5. close the outputer
-      this.outputer.close();
-    }/* if runtime exception happens in user's code, exit jvm */
-    catch (RuntimeException e) {
-      e.printStackTrace();
-      System.exit(0);
+      
+      // skip to next key, if the user does not fetch all values
+      while(kviterator.hasNext()) {
+        kviterator.next();
+      }
     }
+    
+    // 5. close the outputer
+    this.outputer.close();
 
     // 6. do cleanup
     this.reducer.cleanup();

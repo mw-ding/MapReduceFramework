@@ -2,6 +2,8 @@ package mapreduce;
 
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.List;
 import java.util.Map;
@@ -40,8 +42,11 @@ public class JobTrackerServices extends UnicastRemoteObject implements StatusUpd
     if (ttmeta == null) {
       // register this tasktracker first
       try {
-        TaskLauncher taskLauncher = (TaskLauncher) this.jobTracker.getRMIRegistry().lookup(
-                taskTrackerPkg.getServiceName());
+        String rhost = taskTrackerPkg.getRmiHostName();
+        int rport = taskTrackerPkg.getRmiPort();
+        Registry rmiReg = LocateRegistry.getRegistry(rhost, rport);
+        
+        TaskLauncher taskLauncher = (TaskLauncher) rmiReg.lookup(taskTrackerPkg.getServiceName());
         ttmeta = new TaskTrackerMeta(taskTrackerPkg.getTaskTrackerName(), taskLauncher);
         if (this.jobTracker.registerTaskTracker(ttmeta)) {
           System.err.println("Register successfully");

@@ -90,7 +90,6 @@ public abstract class Worker {
     thread.setDaemon(true);
     schExec.scheduleAtFixedRate(thread, 0, Integer.parseInt(Utility.getParam("HEART_BEAT_PERIOD")),
             TimeUnit.SECONDS);
-    ;
   }
 
   /**
