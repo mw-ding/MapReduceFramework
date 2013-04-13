@@ -93,7 +93,7 @@ public class MapperWorker extends Worker {
     /* do cleanup */
     mapper.cleanup();
     /* report to task tracker that this task is done */
-    this.updateStatusSucceed();
+    this.updateStatusSucceed(); 
     System.exit(0);
   }
 
