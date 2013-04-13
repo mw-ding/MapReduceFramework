@@ -20,7 +20,7 @@ public class Main {
     String output = args[1];
     JobConf jobConf = new JobConf();
     jobConf.setInputPath(input);
-    jobConf.setBlockSize(1000);
+    jobConf.setBlockSize(100000);
     jobConf.setJobName("degree count");
     jobConf.setMapperClassName("example.degreecount.DegreeCountMapper");
     jobConf.setReducerClassName("example.degreecount.DegreeCountReducer");
