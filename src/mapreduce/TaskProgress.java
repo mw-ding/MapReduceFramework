@@ -1,13 +1,22 @@
 package mapreduce;
+
 import java.io.Serializable;
 
 public class TaskProgress implements Serializable {
+
+  /* task id */
   private int taskID;
 
+  /* percentage of work already done */
   private float percentage;
 
+  /* status of task */
   private TaskMeta.TaskStatus status;
 
+  /*
+   * this is mapper or reducer, need this field to determine whether to free mapper or reducer slot
+   * when work is done
+   */
   private TaskMeta.TaskType type;
 
   private long timestamp;

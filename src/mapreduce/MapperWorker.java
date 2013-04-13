@@ -17,18 +17,38 @@ import java.util.Collections;
 
 public class MapperWorker extends Worker {
 
+  /* the block offset */
   private long offset;
 
+  /* the block size */
   private int blockSize;
 
+  /* number of reducer, needed to partition */
   private int reducerNum;
 
+  /* how to output the mapper result */
   private MapperOutputer outputer;
 
+  /* the mapper class */
   private Mapper mapper;
 
+  /* how to parse the input file to key-value pair */
   private InputFormat inputFormat;
 
+  /**
+   * constructor method
+   * @param taskID
+   * @param infile
+   * @param offset
+   * @param blockSize
+   * @param outfile
+   * @param mapper
+   * @param partitioner
+   * @param inputFormat
+   * @param numReducer
+   * @param taskTrackerServiceName
+   *        : where to contact the task tracker 
+   */
   public MapperWorker(int taskID, String infile, long offset, int blockSize, String outfile,
           String mapper, String partitioner, String inputFormat, int numReducer,
           String taskTrackerServiceName) {
@@ -85,10 +105,8 @@ public class MapperWorker extends Worker {
     }/* if runtime exception happens in user's code, exit jvm */
     catch (RuntimeException e) {
       e.printStackTrace();
-      System.out.println("the jvm is going to shut down");
       System.exit(0);
     }
-    System.out.println("the jvm should have been shut down");
     /* sort the files */
     this.sort();
     /* do cleanup */
@@ -97,17 +115,24 @@ public class MapperWorker extends Worker {
     this.updateStatusSucceed();
     System.exit(0);
   }
-
+  
+  /**
+   * @return percentage of work already done
+   */
   protected float getPercentage() {
     try {
+      /* the percentage of work is: bytes already processed / block size */
       return (float) (this.inputFormat.raf.getFilePointer() - offset) / this.blockSize;
     } catch (IOException e) {
       e.printStackTrace();
     }
     return 0;
   }
-
+  /**
+   * in-memory sort the temp files produced by mappers
+   */
   private void sort() {
+    /* for each partition */
     for (int i = 0; i < this.reducerNum; i++) {
       ArrayList<Record> list = new ArrayList<Record>();
       String filename = outputer.outputDir + System.getProperty("file.separator")
@@ -167,8 +192,7 @@ public class MapperWorker extends Worker {
       System.out.println("Illegal arguments");
     }
     int taskID = Integer.parseInt(args[0]);
-
-    // for test
+    
     try {
       PrintStream out = new PrintStream(new FileOutputStream(new File(
               Utility.getParam("MAPPER_STANDARD_OUT_REDIRECT") + taskID)));

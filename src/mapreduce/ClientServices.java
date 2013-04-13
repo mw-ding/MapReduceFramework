@@ -2,6 +2,9 @@ package mapreduce;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 
+/**
+ *  this service is used to submit job to client, then client submit this job to job tracker
+ *  */
 public class ClientServices extends UnicastRemoteObject implements ClientJobSubmitter {
 
   private JobClient jobClient;

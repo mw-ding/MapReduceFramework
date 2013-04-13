@@ -13,16 +13,25 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * task tracker 
+ *
+ */
 public class TaskTracker {
 
+  /* the service name provided by the task tracker */
   public static String TASKTRACKER_SERVICE_NAME;
 
+  /* the name of the task tracker */
   private String taskTrackerName;
 
+  /* the numebr of running mappers */
   public Integer mapperCounter;
 
+  /* the number of running reducers */
   public Integer reducerCounter;
 
+  /* the service from job tracker, used to*/
   private StatusUpdater jobTrackerStatusUpdater;
 
   private HashMap<Integer, TaskProgress> taskStatus;
@@ -105,6 +114,7 @@ public class TaskTracker {
           for (int id : taskStatus.keySet()) {
             if (taskStatus.get(id).getStatus() != TaskMeta.TaskStatus.INPROGRESS) {
               toDelete.add(id);
+              
               /* free slots */
               if (taskStatus.get(id).getType() == TaskMeta.TaskType.MAPPER)
                 synchronized (mapperCounter) {
@@ -116,6 +126,7 @@ public class TaskTracker {
                 }
             }
           }
+          /* delete task status */
           for (int id : toDelete) {
             taskStatus.remove(id);
           }
@@ -141,7 +152,8 @@ public class TaskTracker {
     });
     taskStatusUpdater.setDaemon(true);
     /* periodically send status progress to job tracker */
-    ScheduledExecutorService schExec = Executors.newScheduledThreadPool(8);
+    int poolSize = Integer.parseInt(Utility.getParam("THREAD_POOL_SIZE"));
+    ScheduledExecutorService schExec = Executors.newScheduledThreadPool(poolSize);
     ScheduledFuture<?> schFutureChecker = schExec.scheduleAtFixedRate(taskStatusChecker, 0, HEART_BEAT_PERIOD,
             TimeUnit.SECONDS);
     ScheduledFuture<?> schFutureUpdater = schExec.scheduleAtFixedRate(taskStatusUpdater, 0, HEART_BEAT_PERIOD,

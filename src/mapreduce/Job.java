@@ -6,7 +6,8 @@ import java.rmi.registry.Registry;
 
 public class Job {
   private JobConf jobConf;
-
+  
+  /* used to submit the job to client */
   private ClientJobSubmitter cs;
 
   public Job(JobConf jobConf) {
@@ -22,7 +23,8 @@ public class Job {
       e.printStackTrace();
     }
   }
-
+  
+  /* submit job to client */
   public void run() {
     try {
       cs.submitJob(jobConf);
