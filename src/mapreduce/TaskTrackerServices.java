@@ -56,7 +56,7 @@ public class TaskTrackerServices extends UnicastRemoteObject implements TaskLaun
               String.valueOf(mapperTaskInfo.getBlockSize()), mapperTaskInfo.getOutputPath(),
               mapperTaskInfo.getMapper(), mapperTaskInfo.getPartitioner(),
               mapperTaskInfo.getInputFormat(), String.valueOf(mapperTaskInfo.getReducerNum()),
-              taskTracker.getTaskTrackerName() };
+              taskTracker.getTaskTrackerName(), String.valueOf(taskTracker.getRPort()) };
           try {
             Utility.startJavaProcess(args, taskInfo.getJobID());
           } catch (Exception e) {
@@ -84,7 +84,8 @@ public class TaskTrackerServices extends UnicastRemoteObject implements TaskLaun
               String.valueOf(reducerTaskInfo.getTaskID()),
               String.valueOf(reducerTaskInfo.getOrderId()), reducerTaskInfo.getReducer(),
               reducerTaskInfo.getOutputFormat(), reducerTaskInfo.getInputPath(),
-              reducerTaskInfo.getOutputPath(), taskTracker.getTaskTrackerName() };
+              reducerTaskInfo.getOutputPath(), taskTracker.getTaskTrackerName(),
+              String.valueOf(taskTracker.getRPort()) };
           try {
             Utility.startJavaProcess(args, taskInfo.getJobID());
           } catch (Exception e) {

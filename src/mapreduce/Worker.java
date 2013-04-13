@@ -1,5 +1,7 @@
 package mapreduce;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -42,7 +44,7 @@ public abstract class Worker {
    * @param type
    */
   public Worker(int taskID, String infile, String outfile, String taskTrackerServiceName,
-          TaskMeta.TaskType type) {
+          TaskMeta.TaskType type, int rPort) {
 
     this.taskID = taskID;
     this.outputFile = outfile;
@@ -50,11 +52,15 @@ public abstract class Worker {
     this.progress = new TaskProgress(this.taskID, type);
 
     /* get the task tracker status updater from rmi */
-    String registryHostName = Utility.getParam("REGISTRY_HOST");
-    int registryPort = Integer.parseInt(Utility.getParam("REGISTRY_PORT"));
+    String registryHostName = null;
+    try {
+      registryHostName = InetAddress.getLocalHost().getHostName();
+    } catch (UnknownHostException e1) {
+      e1.printStackTrace();
+    }
 
     try {
-      Registry reg = LocateRegistry.getRegistry(registryHostName, registryPort);
+      Registry reg = LocateRegistry.getRegistry(registryHostName, rPort);
       taskStatusUpdater = (StatusUpdater) reg.lookup(taskTrackerServiceName);
     } catch (RemoteException e) {
       e.printStackTrace();

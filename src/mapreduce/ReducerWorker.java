@@ -29,8 +29,8 @@ public class ReducerWorker extends Worker {
   private final int SLEEP_CYCLE;
 
   public ReducerWorker(int taskID, int order, String reducer, String oformater, String indir,
-          String outdir, String taskTrackerServiceName) {
-    super(taskID, indir, outdir, taskTrackerServiceName, TaskMeta.TaskType.REDUCER);
+          String outdir, String taskTrackerServiceName, int rPort) {
+    super(taskID, indir, outdir, taskTrackerServiceName, TaskMeta.TaskType.REDUCER, rPort);
 
     File outdirfile = new File(this.outputFile);
     outdirfile.mkdir();
@@ -221,7 +221,7 @@ public class ReducerWorker extends Worker {
   }
 
   public static void main(String[] args) {
-    if (args.length != 7) {
+    if (args.length != 8) {
       System.out.println("Illegal arguments");
     }
     int taskID = Integer.parseInt(args[0]);
@@ -244,8 +244,9 @@ public class ReducerWorker extends Worker {
     String indir = args[4];
     String outdir = args[5];
     String taskTrackerServiceName = args[6];
+    int rPort = Integer.parseInt(args[7]);
     ReducerWorker worker = new ReducerWorker(taskID, order, reducer, outputFormat, indir, outdir,
-            taskTrackerServiceName);
+            taskTrackerServiceName, rPort);
     worker.run();
   }
 

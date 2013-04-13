@@ -1,4 +1,5 @@
 package mapreduce;
+
 import java.io.*;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -18,7 +19,7 @@ public class JobTracker {
   public static String JOB_MAPPER_OUTPUT_PREFIX = "mapper_output_job_";
 
   public static String TASK_MAPPER_OUTPUT_PREFIX = "mapper_output_task_";
-  
+
   public final static int SCHEDULER_POOL_SIZE = 8;
 
   public final static int ALIVE_CHECK_CYCLE_SEC = 4;
@@ -101,18 +102,18 @@ public class JobTracker {
     this.scheduler = new DefaultTaskScheduler(this);
 
     this.services = new JobTrackerServices(this);
-    
+
     // register the RMI service this jobtracker provides
     this.rmiReg = LocateRegistry.getRegistry(rh, rp);
     this.rmiReg.rebind(JOBTRACKER_SERVICE_NAME, this.services);
-    
+
     ScheduledExecutorService serviceSche = Executors.newScheduledThreadPool(SCHEDULER_POOL_SIZE);
 
     // start the task tracker alive checking
     TaskTrackerAliveChecker alivechecker = new TaskTrackerAliveChecker(this);
     serviceSche.scheduleAtFixedRate(alivechecker, ALIVE_CHECK_CYCLE_SEC, ALIVE_CHECK_CYCLE_SEC,
             TimeUnit.SECONDS);
-    
+
     // the command console to display the statistics of this job tracker
     this.controlConsole();
   }
@@ -173,6 +174,7 @@ public class JobTracker {
 
   /**
    * deregister a task tracker
+   * 
    * @param ttname
    */
   public void deleteTaskTracker(String ttname) {
@@ -187,6 +189,7 @@ public class JobTracker {
 
   /**
    * Retrieve the information of a job
+   * 
    * @param jid
    * @return
    */
@@ -234,23 +237,24 @@ public class JobTracker {
 
   /**
    * get the RMI registry
+   * 
    * @return
    */
   public Registry getRMIRegistry() {
     return rmiReg;
   }
-  
+
   /**
-   * get next mapper task. First, check whether the job, to which
-   * this task belongs, has already failed. If so, throw this task;
-   * otherwise, return this task.
+   * get next mapper task. First, check whether the job, to which this task belongs, has already
+   * failed. If so, throw this task; otherwise, return this task.
+   * 
    * @return
    */
   public TaskMeta getNextMapperTask() {
     while (!this.mapTasksQueue.isEmpty()) {
       TaskMeta task = this.mapTasksQueue.poll();
       JobMeta job = this.jobs.get(task.getJobID());
-      
+
       if (job.getStatus() == JobMeta.JobStatus.FAILED) {
         // this job has already failed
         task.getTaskProgress().setStatus(TaskMeta.TaskStatus.FAILED);
@@ -258,21 +262,21 @@ public class JobTracker {
         return task;
       }
     }
-    
+
     return null;
   }
-  
+
   /**
-   * get next reducer task. First, check whether the job, to which
-   * this task belongs, has already failed. If so, throw this task;
-   * otherwise, return this task.
+   * get next reducer task. First, check whether the job, to which this task belongs, has already
+   * failed. If so, throw this task; otherwise, return this task.
+   * 
    * @return
    */
   public TaskMeta getNextReducerTask() {
     while (!this.reduceTasksQueue.isEmpty()) {
       TaskMeta task = this.reduceTasksQueue.poll();
       JobMeta job = this.jobs.get(task.getJobID());
-      
+
       if (job.getStatus() == JobMeta.JobStatus.FAILED) {
         // this job has already failed;
         task.getTaskProgress().setStatus(TaskMeta.TaskStatus.FAILED);
@@ -280,7 +284,7 @@ public class JobTracker {
         return task;
       }
     }
-    
+
     return null;
   }
 
@@ -289,7 +293,7 @@ public class JobTracker {
    */
   public void distributeTasks() {
     Map<Integer, String> schestrategies = null;
-    
+
     // use the system's scheduler to generate the scheduling schemes
     synchronized (this.tasktrackers) {
       schestrategies = this.scheduler.scheduleTask();
@@ -351,7 +355,7 @@ public class JobTracker {
     try {
       JarFile jar = new JarFile(jarpath);
       Enumeration enums = jar.entries();
-      
+
       // find the path to which the jar file should be extracted
       String destDirPath = JobTracker.JOB_CLASSPATH + JobTracker.JOB_CLASSPATH_PREFIX + jobid
               + File.separator;
@@ -448,6 +452,7 @@ public class JobTracker {
 
   /**
    * register a new task by inserting it into a queue
+   * 
    * @param task
    */
   public void submitTask(TaskMeta task) {
@@ -459,11 +464,11 @@ public class JobTracker {
   }
 
   /**
-   * Check the status of the Map phase of a job. This method
-   * is used by the reducer to check how is everything going
-   * in the mapper phase
+   * Check the status of the Map phase of a job. This method is used by the reducer to check how is
+   * everything going in the mapper phase
+   * 
    * @param tid
-   *    the task id of the reduce task which send the retrieval request
+   *          the task id of the reduce task which send the retrieval request
    * @return
    */
   public MapStatusChecker.MapStatus checkMapStatus(int tid) {
@@ -487,7 +492,7 @@ public class JobTracker {
       if (this.mapTasks.containsKey(mid) && !this.mapTasks.get(mid).isDone())
         return MapStatusChecker.MapStatus.INPROGRESS;
     }
-    
+
     // if all map tasks finished, then return FINISHED
     return MapStatusChecker.MapStatus.FINISHED;
   }
@@ -562,6 +567,7 @@ public class JobTracker {
 
   /**
    * list the statistic of a specific job
+   * 
    * @param jid
    */
   private void listJob(int jid) {
@@ -584,27 +590,28 @@ public class JobTracker {
     System.out.println("TaskID\tAttempts\tTaskStatus\tTaskCompleteness");
     for (int tid : maps) {
       TaskMeta task = this.mapTasks.get(tid);
-      System.out.println(tid + "\t" + task.getAttempts() + "\t" + task.getTaskProgress().getStatus() + "\t"
-              + task.getTaskProgress().getPercentage());
+      System.out.println(tid + "\t" + task.getAttempts() + "\t"
+              + task.getTaskProgress().getStatus() + "\t" + task.getTaskProgress().getPercentage());
     }
     System.out.println("\nReduce Tasks:");
     System.out.println("TaskID\tAttempts\tTaskStatus\tTaskCompleteness");
     Set<Integer> reduces = job.getReduceTasks();
     for (int tid : reduces) {
       TaskMeta task = this.reduceTasks.get(tid);
-      System.out.println(tid + "\t" + task.getAttempts() + "\t" + task.getTaskProgress().getStatus() + "\t"
-              + task.getTaskProgress().getPercentage());
+      System.out.println(tid + "\t" + task.getAttempts() + "\t"
+              + task.getTaskProgress().getStatus() + "\t" + task.getTaskProgress().getPercentage());
     }
   }
-  
+
   /**
    * list all task trackers connected to current job tracker
    */
   private void listTaskTrackers() {
     System.out.println("========== Task Trackers ==========");
     System.out.println("Name\tAvailableMapperSlots\tAvailableReducerSlots");
-    for (TaskTrackerMeta tt : this.tasktrackers.values()){
-      System.out.println(tt.getTaskTrackerName() + "\t" + tt.getNumOfMapperSlots() + "\t" + tt.getNumOfReducerSlots());
+    for (TaskTrackerMeta tt : this.tasktrackers.values()) {
+      System.out.println(tt.getTaskTrackerName() + "\t" + tt.getNumOfMapperSlots() + "\t"
+              + tt.getNumOfReducerSlots());
     }
   }
 
@@ -615,13 +622,14 @@ public class JobTracker {
     if (!tmp.exists()) {
       tmp.mkdir();
     }
-
     return "tmp";
   }
 
   public static void main(String[] args) {
     try {
-      JobTracker jb = new JobTracker("127.0.0.1", 12345);
+      System.out.println(Utility.getParam("REGISTRY_HOST"));
+      JobTracker jb = new JobTracker(Utility.getParam("REGISTRY_HOST"), Integer.parseInt(Utility
+              .getParam("REGISTRY_PORT")));
     } catch (RemoteException e) {
       e.printStackTrace();
     }

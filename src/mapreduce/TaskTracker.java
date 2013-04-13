@@ -1,4 +1,5 @@
 package mapreduce;
+
 import java.rmi.AlreadyBoundException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -14,8 +15,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * task tracker 
- *
+ * task tracker
+ * 
  */
 public class TaskTracker {
 
@@ -31,7 +32,7 @@ public class TaskTracker {
   /* the number of running reducers */
   public Integer reducerCounter;
 
-  /* the service from job tracker, used to*/
+  /* the service from job tracker, used to */
   private StatusUpdater jobTrackerStatusUpdater;
 
   private HashMap<Integer, TaskProgress> taskStatus;
@@ -45,13 +46,12 @@ public class TaskTracker {
   /* number of reducer slots */
   public final int NUM_OF_REDUCER_SLOTS;
 
+  /* the registry port of this task tracker */
+  private int rPort;
+
   /**
    * constructor of task tracker
    * 
-   * @param rHostName
-   * @param rPort
-   * @param taskTrackerName
-   * @param jobTrackerStatusUpdaterName
    */
   public TaskTracker(int taskTrackerSeq) {
     this.taskTrackerName = Utility.getParam("TASK_TRACKER_" + taskTrackerSeq + "_NAME");
@@ -65,9 +65,12 @@ public class TaskTracker {
     /* initiate task status */
     this.taskStatus = new HashMap<Integer, TaskProgress>();
 
-    /* get the registry information */
+    /* get the job tracker registry information */
     String registryHostName = Utility.getParam("REGISTRY_HOST");
     int registryPort = Integer.parseInt(Utility.getParam("REGISTRY_PORT"));
+
+    /* all registries are using the same port number */
+    this.rPort = registryPort;
 
     /* get the job tracker status updater */
     try {
@@ -114,7 +117,7 @@ public class TaskTracker {
           for (int id : taskStatus.keySet()) {
             if (taskStatus.get(id).getStatus() != TaskMeta.TaskStatus.INPROGRESS) {
               toDelete.add(id);
-              
+
               /* free slots */
               if (taskStatus.get(id).getType() == TaskMeta.TaskType.MAPPER)
                 synchronized (mapperCounter) {
@@ -137,7 +140,7 @@ public class TaskTracker {
             synchronized (reducerCounter) {
               pkg = new TaskTrackerUpdatePkg(taskTrackerName, NUM_OF_MAPPER_SLOTS - mapperCounter,
                       NUM_OF_REDUCER_SLOTS - reducerCounter, TaskTracker.TASKTRACKER_SERVICE_NAME,
-                      taskList);
+                      taskList, rPort);
             }
           }
           /* send update package */
@@ -154,10 +157,10 @@ public class TaskTracker {
     /* periodically send status progress to job tracker */
     int poolSize = Integer.parseInt(Utility.getParam("THREAD_POOL_SIZE"));
     ScheduledExecutorService schExec = Executors.newScheduledThreadPool(poolSize);
-    ScheduledFuture<?> schFutureChecker = schExec.scheduleAtFixedRate(taskStatusChecker, 0, HEART_BEAT_PERIOD,
-            TimeUnit.SECONDS);
-    ScheduledFuture<?> schFutureUpdater = schExec.scheduleAtFixedRate(taskStatusUpdater, 0, HEART_BEAT_PERIOD,
-            TimeUnit.SECONDS);
+    ScheduledFuture<?> schFutureChecker = schExec.scheduleAtFixedRate(taskStatusChecker, 0,
+            HEART_BEAT_PERIOD, TimeUnit.SECONDS);
+    ScheduledFuture<?> schFutureUpdater = schExec.scheduleAtFixedRate(taskStatusUpdater, 0,
+            HEART_BEAT_PERIOD, TimeUnit.SECONDS);
   }
 
   public String getTaskTrackerName() {
@@ -166,6 +169,10 @@ public class TaskTracker {
 
   public void setTaskTrackerName(String taskTrackerName) {
     this.taskTrackerName = taskTrackerName;
+  }
+
+  public String getRPort() {
+    return this.getRPort();
   }
 
   public static void main(String[] args) {

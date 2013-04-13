@@ -22,6 +22,12 @@ public class TaskTrackerUpdatePkg implements Serializable {
 	
 	/* the service name of task tracker: where to contact of necessary */
 	private String serviceName;
+	
+	/* the task tracker registry host name */
+	private String hostname;
+	
+	/* the task tracker registry port */
+	private int rPort;
 
 	/**
 	 * constructor method 
@@ -32,12 +38,13 @@ public class TaskTrackerUpdatePkg implements Serializable {
 	 * @param taskStatus
 	 */
 	public TaskTrackerUpdatePkg(String taskTrackerName, int numOfMapperSlots,
-			int numOfReducerSlots, String sn, List<TaskProgress> taskStatus) {
+			int numOfReducerSlots, String sn, List<TaskProgress> taskStatus, int port) {
 		this.taskTrackerName = taskTrackerName;
 		this.numOfMapperSlots = numOfMapperSlots;
 		this.numOfReducerSlots = numOfReducerSlots;
 		this.taskStatus = taskStatus;
 		this.serviceName = sn;
+		this.rPort = port;
 	}
 
 	public int getNumOfMapperSlots() {
@@ -58,5 +65,9 @@ public class TaskTrackerUpdatePkg implements Serializable {
 
 	public String getServiceName() {
 		return serviceName;
+	}
+	
+	public int getRPort(){
+	  return this.rPort;
 	}
 }

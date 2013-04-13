@@ -37,6 +37,7 @@ public class MapperWorker extends Worker {
 
   /**
    * constructor method
+   * 
    * @param taskID
    * @param infile
    * @param offset
@@ -47,12 +48,12 @@ public class MapperWorker extends Worker {
    * @param inputFormat
    * @param numReducer
    * @param taskTrackerServiceName
-   *        : where to contact the task tracker 
+   *          : where to contact the task tracker
    */
   public MapperWorker(int taskID, String infile, long offset, int blockSize, String outfile,
           String mapper, String partitioner, String inputFormat, int numReducer,
-          String taskTrackerServiceName) {
-    super(taskID, infile, outfile, taskTrackerServiceName, TaskMeta.TaskType.MAPPER);
+          String taskTrackerServiceName, int rPort) {
+    super(taskID, infile, outfile, taskTrackerServiceName, TaskMeta.TaskType.MAPPER, rPort);
     this.offset = offset;
     this.blockSize = blockSize;
     this.reducerNum = numReducer;
@@ -115,7 +116,7 @@ public class MapperWorker extends Worker {
     this.updateStatusSucceed();
     System.exit(0);
   }
-  
+
   /**
    * @return percentage of work already done
    */
@@ -128,6 +129,7 @@ public class MapperWorker extends Worker {
     }
     return 0;
   }
+
   /**
    * in-memory sort the temp files produced by mappers
    */
@@ -188,11 +190,11 @@ public class MapperWorker extends Worker {
   }
 
   public static void main(String[] args) {
-    if (args.length != 10) {
+    if (args.length != 11) {
       System.out.println("Illegal arguments");
     }
     int taskID = Integer.parseInt(args[0]);
-    
+
     try {
       PrintStream out = new PrintStream(new FileOutputStream(new File(
               Utility.getParam("MAPPER_STANDARD_OUT_REDIRECT") + taskID)));
@@ -213,8 +215,9 @@ public class MapperWorker extends Worker {
     String inputFormat = args[7];
     int reducerNum = Integer.parseInt(args[8]);
     String taskTrackerServiceName = args[9];
+    int rPort = Integer.parseInt(args[10]);
     MapperWorker worker = new MapperWorker(taskID, inputFile, offset, blockSize, outputFile,
-            mapper, partitioner, inputFormat, reducerNum, taskTrackerServiceName);
+            mapper, partitioner, inputFormat, reducerNum, taskTrackerServiceName, rPort);
     worker.run();
   }
 
