@@ -1,5 +1,7 @@
 package mapreduce;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.rmi.AlreadyBoundException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -66,7 +68,12 @@ public class TaskTracker {
     this.taskStatus = new HashMap<Integer, TaskProgress>();
 
     /* get the job tracker registry information */
-    String registryHostName = Utility.getParam("REGISTRY_HOST");
+    String registryHostName = null;
+    try {
+      registryHostName = InetAddress.getLocalHost().getHostName();
+    } catch (UnknownHostException e1) {
+      e1.printStackTrace();
+    }
     int registryPort = Integer.parseInt(Utility.getParam("REGISTRY_PORT"));
 
     /* all registries are using the same port number */
