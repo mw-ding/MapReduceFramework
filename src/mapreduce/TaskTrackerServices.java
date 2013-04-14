@@ -44,7 +44,8 @@ public class TaskTrackerServices extends UnicastRemoteObject implements TaskLaun
 
           /* do some logging */
           System.out.println("task tracker " + this.taskTracker.getTaskTrackerName()
-                  + " received runTask request taskid:" + taskInfo.getTaskID());
+                  + " received runTask request taskid:" + taskInfo.getTaskID() + " "
+                  + taskInfo.getType());
 
           /* increase number of mapper running on this task tracker */
           taskTracker.mapperCounter++;
@@ -75,6 +76,11 @@ public class TaskTrackerServices extends UnicastRemoteObject implements TaskLaun
       synchronized (taskTracker.reducerCounter) {
         /* if there is free reducer slots */
         if (taskTracker.reducerCounter < taskTracker.NUM_OF_REDUCER_SLOTS) {
+
+          /* do some logging */
+          System.out.println("task tracker " + this.taskTracker.getTaskTrackerName()
+                  + " received runTask request taskid:" + taskInfo.getTaskID() + " "
+                  + taskInfo.getType());
 
           /* increase the number of reducer running on this task tracker */
           taskTracker.reducerCounter++;

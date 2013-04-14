@@ -77,6 +77,7 @@ public class MapperWorker extends Worker {
       /* exception happens, shut down jvm */
       System.exit(0);
     }
+    System.out.println("contructor done");
   }
 
   @Override
@@ -156,7 +157,6 @@ public class MapperWorker extends Worker {
             e.printStackTrace();
             System.exit(0);
           }
-        System.exit(0);
       }
       /* delete the file */
       file.delete();
@@ -180,7 +180,6 @@ public class MapperWorker extends Worker {
             e.printStackTrace();
             System.exit(0);
           }
-        System.exit(0);
       }
     }
   }
@@ -190,7 +189,6 @@ public class MapperWorker extends Worker {
       System.out.println("Illegal arguments");
     }
     int taskID = Integer.parseInt(args[0]);
-
     try {
       PrintStream out = new PrintStream(new FileOutputStream(new File(
               Utility.getParam("MAPPER_STANDARD_OUT_REDIRECT") + taskID)));
@@ -202,7 +200,6 @@ public class MapperWorker extends Worker {
       e.printStackTrace();
       System.exit(0);
     }
-
     String inputFile = args[1];
     long offset = Long.parseLong(args[2]);
     int blockSize = Integer.parseInt(args[3]);

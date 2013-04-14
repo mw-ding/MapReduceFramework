@@ -78,7 +78,6 @@ public class Utility {
     newargs[0] = path;
     newargs[1] = "-cp";
     newargs[2] = classpath + File.pathSeparator + Utility.getParam("USER_CLASS_PATH") + separator + "job" + jid;
-    System.out.println("CLASSPATH: " + newargs[2]);
 
     /* get the rmi codebase path */
     newargs[3] = "-Djava.rmi.server.codebase=file:" + Utility.getParam("RMI_CODE_BASE");

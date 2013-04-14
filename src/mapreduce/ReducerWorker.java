@@ -277,7 +277,6 @@ public class ReducerWorker extends Worker {
     KeyValueIterator kviterator = new KeyValueIterator(mapperOutputFiles);
     while (kviterator.continueNextKey()) {
       String key = kviterator.currentKey();
-      System.out.println("reduce framework key : " + key);
       try {
         this.reducer.reduce(key, kviterator, this.outputer);
       } catch (RuntimeException e) {
@@ -313,7 +312,6 @@ public class ReducerWorker extends Worker {
     }
     int taskID = Integer.parseInt(args[0]);
 
-    // for test
     try {
       PrintStream out = new PrintStream(new FileOutputStream(new File(
               Utility.getParam("REDUCER_STANDARD_OUT_REDIRECT") + taskID)));

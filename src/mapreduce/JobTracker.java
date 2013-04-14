@@ -346,19 +346,22 @@ public class JobTracker {
       Enumeration enums = jar.entries();
 
       // find the path to which the jar file should be extracted
-      String destDirPath = JobTracker.JOB_CLASSPATH + File.separator + JobTracker.JOB_CLASSPATH_PREFIX + jobid
-              + File.separator;
+      String destDirPath = JobTracker.JOB_CLASSPATH + File.separator
+              + JobTracker.JOB_CLASSPATH_PREFIX + jobid + File.separator;
+      File destDir = new File(destDirPath);
+      if (!destDir.exists()) {
+        destDir.mkdirs();
+      }
 
       // copy each file in jar archive one by one
       while (enums.hasMoreElements()) {
         JarEntry file = (JarEntry) enums.nextElement();
 
         File outputfile = new File(destDirPath + file.getName());
-        if (outputfile.isDirectory()) {
+        if (file.isDirectory()) {
           outputfile.mkdirs();
           continue;
         }
-
         InputStream is = jar.getInputStream(file);
         FileOutputStream fos = null;
         try {
@@ -367,11 +370,9 @@ public class JobTracker {
           outputfile.getParentFile().mkdirs();
           fos = new FileOutputStream(outputfile);
         }
-
         while (is.available() > 0) {
           fos.write(is.read());
         }
-
         fos.close();
         is.close();
       }
@@ -606,13 +607,14 @@ public class JobTracker {
 
   /**
    * get the system's temporary dir which holds mapper's output
+   * 
    * @return
    */
   public static String getSystemTempDir() {
     String res = Utility.getParam("SYSTEM_TEMP_DIR");
     if (res.compareTo("") == 0)
       res = System.getProperty("java.io.tmpdir");
-    
+
     File tmpdir = new File(res);
     if (!tmpdir.exists()) {
       tmpdir.mkdirs();
@@ -623,8 +625,8 @@ public class JobTracker {
 
   public static void main(String[] args) {
     try {
-      JobTracker jb = new JobTracker(Utility.getParam("JOB_TRACKER_REGISTRY_HOST"), Integer.parseInt(Utility
-              .getParam("REGISTRY_PORT")));
+      JobTracker jb = new JobTracker(Utility.getParam("JOB_TRACKER_REGISTRY_HOST"),
+              Integer.parseInt(Utility.getParam("REGISTRY_PORT")));
     } catch (RemoteException e) {
       e.printStackTrace();
     }
