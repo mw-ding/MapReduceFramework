@@ -25,7 +25,7 @@ public class JobTracker {
   public final static int ALIVE_CHECK_CYCLE_SEC = 4;
 
   // the directory to which all the classes that user submits are extracted
-  public final static String JOB_CLASSPATH = "bin" + File.separator;
+  public static String JOB_CLASSPATH;
 
   // the prefix of the directories that stores the classes for different jobs
   public final static String JOB_CLASSPATH_PREFIX = "job";
@@ -72,6 +72,7 @@ public class JobTracker {
     this.reduceTasks = Collections.synchronizedMap(new HashMap<Integer, TaskMeta>());
     this.jobs = Collections.synchronizedMap(new HashMap<Integer, JobMeta>());
     JOBTRACKER_SERVICE_NAME = Utility.getParam("JOB_TRACKER_SERVICE_NAME");
+    JOB_CLASSPATH = Utility.getParam("USER_CLASS_PATH");
 
     // all tasks are queued in a priority queue, which the job id is the priority
     // the smaller the id is, the higher the priority is
