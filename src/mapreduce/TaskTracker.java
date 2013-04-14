@@ -68,12 +68,8 @@ public class TaskTracker {
     this.taskStatus = new HashMap<Integer, TaskProgress>();
 
     /* get the job tracker registry information */
-    String registryHostName = null;
-    try {
-      registryHostName = InetAddress.getLocalHost().getHostName();
-    } catch (UnknownHostException e1) {
-      e1.printStackTrace();
-    }
+    String registryHostName = Utility.getParam("REGISTRY_HOST");
+
     int registryPort = Integer.parseInt(Utility.getParam("REGISTRY_PORT"));
 
     /* all registries are using the same port number */
@@ -93,7 +89,14 @@ public class TaskTracker {
     /* register service to registry */
     try {
       TaskTrackerServices tts = new TaskTrackerServices(this);
-      Registry reg = LocateRegistry.getRegistry(registryHostName, registryPort);
+      String rHostName = null;
+      try {
+        rHostName = InetAddress.getLocalHost().getHostName();
+      } catch (UnknownHostException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+      Registry reg = LocateRegistry.getRegistry(rHostName, registryPort);
       TaskTracker.TASKTRACKER_SERVICE_NAME = this.taskTrackerName;
       reg.rebind(TaskTracker.TASKTRACKER_SERVICE_NAME, tts);
     } catch (RemoteException e) {
@@ -178,8 +181,8 @@ public class TaskTracker {
     this.taskTrackerName = taskTrackerName;
   }
 
-  public String getRPort() {
-    return this.getRPort();
+  public int getRPort() {
+    return this.rPort;
   }
 
   public static void main(String[] args) {

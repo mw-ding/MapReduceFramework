@@ -1,4 +1,7 @@
 package mapreduce;
+
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -15,13 +18,23 @@ public class JobClient {
 
   public JobClient() {
     try {
-      // locate the remote reference from the registry
+      // locate the job tracker service from the job tracker registry
       Registry register = LocateRegistry.getRegistry(Utility.getParam("REGISTRY_HOST"),
               Integer.parseInt(Utility.getParam("REGISTRY_PORT")));
       this.jobTrackerJobSubmitter = (JobTrackerJobSubmitter) register.lookup(Utility
               .getParam("JOB_TRACKER_SERVICE_NAME"));
+      
+      // register client service to local registry
       ClientServices cs = new ClientServices(this);
-      register.rebind(Utility.getParam("CLIENT_SERVICE_NAME"), cs);
+      String rHostName = null;
+      try {
+        rHostName = InetAddress.getLocalHost().getHostName();
+      } catch (UnknownHostException e) {
+        e.printStackTrace();
+      }
+      Registry reg = LocateRegistry.getRegistry(rHostName,
+              Integer.parseInt(Utility.getParam("REGISTRY_PORT")));
+      reg.rebind(Utility.getParam("CLIENT_SERVICE_NAME"), cs);
     } catch (RemoteException e) {
       e.printStackTrace();
     } catch (NotBoundException e) {
@@ -63,7 +76,7 @@ public class JobClient {
     } else {
       jconf.setJobID(jid);
     }
-    System.out.println("client get job id "+jid+" from job tracker");
+    System.out.println("client get job id " + jid + " from job tracker");
 
     // 2. set the job id as the default job name if name has not been specified
     if (jconf.getJobName().length() == 0) {

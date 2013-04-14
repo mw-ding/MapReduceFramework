@@ -1,4 +1,7 @@
 package mapreduce;
+
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -6,15 +9,21 @@ import java.rmi.registry.Registry;
 
 public class Job {
   private JobConf jobConf;
-  
+
   /* used to submit the job to client */
   private ClientJobSubmitter cs;
 
   public Job(JobConf jobConf) {
+    // locate the client service from the local client registry
     this.jobConf = jobConf;
     try {
-      // locate the remote reference from the registry
-      Registry register = LocateRegistry.getRegistry(Utility.getParam("REGISTRY_HOST"),
+      String rHostName = null;
+      try {
+        rHostName = InetAddress.getLocalHost().getHostName();
+      } catch (UnknownHostException e) {
+        e.printStackTrace();
+      }
+      Registry register = LocateRegistry.getRegistry(rHostName,
               Integer.parseInt(Utility.getParam("REGISTRY_PORT")));
       this.cs = (ClientJobSubmitter) register.lookup(Utility.getParam("CLIENT_SERVICE_NAME"));
     } catch (RemoteException e) {
@@ -23,7 +32,7 @@ public class Job {
       e.printStackTrace();
     }
   }
-  
+
   /* submit job to client */
   public void run() {
     try {
