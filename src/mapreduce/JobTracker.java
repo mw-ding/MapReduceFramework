@@ -346,7 +346,7 @@ public class JobTracker {
       Enumeration enums = jar.entries();
 
       // find the path to which the jar file should be extracted
-      String destDirPath = JobTracker.JOB_CLASSPATH + JobTracker.JOB_CLASSPATH_PREFIX + jobid
+      String destDirPath = JobTracker.JOB_CLASSPATH + File.separator + JobTracker.JOB_CLASSPATH_PREFIX + jobid
               + File.separator;
 
       // copy each file in jar archive one by one
