@@ -64,8 +64,8 @@ public class JobTracker {
   /*****************************************/
 
   public JobTracker(String rh, int rp) throws RemoteException {
-    this.currentMaxJobId = 0;
-    this.currentMaxTaskId = 0;
+    this.currentMaxJobId = (int) (Math.random()*1000);
+    this.currentMaxTaskId = (int) (Math.random()*1000);
 
     this.tasktrackers = Collections.synchronizedMap(new HashMap<String, TaskTrackerMeta>());
     this.mapTasks = Collections.synchronizedMap(new HashMap<Integer, TaskMeta>());
