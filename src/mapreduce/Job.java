@@ -17,12 +17,7 @@ public class Job {
     // locate the client service from the local client registry
     this.jobConf = jobConf;
     try {
-      String rHostName = null;
-      try {
-        rHostName = InetAddress.getLocalHost().getHostName();
-      } catch (UnknownHostException e) {
-        e.printStackTrace();
-      }
+      String rHostName = Utility.getParam("CLIENT_HOST");
       Registry register = LocateRegistry.getRegistry(rHostName,
               Integer.parseInt(Utility.getParam("REGISTRY_PORT")));
       this.cs = (ClientJobSubmitter) register.lookup(Utility.getParam("CLIENT_SERVICE_NAME"));

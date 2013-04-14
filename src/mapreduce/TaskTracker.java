@@ -68,7 +68,7 @@ public class TaskTracker {
     this.taskStatus = new HashMap<Integer, TaskProgress>();
 
     /* get the job tracker registry information */
-    String registryHostName = Utility.getParam("REGISTRY_HOST");
+    String registryHostName = Utility.getParam("JOB_TRACKER_REGISTRY_HOST");
 
     int registryPort = Integer.parseInt(Utility.getParam("REGISTRY_PORT"));
 

@@ -20,9 +20,9 @@ public class JobTracker {
 
   public static String TASK_MAPPER_OUTPUT_PREFIX = "mapper_output_task_";
 
-  public final static int SCHEDULER_POOL_SIZE = 8;
+  public static int SCHEDULER_POOL_SIZE = 8;
 
-  public final static int ALIVE_CHECK_CYCLE_SEC = 4;
+  public static int ALIVE_CHECK_CYCLE_SEC = 4;
 
   // the directory to which all the classes that user submits are extracted
   public static String JOB_CLASSPATH;
@@ -623,8 +623,7 @@ public class JobTracker {
 
   public static void main(String[] args) {
     try {
-      System.out.println(Utility.getParam("REGISTRY_HOST"));
-      JobTracker jb = new JobTracker(Utility.getParam("REGISTRY_HOST"), Integer.parseInt(Utility
+      JobTracker jb = new JobTracker(Utility.getParam("JOB_TRACKER_REGISTRY_HOST"), Integer.parseInt(Utility
               .getParam("REGISTRY_PORT")));
     } catch (RemoteException e) {
       e.printStackTrace();

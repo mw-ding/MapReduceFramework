@@ -77,7 +77,7 @@ public class Utility {
     String[] newargs = new String[args.length + 4]; /* three more args for path, -cp, classpath */
     newargs[0] = path;
     newargs[1] = "-cp";
-    newargs[2] = classpath + File.pathSeparator + classpath + separator + "job" + jid;
+    newargs[2] = classpath + File.pathSeparator + Utility.getParam("USER_CLASS_PATH") + separator + "job" + jid;
     System.out.println("CLASSPATH: " + newargs[2]);
 
     /* get the rmi codebase path */

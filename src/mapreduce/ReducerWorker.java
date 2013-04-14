@@ -9,21 +9,21 @@ import java.util.*;
 import java.util.Map.Entry;
 
 public class ReducerWorker extends Worker {
-  
+
   private final int SLEEP_CYCLE;
-  
+
   // the stream for merge sort in reducer
   private class MergeStream {
-    
+
     private Record next;
-    
+
     private Scanner scanner;
-    
+
     public MergeStream(Scanner s) {
       this.scanner = s;
       this.next = null;
     }
-    
+
     public void tryFetchNext() {
       if (this.scanner.hasNext()) {
         String line = this.scanner.nextLine();
@@ -33,23 +33,23 @@ public class ReducerWorker extends Worker {
         this.next = null;
       }
     }
-    
+
     public Record getNext() {
       return this.next;
     }
   }
-  
+
   // the key/value iterator for reduce()
   private class KeyValueIterator implements Iterator<String> {
-    
+
     private PriorityQueue<MergeStream> streams;
-    
+
     private String curKey;
-    
+
     public KeyValueIterator(List<File> flist) {
       if (flist == null)
-        return ;
-      
+        return;
+
       // initialize the heap
       int size = flist.size();
       this.streams = new PriorityQueue<MergeStream>(size, new Comparator<MergeStream>() {
@@ -58,29 +58,31 @@ public class ReducerWorker extends Worker {
         public int compare(MergeStream stream1, MergeStream stream2) {
           return stream1.getNext().key.compareTo(stream2.getNext().key);
         }
-        
+
       });
-      
+
       // prepare all input stream
       for (File f : flist) {
         try {
           Scanner newscanner = new Scanner(new FileInputStream(f));
           MergeStream newstream = new MergeStream(newscanner);
-          
+
           // try to fetch the first line
           newstream.tryFetchNext();
-          
+
           // if failed to fetch the first line, do not add
           // it into the queue; otherwise, add it in.
           if (newstream.getNext() != null) {
             this.streams.add(newstream);
           }
-          
+
         } catch (FileNotFoundException e) {
           e.printStackTrace();
+          /* exception happens, shut down jvm */
+          System.exit(0);
         }
       }
-      
+
       this.curKey = null;
     }
 
@@ -116,18 +118,17 @@ public class ReducerWorker extends Worker {
     public void remove() {
       // do not support remove operation
     }
-    
+
     public String currentKey() {
       return this.curKey;
     }
-    
+
     // continue the iteration to the next key
     public boolean continueNextKey() {
       if (this.streams.isEmpty()) {
         // no more keys any more, stop read key/value pair right here
         return false;
-      }
-      else {
+      } else {
         // set curKey to nextKey to allow next iteration
         this.curKey = this.streams.peek().getNext().key;
         return true;
@@ -167,32 +168,30 @@ public class ReducerWorker extends Worker {
       OutputFormat formater = (OutputFormat) Class.forName(oformater).newInstance();
       this.outputer = new ReducerOutputer(this.outputFile + File.separator + Outputer.defaultName
               + this.orderId, formater);
-    } catch (InstantiationException e) {
+    } catch (Exception e) {
       e.printStackTrace();
-    } catch (IllegalAccessException e) {
-      e.printStackTrace();
-    } catch (ClassNotFoundException e) {
-      e.printStackTrace();
+      /* exception happens, shut down jvm */
+      System.exit(0);
     }
 
     /* get the task tracker status updater */
-    String registryHostName = Utility.getParam("REGISTRY_HOST");
+    String registryHostName = Utility.getParam("JOB_TRACKER_REGISTRY_HOST");
     int registryPort = Integer.parseInt(Utility.getParam("REGISTRY_PORT"));
 
     try {
       Registry reg = LocateRegistry.getRegistry(registryHostName, registryPort);
       mapStatusChecker = (MapStatusChecker) reg
               .lookup(Utility.getParam("JOB_TRACKER_SERVICE_NAME"));
-    } catch (RemoteException e) {
+    } catch (Exception e) {
       e.printStackTrace();
-    } catch (NotBoundException e) {
-      e.printStackTrace();
+      /* exception happens, shut down jvm */
+      System.exit(0);
     }
 
     this.copyPercentage = 0;
     this.groupPercentage = 0;
     this.reducePercentage = 0;
-    
+
     SLEEP_CYCLE = Integer.parseInt(Utility.getParam("REDUCER_CHECK_MAPPER_CYCLE"));
   }
 
@@ -221,6 +220,8 @@ public class ReducerWorker extends Worker {
       }
     } catch (RemoteException e) {
       e.printStackTrace();
+      /* exception happens, shut down jvm */
+      System.exit(0);
     }
     List<File> result = new ArrayList<File>();
 
@@ -251,9 +252,9 @@ public class ReducerWorker extends Worker {
     // locating the temporary output files from mappers, which
     // could be done almost at once
     List<File> result = this.locateMapOutput();
-    
+
     this.copyPercentage = (float) 1.0;
-    
+
     return result;
   }
 
@@ -270,26 +271,26 @@ public class ReducerWorker extends Worker {
 
     // 3. sort and group all key/value pairs
     this.groupPercentage = (float) 1.0;
-    
+
     // 4. call the reduce and feed it with key/value pairs. The iterator
     // read next key/value pair on-demand
     KeyValueIterator kviterator = new KeyValueIterator(mapperOutputFiles);
-    while(kviterator.continueNextKey()) {
+    while (kviterator.continueNextKey()) {
       String key = kviterator.currentKey();
-      System.out.println("reduce framework key : " + key );
+      System.out.println("reduce framework key : " + key);
       try {
         this.reducer.reduce(key, kviterator, this.outputer);
       } catch (RuntimeException e) {
         e.printStackTrace();
         System.exit(0);
       }
-      
+
       // skip to next key, if the user does not fetch all values
-      while(kviterator.hasNext()) {
+      while (kviterator.hasNext()) {
         kviterator.next();
       }
     }
-    
+
     // 5. close the outputer
     this.outputer.close();
 
@@ -322,6 +323,8 @@ public class ReducerWorker extends Worker {
       System.setOut(out);
     } catch (FileNotFoundException e) {
       e.printStackTrace();
+      /* exception happens, shut down jvm */
+      System.exit(0);
     }
 
     int order = Integer.parseInt(args[1]);

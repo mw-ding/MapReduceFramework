@@ -72,20 +72,10 @@ public class MapperWorker extends Worker {
       this.inputFormat = (InputFormat) Class.forName(inputFormat)
               .getConstructor(String.class, Long.class, Integer.class)
               .newInstance(this.inputFile, new Long(this.offset), new Integer(this.blockSize));
-    } catch (InstantiationException e) {
+    } catch (Exception e) {
       e.printStackTrace();
-    } catch (IllegalAccessException e) {
-      e.printStackTrace();
-    } catch (ClassNotFoundException e) {
-      e.printStackTrace();
-    } catch (IllegalArgumentException e) {
-      e.printStackTrace();
-    } catch (SecurityException e) {
-      e.printStackTrace();
-    } catch (InvocationTargetException e) {
-      e.printStackTrace();
-    } catch (NoSuchMethodException e) {
-      e.printStackTrace();
+      /* exception happens, shut down jvm */
+      System.exit(0);
     }
   }
 
@@ -114,6 +104,7 @@ public class MapperWorker extends Worker {
     mapper.cleanup();
     /* report to task tracker that this task is done */
     this.updateStatusSucceed();
+    /* shut down jvm */
     System.exit(0);
   }
 
@@ -126,6 +117,7 @@ public class MapperWorker extends Worker {
       return (float) (this.inputFormat.raf.getFilePointer() - offset) / this.blockSize;
     } catch (IOException e) {
       e.printStackTrace();
+      System.exit(0);
     }
     return 0;
   }
@@ -162,7 +154,9 @@ public class MapperWorker extends Worker {
             br.close();
           } catch (IOException e) {
             e.printStackTrace();
+            System.exit(0);
           }
+        System.exit(0);
       }
       /* delete the file */
       file.delete();
@@ -184,7 +178,9 @@ public class MapperWorker extends Worker {
             bw.close();
           } catch (IOException e) {
             e.printStackTrace();
+            System.exit(0);
           }
+        System.exit(0);
       }
     }
   }
@@ -204,6 +200,7 @@ public class MapperWorker extends Worker {
       System.setOut(out);
     } catch (FileNotFoundException e) {
       e.printStackTrace();
+      System.exit(0);
     }
 
     String inputFile = args[1];
