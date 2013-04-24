@@ -1,5 +1,5 @@
-RMI_CODE_BASE=-Djava.rmi.server.codebase=file:MapReduce.jar
-
+RMI_CODE_BASE=-Djava.rmi.server.codebase=file:$(MAPREDUCE_HOME)/bin/
+CLASSPATH=$(MAPREDUCE_HOME)/bin/
 compile:
 	cd src; make
 	
@@ -7,21 +7,20 @@ jar:
 	jar cf MapReduce.jar -C bin/ .
 
 rmi:
-	rmiregistry $(PORT) &
+	cd $(CLASSPATH); rmiregistry $(PORT) &
 	
 jobtracker:
-	#export MAPREDUCE_HOME=/Users/huanchen/Documents/workspace/MapReduceFramework
-	java -cp MapReduce.jar $(RMI_CODE_BASE) mapreduce.JobTracker
+	java -cp $(CLASSPATH) $(RMI_CODE_BASE) mapreduce.JobTracker
 
 tasktracker:
-	#setenv MAPREDUCE_HOME /afs/andrew.cmu.edu/usr23/huanchez/ds/project3/MapReduceFramework
-	java -cp MapReduce.jar $(RMI_CODE_BASE) mapreduce.TaskTracker $(SEQ)
+	java -cp $(CLASSPATH) $(RMI_CODE_BASE) mapreduce.TaskTracker $(SEQ)
 	
 client:
-	#java -cp MapReduce.jar $(RMI_CODE_BASE) mapreduce.JobClient &
-	java -cp MapReduce.jar $(RMI_CODE_BASE) -Djava.security.policy=server.policy mapreduce.JobClient
+	java -cp $(CLASSPATH) $(RMI_CODE_BASE) mapreduce.JobClient &
 	 
 degreecount:
-	java -cp degreecount.jar:MapReduce.jar $(RMI_CODE_BASE) example.degreecount.Main input output degreecount.jar
+	java -cp degreecount.jar:$(CLASSPATH) $(RMI_CODE_BASE) example.degreecount.Main input $(OUTPUT) degreecount.jar
+wordcount:
+	java -cp wordcount.jar:$(CLASSPATH) $(RMI_CODE_BASE) example.wordcount.Main input $(OUTPUT) wordcount.jar
 clean:
-	rm -rf bin/*
+	rm -rf bin/* MapReduce.jar
