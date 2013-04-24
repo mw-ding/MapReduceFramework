@@ -22,6 +22,12 @@ public class TaskTrackerAliveChecker implements Runnable {
       // if this task tracker is now not alive anymore, remove it
       if (!meta.isAlive()) {
         this.jTracker.deleteTaskTracker(meta.getTaskTrackerName());
+        
+        // reassign the tasks running on this task tracker
+        Set<Integer> currentTasks = meta.getTasks();
+        for (Integer tid : currentTasks) {
+          this.jTracker.submitExistingTask(tid);
+        }
       }
     }
 

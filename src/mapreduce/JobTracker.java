@@ -312,23 +312,23 @@ public class JobTracker {
       // find the specific task tracker
       TaskTrackerMeta targetTasktracker = this.tasktrackers.get(entry.getValue());
 
+      // assign the task to the tasktracker
+      boolean res = false;
       try {
-        // assign the task to the tasktracker
-        boolean res = targetTasktracker.getTaskLauncher().runTask(task.getTaskInfo());
-
-        if (res) {
-          // if this task has been submitted to a tasktracker successfully
-          task.getTaskProgress().setStatus(TaskMeta.TaskStatus.INPROGRESS);
+        res = targetTasktracker.getTaskLauncher().runTask(task.getTaskInfo());
+      } catch (Exception e) {
+        res = false;
+      }
+      if (res) {
+        // if this task has been submitted to a tasktracker successfully
+        task.getTaskProgress().setStatus(TaskMeta.TaskStatus.INPROGRESS);
+      } else {
+        // if this task is failed to be submitted, place it back to the queue
+        if (task.isMapper()) {
+          this.mapTasksQueue.offer(task);
         } else {
-          // if this task is failed to be submitted, place it back to the queue
-          if (task.isMapper()) {
-            this.mapTasksQueue.offer(task);
-          } else {
-            this.reduceTasksQueue.offer(task);
-          }
+          this.reduceTasksQueue.offer(task);
         }
-      } catch (RemoteException e) {
-        e.printStackTrace();
       }
     }
   }
@@ -450,6 +450,14 @@ public class JobTracker {
       this.mapTasksQueue.offer(task);
     } else {
       this.reduceTasksQueue.offer(task);
+    }
+  }
+  
+  public void submitExistingTask(int tid) {
+    if (this.mapTasks.containsKey(tid)) {
+      this.submitTask(this.mapTasks.get(tid));
+    } else {
+      this.submitTask(this.reduceTasks.get(tid));
     }
   }
 
@@ -577,19 +585,19 @@ public class JobTracker {
             + job.getFinishedReducerNumber() + "/" + job.getReduceTasks().size());
     System.out.println("\nMap Tasks:");
     Set<Integer> maps = job.getMapTasks();
-    System.out.println("TaskID\tAttempts\tTaskStatus\tTaskCompleteness");
+    System.out.println("TaskID\tAttempts\tTaskStatus");
     for (int tid : maps) {
       TaskMeta task = this.mapTasks.get(tid);
       System.out.println(tid + "\t" + task.getAttempts() + "\t"
-              + task.getTaskProgress().getStatus() + "\t" + task.getTaskProgress().getPercentage());
+              + task.getTaskProgress().getStatus());
     }
     System.out.println("\nReduce Tasks:");
-    System.out.println("TaskID\tAttempts\tTaskStatus\tTaskCompleteness");
+    System.out.println("TaskID\tAttempts\tTaskStatus");
     Set<Integer> reduces = job.getReduceTasks();
     for (int tid : reduces) {
       TaskMeta task = this.reduceTasks.get(tid);
       System.out.println(tid + "\t" + task.getAttempts() + "\t"
-              + task.getTaskProgress().getStatus() + "\t" + task.getTaskProgress().getPercentage());
+              + task.getTaskProgress().getStatus());
     }
   }
 
