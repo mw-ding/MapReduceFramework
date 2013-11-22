@@ -1,0 +1,12 @@
+*.class
+*.log
+
+# idea ide
+*.iml
+*.ipr
+*.iws
+
+build
+out
+*~
+.*
