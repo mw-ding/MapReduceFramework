@@ -175,13 +175,13 @@ public class ReducerWorker extends Worker {
     }
 
     /* get the task tracker status updater */
-    String registryHostName = Utility.getParam("JOB_TRACKER_REGISTRY_HOST");
-    int registryPort = Integer.parseInt(Utility.getParam("REGISTRY_PORT"));
+    String registryHostName = Constants.getResource(Constants.JOB_TRACKER_REGISTRY_HOST);
+    int registryPort = Integer.parseInt(Constants.getResource(Constants.REGISTRY_PORT));
 
     try {
       Registry reg = LocateRegistry.getRegistry(registryHostName, registryPort);
       mapStatusChecker = (MapStatusChecker) reg
-              .lookup(Utility.getParam("JOB_TRACKER_SERVICE_NAME"));
+              .lookup(Constants.getResource(Constants.JOB_TRACKER_SERVICE_NAME));
     } catch (Exception e) {
       e.printStackTrace();
       /* exception happens, shut down jvm */
@@ -192,7 +192,7 @@ public class ReducerWorker extends Worker {
     this.groupPercentage = 0;
     this.reducePercentage = 0;
 
-    SLEEP_CYCLE = Integer.parseInt(Utility.getParam("REDUCER_CHECK_MAPPER_CYCLE"));
+    SLEEP_CYCLE = Integer.parseInt(Constants.getResource(Constants.RECUDER_CHECK_MAPPER_CYCLE));
   }
 
   /**
@@ -314,9 +314,9 @@ public class ReducerWorker extends Worker {
 
     try {
       PrintStream out = new PrintStream(new FileOutputStream(new File(
-              Utility.getParam("REDUCER_STANDARD_OUT_REDIRECT") + taskID)));
+              Constants.getResource(Constants.REDUCER_STDOUT_REDIRECT) + taskID)));
       PrintStream err = new PrintStream(new FileOutputStream(new File(
-              Utility.getParam("REDUCER_STANDARD_ERR_REDIRECT") + taskID)));
+              Constants.getResource(Constants.REDUCER_STDERR_REDIRECT) + taskID)));
       System.setErr(err);
       System.setOut(out);
     } catch (FileNotFoundException e) {

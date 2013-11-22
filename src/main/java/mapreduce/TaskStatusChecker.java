@@ -22,7 +22,7 @@ public class TaskStatusChecker implements Runnable {
    */
   public TaskStatusChecker(TaskTracker taskTracker) {
     this.taskTracker = taskTracker;
-    ALIVE_CYCLE = Long.parseLong(Utility.getParam("ALIVE_CYCLE"));
+    ALIVE_CYCLE = Long.parseLong(Constants.getResource(Constants.ALIVE_CYCLE));
   }
   
   /**

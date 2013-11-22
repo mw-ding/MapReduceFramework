@@ -19,17 +19,16 @@ public class JobClient {
   public JobClient() {
     try {
       // locate the job tracker service from the job tracker registry
-      Registry register = LocateRegistry.getRegistry(Utility.getParam("JOB_TRACKER_REGISTRY_HOST"),
-              Integer.parseInt(Utility.getParam("REGISTRY_PORT")));
-      this.jobTrackerJobSubmitter = (JobTrackerJobSubmitter) register.lookup(Utility
-              .getParam("JOB_TRACKER_SERVICE_NAME"));
+      Registry register = LocateRegistry.getRegistry(Constants.getResource(Constants.JOB_TRACKER_REGISTRY_HOST),
+              Integer.parseInt(Constants.getResource(Constants.REGISTRY_PORT)));
+      this.jobTrackerJobSubmitter = (JobTrackerJobSubmitter) register.lookup(Constants.getResource(Constants.JOB_TRACKER_SERVICE_NAME));
 
       // register client service to local registry
       ClientServices cs = new ClientServices(this);
-      String rHostName = Utility.getParam("CLIENT_HOST");
+      String rHostName = Constants.getResource(Constants.CLIENT_HOST);
       Registry reg = LocateRegistry.getRegistry(rHostName,
-              Integer.parseInt(Utility.getParam("REGISTRY_PORT")));
-      reg.rebind(Utility.getParam("CLIENT_SERVICE_NAME"), cs);
+              Integer.parseInt(Constants.getResource(Constants.REGISTRY_PORT)));
+      reg.rebind(Constants.getResource(Constants.CLIENT_SERVICE_NAME), cs);
     } catch (RemoteException e) {
       e.printStackTrace();
     } catch (NotBoundException e) {

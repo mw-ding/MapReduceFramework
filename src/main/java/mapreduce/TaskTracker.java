@@ -68,9 +68,9 @@ public class TaskTracker {
     this.taskStatus = new HashMap<Integer, TaskProgress>();
 
     /* get the job tracker registry information */
-    String registryHostName = Utility.getParam("JOB_TRACKER_REGISTRY_HOST");
+    String registryHostName = Constants.getResource(Constants.JOB_TRACKER_REGISTRY_HOST);
 
-    int registryPort = Integer.parseInt(Utility.getParam("REGISTRY_PORT"));
+    int registryPort = Integer.parseInt(Constants.getResource(Constants.REGISTRY_PORT));
 
     /* all registries are using the same port number */
     this.rPort = registryPort;
@@ -78,12 +78,11 @@ public class TaskTracker {
     /* get the job tracker status updater */
     try {
       Registry reg = LocateRegistry.getRegistry(registryHostName, registryPort);
-      jobTrackerStatusUpdater = (StatusUpdater) reg.lookup(Utility
-              .getParam("JOB_TRACKER_SERVICE_NAME"));
+      jobTrackerStatusUpdater = (StatusUpdater) reg.lookup(Constants.getResource(Constants.JOB_TRACKER_SERVICE_NAME));
     } catch (RemoteException e) {
       e.printStackTrace();
     } catch (NotBoundException e) {
-      System.err.println(Utility.getParam("JOB_TRACKER_SERVICE_NAME") + " is not registered.");
+      System.err.println(Constants.getResource(Constants.JOB_TRACKER_SERVICE_NAME) + " is not registered.");
     }
 
     /* register service to registry */
@@ -165,7 +164,7 @@ public class TaskTracker {
     });
     taskStatusUpdater.setDaemon(true);
     /* periodically send status progress to job tracker */
-    int poolSize = Integer.parseInt(Utility.getParam("THREAD_POOL_SIZE"));
+    int poolSize = Integer.parseInt(Constants.getResource(Constants.THREAD_POOL_SIZE));
     ScheduledExecutorService schExec = Executors.newScheduledThreadPool(poolSize);
     ScheduledFuture<?> schFutureChecker = schExec.scheduleAtFixedRate(taskStatusChecker, 0,
             HEART_BEAT_PERIOD, TimeUnit.SECONDS);

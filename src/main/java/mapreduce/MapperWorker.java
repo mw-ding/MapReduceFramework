@@ -191,9 +191,9 @@ public class MapperWorker extends Worker {
     int taskID = Integer.parseInt(args[0]);
     try {
       PrintStream out = new PrintStream(new FileOutputStream(new File(
-              Utility.getParam("MAPPER_STANDARD_OUT_REDIRECT") + taskID)));
+              Constants.getResource(Constants.MAPPER_STDOUT_REDIRECT) + taskID)));
       PrintStream err = new PrintStream(new FileOutputStream(new File(
-              Utility.getParam("MAPPER_STANDARD_ERR_REDIRECT") + taskID)));
+              Constants.getResource(Constants.MAPPER_STDERR_REDIRECT) + taskID)));
       System.setErr(err);
       System.setOut(out);
     } catch (FileNotFoundException e) {

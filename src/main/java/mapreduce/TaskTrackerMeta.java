@@ -26,7 +26,7 @@ public class TaskTrackerMeta {
     this.tasks = new HashSet<Integer>();
     this.numOfMapperSlots = 0;
     this.numOfReducerSlots = 0;
-    this.ALIVE_CYCLE = Integer.parseInt(Utility.getParam("ALIVE_CYCLE"));
+    this.ALIVE_CYCLE = Integer.parseInt(Constants.getResource(Constants.ALIVE_CYCLE));
   }
 
   public TaskLauncher getTaskLauncher() {

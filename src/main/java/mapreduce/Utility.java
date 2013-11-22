@@ -77,10 +77,10 @@ public class Utility {
     String[] newargs = new String[args.length + 4]; /* three more args for path, -cp, classpath */
     newargs[0] = path;
     newargs[1] = "-cp";
-    newargs[2] = classpath + File.pathSeparator + Utility.getParam("USER_CLASS_PATH") + separator + "job" + jid;
+    newargs[2] = classpath + File.pathSeparator + Constants.getResource(Constants.USER_CLASS_PATH) + separator + "job" + jid;
 
     /* get the rmi codebase path */
-    newargs[3] = "-Djava.rmi.server.codebase=file:" + Utility.getParam("RMI_CODE_BASE");
+    newargs[3] = "-Djava.rmi.server.codebase=file:" + Constants.getResource(Constants.RMI_CODE_BASE);
     for (int i = 4, j = 0; j < args.length; i++, j++) {
       newargs[i] = args[j];
     }

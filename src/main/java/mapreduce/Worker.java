@@ -80,7 +80,7 @@ public abstract class Worker {
    */
   public void updateStatusToTaskTracker() {
     /* periodically send status progress to task tracker */
-    int poolSize = Integer.parseInt(Utility.getParam("THREAD_POOL_SIZE"));
+    int poolSize = Integer.parseInt(Constants.getResource(Constants.THREAD_POOL_SIZE));
     ScheduledExecutorService schExec = Executors.newScheduledThreadPool(poolSize);
     Thread thread = new Thread(new Runnable() {
       public void run() {
@@ -88,7 +88,7 @@ public abstract class Worker {
       }
     });
     thread.setDaemon(true);
-    schExec.scheduleAtFixedRate(thread, 0, Integer.parseInt(Utility.getParam("HEART_BEAT_PERIOD")),
+    schExec.scheduleAtFixedRate(thread, 0, Integer.parseInt(Constants.getResource(Constants.HEARTBEAT_PERIOD)),
             TimeUnit.SECONDS);
   }
 

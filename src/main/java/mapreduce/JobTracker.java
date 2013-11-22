@@ -71,8 +71,8 @@ public class JobTracker {
     this.mapTasks = Collections.synchronizedMap(new HashMap<Integer, TaskMeta>());
     this.reduceTasks = Collections.synchronizedMap(new HashMap<Integer, TaskMeta>());
     this.jobs = Collections.synchronizedMap(new HashMap<Integer, JobMeta>());
-    JOBTRACKER_SERVICE_NAME = Utility.getParam("JOB_TRACKER_SERVICE_NAME");
-    JOB_CLASSPATH = Utility.getParam("USER_CLASS_PATH");
+    JOBTRACKER_SERVICE_NAME = Constants.getResource(Constants.JOB_TRACKER_SERVICE_NAME);
+    JOB_CLASSPATH = Constants.getResource(Constants.USER_CLASS_PATH);
 
     // all tasks are queued in a priority queue, which the job id is the priority
     // the smaller the id is, the higher the priority is
@@ -619,7 +619,7 @@ public class JobTracker {
    * @return
    */
   public static String getSystemTempDir() {
-    String res = Utility.getParam("SYSTEM_TEMP_DIR");
+    String res = Constants.getResource(Constants.SYSTEM_TEMP_DIR);
     if (res.compareTo("") == 0)
       res = System.getProperty("java.io.tmpdir");
 
@@ -633,8 +633,8 @@ public class JobTracker {
 
   public static void main(String[] args) {
     try {
-      JobTracker jb = new JobTracker(Utility.getParam("JOB_TRACKER_REGISTRY_HOST"),
-              Integer.parseInt(Utility.getParam("REGISTRY_PORT")));
+      JobTracker jb = new JobTracker(Constants.getResource(Constants.JOB_TRACKER_REGISTRY_HOST),
+              Integer.parseInt(Constants.getResource(Constants.REGISTRY_PORT)));
     } catch (RemoteException e) {
       e.printStackTrace();
     }
