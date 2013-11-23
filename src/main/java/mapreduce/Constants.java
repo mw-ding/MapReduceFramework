@@ -33,4 +33,8 @@ public class Constants {
     public static final String THREAD_POOL_SIZE="thread_pool.size";
 
     public static final String RMI_CODE_BASE="rmi.code.base";
+
+    public static final String TASK_TRACKER_NAME="name.task_tracker_";
+    public static final String TASK_TRACKER_MAPPER_NUM="num.mapper.task_tracker_";
+    public static final String TASK_TRACKER_REDUCER_NUM="num.reducer.task_tracker_";
 }

@@ -12,3 +12,51 @@ dependencies {
     compile "commons-io:commons-io:2.4"
     testCompile "junit:junit:4.11"
 }
+
+task packageMapReduce(type: Jar) {
+	archiveName="MapReduce.jar"
+    from sourceSets.main.output
+	include "mapreduce/**/*"
+    copy {
+        from 'build/libs/MapReduce.jar'
+        into 'MapReduce.jar'
+    }
+}
+
+task packageExamples(type: Jar) {
+    archiveName="Examples.jar"
+    from sourceSets.main.output
+    include "example/**/*"
+    copy {
+        from 'build/libs/Examples.jar'
+        into 'Examples.jar'
+    }
+}
+
+jar {
+    packageMapReduce.execute()
+    packageExamples.execute()
+}
+
+task deleteJar(type: Delete) {
+    delete 'Examples.jar'
+    delete 'MapReduce.jar'
+}
+
+clean {
+    deleteJar.execute()
+}
+
+task startrmi(type: Exec) {
+    workingDir '.'
+
+    commandLine "rmiregistry", "$rmiport", "&"
+
+    //store the output instead of printing to the console:
+    standardOutput = new ByteArrayOutputStream()
+
+    //extension method stopTomcat.output() can be used to obtain the output:
+    ext.output = {
+        return standardOutput.toString()
+    }
+}

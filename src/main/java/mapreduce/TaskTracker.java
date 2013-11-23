@@ -56,12 +56,10 @@ public class TaskTracker {
    * 
    */
   public TaskTracker(int taskTrackerSeq) {
-    this.taskTrackerName = Utility.getParam("TASK_TRACKER_" + taskTrackerSeq + "_NAME");
+    this.taskTrackerName = Constants.getResource(Constants.TASK_TRACKER_NAME + taskTrackerSeq);
     System.out.println(taskTrackerName + " STARTED..");
-    this.NUM_OF_MAPPER_SLOTS = Integer.parseInt(Utility.getParam("TASK_TRACKER_" + taskTrackerSeq
-            + "_NUM_MAPPER"));
-    this.NUM_OF_REDUCER_SLOTS = Integer.parseInt(Utility.getParam("TASK_TRACKER_" + taskTrackerSeq
-            + "_NUM_REDUCER"));
+    this.NUM_OF_MAPPER_SLOTS = Integer.parseInt(Constants.getResource(Constants.TASK_TRACKER_MAPPER_NUM + taskTrackerSeq));
+    this.NUM_OF_REDUCER_SLOTS = Integer.parseInt(Constants.getResource(Constants.TASK_TRACKER_REDUCER_NUM + taskTrackerSeq));
     this.mapperCounter = new Integer(0);
     this.reducerCounter = new Integer(0);
     /* initiate task status */
