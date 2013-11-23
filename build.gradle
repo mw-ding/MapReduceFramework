@@ -47,16 +47,14 @@ clean {
     deleteJar.execute()
 }
 
-task startrmi(type: Exec) {
-    workingDir '.'
-
-    commandLine "rmiregistry", "$rmiport", "&"
-
-    //store the output instead of printing to the console:
-    standardOutput = new ByteArrayOutputStream()
-
-    //extension method stopTomcat.output() can be used to obtain the output:
-    ext.output = {
-        return standardOutput.toString()
+task startrmi << {
+    if (project.hasProperty('rmiport')) {
+        def port = project.rmiport
+        def proc = ("./scripts/start-rmi.sh " + port).execute()
+        proc.in.eachLine { line -> println line}
+        proc.err.eachLine { line -> println "Error: " + line}
+        proc.waitFor()
+    } else {
+        println "Error: please specify rmi port number (-Prmiport=1234)"
     }
 }
